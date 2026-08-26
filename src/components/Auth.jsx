@@ -26,8 +26,6 @@ function Auth({ onAuthenticated }) {
 
       if (cleanRef) {
         setReferralUsername(cleanRef);
-
-        // Referral links should open on the signup screen.
         setMode("signup");
       }
     }
@@ -53,7 +51,11 @@ function Auth({ onAuthenticated }) {
 
     try {
       if (!email.trim()) {
-        setError("Please enter your email.");
+        setError(
+          isLogin
+            ? "Please enter your email or username."
+            : "Please enter your email."
+        );
         return;
       }
 
@@ -62,6 +64,9 @@ function Auth({ onAuthenticated }) {
         return;
       }
 
+      /*
+       * SIGN UP
+       */
       if (!isLogin) {
         const cleanUsername = username.trim();
 
@@ -89,6 +94,26 @@ function Auth({ onAuthenticated }) {
 
         if (password.length < 6) {
           setError("Password must be at least 6 characters.");
+          return;
+        }
+
+        /*
+         * Check whether username is already taken.
+         */
+        const { data: existingUsername, error: usernameCheckError } =
+          await supabase
+            .from("profiles")
+            .select("id")
+            .ilike("username", cleanUsername)
+            .maybeSingle();
+
+        if (usernameCheckError) {
+          console.error(usernameCheckError);
+          throw new Error("Could not check username availability.");
+        }
+
+        if (existingUsername) {
+          setError("That username is already taken.");
           return;
         }
 
@@ -126,11 +151,52 @@ function Auth({ onAuthenticated }) {
         return;
       }
 
+      /*
+       * LOGIN
+       *
+       * Users can enter either:
+       * - their email
+       * - their username
+       */
+      const loginValue = email.trim();
+
+      let loginEmail = loginValue;
+
+      /*
+       * If the input doesn't look like an email,
+       * treat it as a username.
+       */
+      if (!loginValue.includes("@")) {
+        const {
+          data: usernameEmail,
+          error: usernameLookupError,
+        } = await supabase.rpc(
+          "get_email_by_username",
+          {
+            lookup_username: loginValue,
+          }
+        );
+
+        if (usernameLookupError) {
+          console.error(usernameLookupError);
+          throw new Error(
+            "Could not find that username. Please try again."
+          );
+        }
+
+        if (!usernameEmail) {
+          setError("Username not found.");
+          return;
+        }
+
+        loginEmail = usernameEmail;
+      }
+
       const {
         data,
         error: signInError,
       } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: loginEmail,
         password,
       });
 
@@ -140,6 +206,8 @@ function Auth({ onAuthenticated }) {
 
       onAuthenticated(data.session);
     } catch (authError) {
+      console.error(authError);
+
       setError(
         authError?.message ||
           "Something went wrong. Please try again."
@@ -188,7 +256,7 @@ function Auth({ onAuthenticated }) {
 
             <p>
               {isLogin
-                ? "Sign in to continue climbing the leaderboard."
+                ? "Sign in using your email or username."
                 : "Create an account and start earning referrals."}
             </p>
 
@@ -232,18 +300,28 @@ function Auth({ onAuthenticated }) {
             <div className="form-group">
 
               <label htmlFor="email">
-                Email
+                {isLogin
+                  ? "Email or Username"
+                  : "Email"}
               </label>
 
               <input
                 id="email"
-                type="email"
+                type={isLogin ? "text" : "email"}
                 value={email}
                 onChange={(event) =>
                   setEmail(event.target.value)
                 }
-                placeholder="you@example.com"
-                autoComplete="email"
+                placeholder={
+                  isLogin
+                    ? "Email or username"
+                    : "you@example.com"
+                }
+                autoComplete={
+                  isLogin
+                    ? "username"
+                    : "email"
+                }
                 disabled={loading}
               />
 
