@@ -1,0 +1,530 @@
+.referral-section {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 55px auto 0;
+
+  padding: 0 20px;
+
+  position: relative;
+
+  z-index: 3;
+}
+
+.referral-card {
+  width: 100%;
+
+  padding: 26px;
+
+  border-radius: 22px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.08);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.065),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  backdrop-filter: blur(20px);
+
+  box-shadow:
+    0 25px 80px
+    rgba(0, 0, 0, 0.3);
+
+  text-align: left;
+}
+
+.referral-card-top {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.referral-label {
+  color: #8f8f9a;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.8px;
+
+  margin-bottom: 7px;
+}
+
+.referral-card h2 {
+  font-size: 22px;
+
+  line-height: 1.25;
+
+  letter-spacing: -0.8px;
+
+  overflow-wrap: anywhere;
+}
+
+.referral-card h2 span {
+  background:
+    linear-gradient(
+      90deg,
+      #a78bfa,
+      #60a5fa
+    );
+
+  -webkit-background-clip: text;
+
+  background-clip: text;
+
+  color: transparent;
+}
+
+.referral-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 14px;
+
+  background:
+    rgba(139, 92, 246, 0.1);
+
+  border:
+    1px solid rgba(139, 92, 246, 0.18);
+
+  font-size: 20px;
+}
+
+.referral-stats {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.referral-stat {
+  min-height: 82px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  padding: 15px;
+
+  border-radius: 14px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  background:
+    rgba(0, 0, 0, 0.16);
+
+  min-width: 0;
+}
+
+.referral-stat-label {
+  color: #686873;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.4px;
+
+  margin-bottom: 7px;
+}
+
+.referral-stat strong {
+  color: #f4f4f5;
+
+  font-size: 22px;
+
+  line-height: 1;
+}
+
+.referral-stat strong.status-online {
+  color: #4ade80;
+
+  font-size: 12px;
+
+  letter-spacing: 0.8px;
+}
+
+.referral-link-area {
+  margin-top: 22px;
+
+  min-width: 0;
+}
+
+.referral-link-heading {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-bottom: 9px;
+}
+
+.referral-link-heading span {
+  color: #b5b5be;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.referral-link-heading small {
+  color: #5f5f69;
+
+  font-size: 9px;
+}
+
+.referral-link-box {
+  display: flex;
+
+  gap: 8px;
+
+  min-width: 0;
+
+  padding: 5px;
+
+  border-radius: 13px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.07);
+
+  background:
+    rgba(0, 0, 0, 0.22);
+}
+
+.referral-link-box input {
+  flex: 1;
+
+  min-width: 0;
+
+  width: 0;
+
+  height: 40px;
+
+  padding: 0 11px;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #9696a1;
+
+  font-family: monospace;
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+}
+
+.referral-link-box button {
+  height: 40px;
+
+  flex-shrink: 0;
+
+  padding: 0 18px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--purple),
+      var(--blue)
+    );
+
+  color: white;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+}
+
+.referral-link-box button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.referral-link-box button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.referral-link-box button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+.referral-tip {
+  margin-top: 14px;
+
+  color: #666671;
+
+  font-size: 9px;
+
+  line-height: 1.6;
+}
+
+.referral-error {
+  margin-top: 14px;
+
+  padding: 10px 12px;
+
+  border-radius: 9px;
+
+  color: #fca5a5;
+
+  background:
+    rgba(239, 68, 68, 0.08);
+
+  border:
+    1px solid rgba(239, 68, 68, 0.15);
+
+  font-size: 10px;
+}
+
+.referral-loading {
+  padding: 30px;
+
+  text-align: center;
+
+  color: #777782;
+
+  font-size: 11px;
+}
+
+/* Tablet */
+
+@media (max-width: 650px) {
+
+  .referral-section {
+    margin-top: 40px;
+
+    padding: 0 15px;
+  }
+
+  .referral-card {
+    padding: 20px;
+
+    border-radius: 18px;
+  }
+
+  .referral-stats {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+}
+
+/* Phone */
+
+@media (max-width: 520px) {
+
+  .referral-section {
+    padding: 0 12px;
+  }
+
+  .referral-card {
+    padding: 18px 15px;
+
+    border-radius: 17px;
+  }
+
+  .referral-card-top {
+    gap: 12px;
+  }
+
+  .referral-card h2 {
+    font-size: 19px;
+  }
+
+  .referral-icon {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    font-size: 17px;
+  }
+
+  .referral-stats {
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 18px;
+  }
+
+  .referral-stat {
+    min-height: 70px;
+
+    padding: 12px;
+  }
+
+  .referral-stat:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .referral-stat strong {
+    font-size: 19px;
+  }
+
+  .referral-link-heading {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 4px;
+  }
+
+  .referral-link-box {
+    flex-direction: column;
+
+    padding: 7px;
+
+    gap: 6px;
+  }
+
+  .referral-link-box input {
+    width: 100%;
+
+    height: 38px;
+
+    font-size: 9px;
+  }
+
+  .referral-link-box button {
+    width: 100%;
+
+    height: 42px;
+  }
+
+}
+
+/* Small phones */
+
+@media (max-width: 360px) {
+
+  .referral-card {
+    padding: 16px 13px;
+  }
+
+  .referral-card h2 {
+    font-size: 17px;
+  }
+
+  .referral-label {
+    font-size: 8px;
+  }
+
+  .referral-stat strong {
+    font-size: 18px;
+  }
+
+}
+/* Social referral sharing */
+
+.referral-share-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.share-button {
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  color: white;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease,
+    background 0.2s ease;
+}
+
+.share-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+.share-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.share-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.share-button.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: rgba(37, 211, 102, 0.22);
+  color: #4ade80;
+}
+
+.share-button.telegram {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.22);
+  color: #60a5fa;
+}
+
+.share-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+@media (max-width: 500px) {
+  .referral-share-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .share-button {
+    height: 44px;
+  }
+}

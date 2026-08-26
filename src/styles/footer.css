@@ -1,0 +1,38 @@
+.site-footer {
+  width: 100%;
+  max-width: 1000px;
+
+  margin: auto;
+
+  padding: 25px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  color: #55555f;
+
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+
+  .site-footer {
+    flex-direction: column;
+
+    gap: 8px;
+
+    padding:
+      22px 15px;
+
+    text-align: center;
+  }
+
+}
