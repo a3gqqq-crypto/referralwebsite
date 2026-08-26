@@ -4,6 +4,7 @@ import "../styles/referral.css";
 
 function ReferralCard({ user }) {
   const [profile, setProfile] = useState(null);
+  const [rank, setRank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
@@ -18,17 +19,52 @@ function ReferralCard({ user }) {
       setLoading(true);
       setError("");
 
-      const { data, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, username, referral_count")
-        .eq("id", user.id)
-        .single();
+      // Load current user's profile
+      const { data: profileData, error: profileError } =
+        await supabase
+          .from("profiles")
+          .select("id, username, referral_count")
+          .eq("id", user.id)
+          .single();
 
       if (profileError) {
         console.error(profileError);
         setError("Could not load your referral profile.");
+        setLoading(false);
+        return;
+      }
+
+      setProfile(profileData);
+
+      // Load referral counts for everyone
+      const { data: profiles, error: leaderboardError } =
+        await supabase
+          .from("profiles")
+          .select("id, referral_count");
+
+      if (leaderboardError) {
+        console.error(leaderboardError);
+        setError("Could not calculate your rank.");
+        setLoading(false);
+        return;
+      }
+
+      // Sort everyone by referral count
+      const sortedProfiles = [...(profiles || [])].sort(
+        (a, b) =>
+          (b.referral_count || 0) -
+          (a.referral_count || 0)
+      );
+
+      // Find current user's position
+      const userIndex = sortedProfiles.findIndex(
+        (profile) => profile.id === user.id
+      );
+
+      if (userIndex !== -1) {
+        setRank(userIndex + 1);
       } else {
-        setProfile(data);
+        setRank(null);
       }
 
       setLoading(false);
@@ -153,7 +189,7 @@ function ReferralCard({ user }) {
             </span>
 
             <strong>
-              —
+              {rank ? `#${rank}` : "—"}
             </strong>
           </div>
 
@@ -198,7 +234,10 @@ function ReferralCard({ user }) {
               onClick={shareWhatsApp}
               disabled={!referralLink}
             >
-              <span className="share-icon">◉</span>
+              <span className="share-icon">
+                ◉
+              </span>
+
               WhatsApp
             </button>
 
@@ -208,7 +247,10 @@ function ReferralCard({ user }) {
               onClick={shareTelegram}
               disabled={!referralLink}
             >
-              <span className="share-icon">➤</span>
+              <span className="share-icon">
+                ➤
+              </span>
+
               Telegram
             </button>
 
