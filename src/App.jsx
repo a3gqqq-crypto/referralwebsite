@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import ReferralCard from "./components/ReferralCard";
 import ReferralHistory from "./components/ReferralHistory";
+import DonationCard from "./components/DonationCard";
 import Leaderboard from "./components/Leaderboard";
 import Footer from "./components/Footer";
 import Auth from "./components/Auth";
@@ -14,6 +15,7 @@ import "./styles/global.css";
 import "./styles/navbar.css";
 import "./styles/referral.css";
 import "./styles/referralHistory.css";
+import "./styles/donation.css";
 import "./styles/leaderboard.css";
 import "./styles/footer.css";
 import "./styles/auth.css";
@@ -140,6 +142,8 @@ function App() {
         <ReferralHistory
           user={session.user}
         />
+
+        <DonationCard />
 
         <Leaderboard
           user={session.user}
