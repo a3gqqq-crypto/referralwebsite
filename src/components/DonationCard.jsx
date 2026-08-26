@@ -1,15 +1,15 @@
 function DonationCard() {
   const donors = [
-    { name: "DreamCM", amount: 250 },
-    { name: "Alex", amount: 150 },
-    { name: "George", amount: 100 },
-    { name: "Kokomelon", amount: 75 },
-    { name: "Snake", amount: 50 },
-    { name: "PlayerOne", amount: 40 },
-    { name: "Shadow", amount: 35 },
-    { name: "Nova", amount: 25 },
-    { name: "Pixel", amount: 20 },
-    { name: "Dragon", amount: 15 },
+    { name: "pokipine", amount: 50 },
+    { name: "Alex", amount: 40 },
+    { name: "George", amount: 38 },
+    { name: "Kokomelon", amount: 32 },
+    { name: "Snake", amount: 21 },
+    { name: "PlayerOne", amount: 17 },
+    { name: "Shadow", amount: 14 },
+    { name: "Nova", amount: 10 },
+    { name: "Pixel", amount: 5 },
+    { name: "Dragon", amount: 5 },
   ];
 
   return (
