@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
 
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
 
     <meta
       name="viewport"
@@ -12,7 +16,18 @@
 
     <title>Referral Competition</title>
 
-    <!-- Open Graph -->
+    <!-- SEO -->
+    <meta
+      name="description"
+      content="Invite your friends, earn referrals and compete for the top spot on the referral leaderboard."
+    />
+
+    <!-- Open Graph / WhatsApp / Discord -->
+    <meta
+      property="og:type"
+      content="website"
+    />
+
     <meta
       property="og:title"
       content="Referral Competition — Invite More. Climb Higher."
@@ -24,18 +39,31 @@
     />
 
     <meta
-      property="og:image"
-      content="https://referralwebsite-g3nr2oic2-gggm.vercel.app/referral-preview.png"
+      property="og:url"
+      content="https://referralwebsite.vercel.app/"
     />
 
     <meta
-      property="og:url"
-      content="https://referralwebsite-g3nr2oic2-gggm.vercel.app/"
+      property="og:image"
+      content="https://referralwebsite.vercel.app/referral-preview.png"
     />
 
-    <meta property="og:type" content="website" />
+    <meta
+      property="og:image:alt"
+      content="Referral Competition — Invite More. Climb Higher."
+    />
 
-    <!-- Social preview -->
+    <meta
+      property="og:image:width"
+      content="1200"
+    />
+
+    <meta
+      property="og:image:height"
+      content="630"
+    />
+
+    <!-- Twitter / X -->
     <meta
       name="twitter:card"
       content="summary_large_image"
@@ -53,16 +81,19 @@
 
     <meta
       name="twitter:image"
-      content="https://referralwebsite-g3nr2oic2-gggm.vercel.app/referral-preview.png"
+      content="https://referralwebsite.vercel.app/referral-preview.png"
     />
+
   </head>
 
   <body>
+
     <div id="root"></div>
 
     <script
       type="module"
       src="/src/main.jsx"
     ></script>
+
   </body>
 </html>
