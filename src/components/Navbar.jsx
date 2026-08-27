@@ -1,67 +1,111 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { NavLink } from "react-router-dom";
 
 function Navbar({ user, onLogout }) {
-  const [username, setUsername] = useState("");
-
-  useEffect(() => {
-    const loadUsername = async () => {
-      if (!user?.id) {
-        setUsername("");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .single();
-
-      if (error) {
-        console.error("Could not load username:", error);
-
-        setUsername(
-          user?.user_metadata?.username ||
-          "Member"
-        );
-
-        return;
-      }
-
-      setUsername(data?.username || "Member");
-    };
-
-    loadUsername();
-  }, [user]);
+  const username =
+    user?.user_metadata?.username || "Member";
 
   return (
     <nav className="navbar">
 
-      <div className="logo">
-        <span className="logo-icon">
-          R
-        </span>
+      <div className="navbar-inner">
 
-        <span>
-          REFERRAL
-        </span>
-      </div>
+        {/* ===============================
+            BRAND
+        =============================== */}
 
-      <div className="nav-right">
-
-        <span className="nav-status">
-          <span className="status-dot"></span>
-          Live
-        </span>
-
-        <button
-          className="profile-button"
-          type="button"
-          onClick={onLogout}
-          title="Click to log out"
+        <NavLink
+          to="/"
+          className="navbar-brand"
         >
-          {username || "Member"}
-        </button>
+          <div className="navbar-logo">
+            V
+          </div>
+
+          <div className="navbar-brand-text">
+            <strong>
+              VEXORA
+            </strong>
+
+            <span>
+              COMPETITION
+            </span>
+          </div>
+        </NavLink>
+
+
+        {/* ===============================
+            NAVIGATION
+        =============================== */}
+
+        <div className="navbar-links">
+
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Home
+          </NavLink>
+
+          <NavLink
+            to="/events"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Events
+          </NavLink>
+
+          <NavLink
+            to="/events/top-inviter/leaderboard"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Event Leaderboard
+          </NavLink>
+
+          <NavLink
+            to="/invites"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Invites
+          </NavLink>
+
+          <NavLink
+            to="/donations"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+          >
+            Donations
+          </NavLink>
+
+        </div>
+
+
+        {/* ===============================
+            ACCOUNT
+        =============================== */}
+
+        <div className="navbar-account">
+
+          <span className="navbar-username">
+            {username}
+          </span>
+
+          <button
+            type="button"
+            className="navbar-logout"
+            onClick={onLogout}
+          >
+            Log Out
+          </button>
+
+        </div>
 
       </div>
 

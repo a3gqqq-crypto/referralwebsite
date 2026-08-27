@@ -1,0 +1,748 @@
+/* =========================================
+   INVITES PAGE
+========================================= */
+
+.invites-page {
+  width: 100%;
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding:
+    45px 25px 80px;
+
+  position: relative;
+
+  z-index: 2;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.invites-header {
+  max-width: 850px;
+
+  margin:
+    25px auto 40px;
+
+  text-align: center;
+}
+
+.invites-header-label {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    7px 11px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(124, 58, 237, 0.09);
+
+  border:
+    1px solid rgba(139, 92, 246, 0.18);
+
+  color: #a78bfa;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing: 1.6px;
+}
+
+.invites-header h1 {
+  margin-top: 15px;
+
+  color: #ffffff;
+
+  font-size:
+    clamp(38px, 6vw, 62px);
+
+  line-height: 1;
+
+  letter-spacing: -3px;
+
+  font-weight: 900;
+}
+
+.invites-header h1 span {
+  background:
+    linear-gradient(
+      90deg,
+      #a78bfa,
+      #818cf8,
+      #60a5fa
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+
+.invites-header p {
+  max-width: 600px;
+
+  margin:
+    14px auto 0;
+
+  color: #787784;
+
+  font-size: 11px;
+
+  line-height: 1.65;
+}
+
+
+/* =========================================
+   COMPETITION AREA
+========================================= */
+
+.invites-competition {
+  margin-top: 55px;
+}
+
+.invites-competition-heading {
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content: space-between;
+
+  margin-bottom: 17px;
+}
+
+.invites-section-label {
+  color: #8f7cf5;
+
+  font-size: 8px;
+
+  font-weight: 900;
+
+  letter-spacing: 1.7px;
+
+  margin-bottom: 7px;
+}
+
+.invites-competition-heading h2 {
+  color: #ffffff;
+
+  font-size: 25px;
+
+  letter-spacing: -0.8px;
+}
+
+
+/* =========================================
+   TWO PANEL LAYOUT
+========================================= */
+
+.invites-panels {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 0.85fr)
+    minmax(0, 1.15fr);
+
+  gap: 16px;
+
+  align-items: start;
+}
+
+.invites-panel {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  background:
+    rgba(255, 255, 255, 0.018);
+
+  box-shadow:
+    0 20px 65px rgba(0, 0, 0, 0.23);
+}
+
+
+/* =========================================
+   REMOVE OLD SECTION SPACING
+========================================= */
+
+.invites-panel
+.referral-history-section,
+.invites-panel
+.leaderboard-section {
+  width: 100%;
+
+  max-width: none;
+
+  margin: 0;
+
+  padding:
+    20px;
+}
+
+
+/* =========================================
+   HISTORY HEADER
+========================================= */
+
+.invites-panel
+.referral-history-heading {
+  margin-bottom: 14px;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+.invites-panel
+.referral-history-heading h2 {
+  margin: 4px 0;
+
+  font-size: 19px;
+
+  letter-spacing: -0.7px;
+}
+
+.invites-panel
+.referral-history-heading p {
+  font-size: 9px;
+}
+
+
+/* =========================================
+   HISTORY BADGE
+========================================= */
+
+.invites-panel
+.referral-count-badge {
+  min-width: 70px;
+
+  padding:
+    9px 11px;
+
+  border-radius: 11px;
+}
+
+.invites-panel
+.referral-count-badge strong {
+  font-size: 18px;
+}
+
+.invites-panel
+.referral-count-badge span {
+  font-size: 7px;
+}
+
+
+/* =========================================
+   HISTORY SCROLL AREA
+========================================= */
+
+.invites-panel
+.referral-history-card {
+  max-height: 460px;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  border-radius: 14px;
+
+  box-shadow: none;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    rgba(139, 92, 246, 0.35)
+    transparent;
+}
+
+.invites-panel
+.referral-history-card::-webkit-scrollbar {
+  width: 5px;
+}
+
+.invites-panel
+.referral-history-card::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.invites-panel
+.referral-history-card::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+
+  background:
+    rgba(139, 92, 246, 0.35);
+}
+
+
+/* =========================================
+   HISTORY ROWS
+========================================= */
+
+.invites-panel
+.referral-history-row {
+  padding:
+    13px 14px;
+
+  gap: 10px;
+}
+
+.invites-panel
+.referral-history-avatar {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+}
+
+.invites-panel
+.referral-history-user {
+  gap: 9px;
+}
+
+.invites-panel
+.referral-history-user strong {
+  font-size: 11px;
+}
+
+.invites-panel
+.referral-history-user span {
+  font-size: 8px;
+
+  margin-top: 2px;
+}
+
+.invites-panel
+.referral-history-right
+.referral-joined {
+  font-size: 7px;
+
+  margin-bottom: 2px;
+}
+
+.invites-panel
+.referral-history-right strong {
+  font-size: 9px;
+}
+
+
+/* =========================================
+   LEADERBOARD HEADER
+========================================= */
+
+.invites-panel
+.section-heading {
+  margin-bottom: 14px;
+
+  align-items: center;
+}
+
+.invites-panel
+.section-heading h2 {
+  font-size: 19px;
+
+  letter-spacing: -0.7px;
+}
+
+.invites-panel
+.section-label {
+  font-size: 7px;
+
+  letter-spacing: 1.4px;
+
+  margin-bottom: 5px;
+}
+
+.invites-panel
+.updated {
+  font-size: 8px;
+}
+
+
+/* =========================================
+   LEADERBOARD PODIUM
+========================================= */
+
+.invites-panel
+.podium {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  align-items: stretch;
+
+  gap: 7px;
+
+  margin-bottom: 9px;
+}
+
+.invites-panel
+.podium-card {
+  min-width: 0;
+
+  padding:
+    15px 10px;
+
+  border-radius: 13px;
+
+  border:
+    1px solid rgba(255, 255, 255, 0.055);
+
+  background:
+    rgba(255, 255, 255, 0.018);
+
+  text-align: center;
+}
+
+.invites-panel
+.podium-card.first {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(124, 58, 237, 0.12),
+      rgba(124, 58, 237, 0.025)
+    );
+
+  border-color:
+    rgba(139, 92, 246, 0.2);
+}
+
+.invites-panel
+.crown {
+  position: static;
+
+  margin-bottom: 5px;
+
+  font-size: 15px;
+
+  transform: none;
+}
+
+.invites-panel
+.rank-circle {
+  width: 25px;
+  height: 25px;
+
+  margin:
+    0 auto 7px;
+
+  font-size: 9px;
+}
+
+.invites-panel
+.avatar {
+  width: 41px;
+  height: 41px;
+
+  margin:
+    0 auto 7px;
+
+  border-radius: 11px;
+
+  font-size: 13px;
+}
+
+.invites-panel
+.podium-card h3 {
+  max-width: 100%;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 11px;
+}
+
+.invites-panel
+.podium-card p {
+  margin-top: 3px;
+
+  font-size: 8px;
+}
+
+.invites-panel
+.podium-place {
+  margin-top: 9px;
+
+  font-size: 6px;
+
+  letter-spacing: 1.2px;
+}
+
+
+/* =========================================
+   LEADERBOARD LIST
+========================================= */
+
+.invites-panel
+.leaderboard-list {
+  max-height: 270px;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  padding-right: 3px;
+
+  scrollbar-width: thin;
+
+  scrollbar-color:
+    rgba(139, 92, 246, 0.35)
+    transparent;
+}
+
+.invites-panel
+.leaderboard-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.invites-panel
+.leaderboard-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.invites-panel
+.leaderboard-list::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+
+  background:
+    rgba(139, 92, 246, 0.35);
+}
+
+.invites-panel
+.leaderboard-row {
+  padding:
+    9px 10px;
+
+  gap: 8px;
+
+  border-radius: 10px;
+
+  margin-bottom: 5px;
+}
+
+.invites-panel
+.leaderboard-row:last-child {
+  margin-bottom: 0;
+}
+
+.invites-panel
+.rank {
+  width: 27px;
+
+  flex-shrink: 0;
+
+  font-size: 8px;
+}
+
+.invites-panel
+.avatar.small {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 8px;
+
+  font-size: 10px;
+}
+
+.invites-panel
+.user-info {
+  gap: 7px;
+}
+
+.invites-panel
+.user-info strong {
+  font-size: 9px;
+}
+
+.invites-panel
+.user-info
+> div:last-child
+> span:not(.you-badge) {
+  font-size: 7px;
+
+  margin-top: 2px;
+}
+
+.invites-panel
+.referrals strong {
+  font-size: 11px;
+}
+
+.invites-panel
+.referrals span {
+  font-size: 6px;
+}
+
+
+/* =========================================
+   YOUR RANK
+========================================= */
+
+.invites-panel
+.your-rank-card {
+  margin-top: 9px;
+
+  padding: 11px;
+
+  border-radius: 11px;
+
+  gap: 10px;
+}
+
+.invites-panel
+.your-rank-card span {
+  font-size: 6px;
+
+  letter-spacing: 0.8px;
+}
+
+.invites-panel
+.your-rank-card strong {
+  font-size: 13px;
+}
+
+
+/* =========================================
+   LOADING / EMPTY
+========================================= */
+
+.invites-panel
+.leaderboard-loading,
+.invites-panel
+.referral-history-loading {
+  padding: 30px 15px;
+
+  font-size: 9px;
+}
+
+.invites-panel
+.leaderboard-empty,
+.invites-panel
+.referral-history-card.empty {
+  padding: 30px 15px;
+}
+
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
+
+  .invites-page {
+    padding:
+      35px 18px 65px;
+  }
+
+  .invites-panels {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .invites-page {
+    padding:
+      25px 12px 50px;
+  }
+
+  .invites-header {
+    margin:
+      15px auto 30px;
+  }
+
+  .invites-header h1 {
+    font-size:
+      clamp(34px, 11vw, 48px);
+
+    letter-spacing: -2px;
+  }
+
+  .invites-header p {
+    font-size: 10px;
+  }
+
+  .invites-competition {
+    margin-top: 40px;
+  }
+
+  .invites-competition-heading h2 {
+    font-size: 22px;
+  }
+
+  .invites-panel {
+    border-radius: 16px;
+  }
+
+  .invites-panel
+  .referral-history-section,
+  .invites-panel
+  .leaderboard-section {
+    padding: 15px;
+  }
+
+  .invites-panel
+  .referral-history-card {
+    max-height: 360px;
+  }
+
+  .invites-panel
+  .leaderboard-list {
+    max-height: 220px;
+  }
+
+}
+
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 380px) {
+
+  .invites-page {
+    padding:
+      20px 10px 40px;
+  }
+
+  .invites-header h1 {
+    font-size: 33px;
+  }
+
+  .invites-panel
+  .podium-card {
+    padding:
+      12px 7px;
+  }
+
+  .invites-panel
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+}

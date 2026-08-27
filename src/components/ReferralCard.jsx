@@ -15,11 +15,10 @@ function ReferralCard({ user }) {
       return;
     }
 
-    const loadProfile = async () => {
+    const loadReferralData = async () => {
       setLoading(true);
       setError("");
 
-      // Load current user's profile
       const { data: profileData, error: profileError } =
         await supabase
           .from("profiles")
@@ -36,7 +35,6 @@ function ReferralCard({ user }) {
 
       setProfile(profileData);
 
-      // Load referral counts for everyone
       const { data: profiles, error: leaderboardError } =
         await supabase
           .from("profiles")
@@ -49,34 +47,32 @@ function ReferralCard({ user }) {
         return;
       }
 
-      // Sort everyone by referral count
       const sortedProfiles = [...(profiles || [])].sort(
         (a, b) =>
           (b.referral_count || 0) -
           (a.referral_count || 0)
       );
 
-      // Find current user's position
       const userIndex = sortedProfiles.findIndex(
-        (profile) => profile.id === user.id
+        (item) => item.id === user.id
       );
 
-      if (userIndex !== -1) {
-        setRank(userIndex + 1);
-      } else {
-        setRank(null);
-      }
-
+      setRank(userIndex !== -1 ? userIndex + 1 : null);
       setLoading(false);
     };
 
-    loadProfile();
+    loadReferralData();
   }, [user]);
 
-  const username = profile?.username || "";
+  const username =
+    profile?.username ||
+    user?.user_metadata?.username ||
+    "";
 
   const referralLink = username
-    ? `${window.location.origin}/?ref=${encodeURIComponent(username)}`
+    ? `${window.location.origin}/?ref=${encodeURIComponent(
+        username
+      )}`
     : "";
 
   const shareMessage =
@@ -139,6 +135,7 @@ function ReferralCard({ user }) {
     <section className="referral-section">
       <div className="referral-card">
 
+        {/* Header */}
         <div className="referral-card-top">
           <div>
             <div className="referral-label">
@@ -147,12 +144,7 @@ function ReferralCard({ user }) {
 
             <h2>
               Welcome{" "}
-              <span>
-                {profile?.username ||
-                  user?.user_metadata?.username ||
-                  "Member"}
-              </span>
-              👋
+              <span>{username || "Member"}</span> 👋
             </h2>
           </div>
 
@@ -161,6 +153,7 @@ function ReferralCard({ user }) {
           </div>
         </div>
 
+        {/* Stats */}
         <div className="referral-stats">
 
           <div className="referral-stat">
@@ -195,6 +188,7 @@ function ReferralCard({ user }) {
 
         </div>
 
+        {/* Referral link */}
         <div className="referral-link-area">
 
           <div className="referral-link-heading">
@@ -226,6 +220,7 @@ function ReferralCard({ user }) {
 
           </div>
 
+          {/* Share buttons */}
           <div className="referral-share-buttons">
 
             <button
@@ -258,15 +253,17 @@ function ReferralCard({ user }) {
 
         </div>
 
+        {/* Error */}
         {error && (
           <div className="referral-error">
             {error}
           </div>
         )}
 
+        {/* Tip */}
         <div className="referral-tip">
-          💡 The more people who sign up through your link,
-          the higher you climb on the leaderboard.
+          💡 The more people who sign up through your
+          link, the higher you climb on the leaderboard.
         </div>
 
       </div>

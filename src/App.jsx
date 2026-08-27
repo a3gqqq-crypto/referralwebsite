@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import ReferralCard from "./components/ReferralCard";
-import ReferralHistory from "./components/ReferralHistory";
-import DonationCard from "./components/DonationCard";
-import Leaderboard from "./components/Leaderboard";
 import Footer from "./components/Footer";
 import Auth from "./components/Auth";
+
+import Home from "./pages/Home";
+import EventsPage from "./pages/EventsPage";
+import EventDetailsPage from "./pages/EventDetails";
+import EventLeaderboardPage from "./pages/EventLeaderboardPage";
+import InvitesPage from "./pages/InvitesPage";
+import DonationsPage from "./pages/DonationsPage";
+
+import { EventProvider } from "./context/EventContext";
 
 import { supabase } from "./lib/supabaseClient";
 
@@ -15,25 +26,37 @@ import "./styles/global.css";
 import "./styles/navbar.css";
 import "./styles/referral.css";
 import "./styles/referralHistory.css";
-import "./styles/donation.css";
 import "./styles/leaderboard.css";
+import "./styles/donation.css";
 import "./styles/footer.css";
 import "./styles/auth.css";
+import "./styles/events.css";
+import "./styles/eventDetails.css";
+import "./styles/eventLeaderboard.css";
+import "./styles/referralPreview.css";
+import "./styles/home.css";
+import "./styles/invites.css";
 
 function App() {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     let mounted = true;
 
     const loadSession = async () => {
       const {
-        data: { session },
-      } = await supabase.auth.getSession();
+        data: {
+          session: currentSession,
+        },
+      } =
+        await supabase.auth.getSession();
 
       if (mounted) {
-        setSession(session);
+        setSession(currentSession);
         setLoading(false);
       }
     };
@@ -41,12 +64,15 @@ function App() {
     loadSession();
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        setSession(newSession);
-      }
-    );
+      data: {
+        subscription,
+      },
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, newSession) => {
+          setSession(newSession);
+        }
+      );
 
     return () => {
       mounted = false;
@@ -54,18 +80,26 @@ function App() {
     };
   }, []);
 
-  const handleAuthenticated = (newSession) => {
-    setSession(newSession);
-  };
+  const handleAuthenticated =
+    (newSession) => {
+      setSession(newSession);
+    };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+
     setSession(null);
   };
+
+
+  /* =========================================
+     LOADING
+  ========================================= */
 
   if (loading) {
     return (
       <div className="auth-page">
+
         <div className="auth-container">
 
           <div className="auth-card">
@@ -73,7 +107,7 @@ function App() {
             <div className="auth-heading">
 
               <div className="auth-badge">
-                REFERRAL COMPETITION
+                VEXORA
               </div>
 
               <h1>
@@ -89,71 +123,124 @@ function App() {
           </div>
 
         </div>
+
       </div>
     );
   }
 
+
+  /* =========================================
+     LOGIN
+  ========================================= */
+
   if (!session) {
     return (
       <Auth
-        onAuthenticated={handleAuthenticated}
+        onAuthenticated={
+          handleAuthenticated
+        }
       />
     );
   }
 
+
+  /* =========================================
+     LOGGED IN
+  ========================================= */
+
   return (
-    <div className="app">
+    <BrowserRouter>
 
-      <div className="background-glow glow-one"></div>
-      <div className="background-glow glow-two"></div>
-
-      <Navbar
+      <EventProvider
         user={session.user}
-        onLogout={handleLogout}
-      />
+      >
 
-      <main>
+        <div className="app">
 
-        <section className="hero">
+          <div className="background-glow glow-one"></div>
 
-          <div className="hero-badge">
-            🏆 Referral Competition
-          </div>
+          <div className="background-glow glow-two"></div>
 
-          <h1>
-            Invite More.
-            <span>
-              {" "}
-              Climb Higher.
-            </span>
-          </h1>
-
-          <p>
-            Invite your friends and compete for the top
-            spot on the referral leaderboard.
-          </p>
-
-          <ReferralCard
+          <Navbar
             user={session.user}
+            onLogout={handleLogout}
           />
 
-        </section>
+          <Routes>
 
-        <ReferralHistory
-          user={session.user}
-        />
+            <Route
+              path="/"
+              element={
+                <Home
+                  user={session.user}
+                />
+              }
+            />
 
-        <DonationCard />
+            <Route
+              path="/events"
+              element={
+                <EventsPage
+                  user={session.user}
+                />
+              }
+            />
 
-        <Leaderboard
-          user={session.user}
-        />
+            <Route
+              path="/events/:eventId"
+              element={
+                <EventDetailsPage
+                  user={session.user}
+                />
+              }
+            />
 
-      </main>
+            <Route
+              path="/events/:eventId/leaderboard"
+              element={
+                <EventLeaderboardPage
+                  user={session.user}
+                />
+              }
+            />
 
-      <Footer />
+            <Route
+              path="/invites"
+              element={
+                <InvitesPage
+                  user={session.user}
+                />
+              }
+            />
 
-    </div>
+            <Route
+              path="/donations"
+              element={
+                <DonationsPage
+                  user={session.user}
+                />
+              }
+            />
+
+            <Route
+              path="*"
+              element={
+                <Navigate
+                  to="/"
+                  replace
+                />
+              }
+            />
+
+          </Routes>
+
+          <Footer />
+
+        </div>
+
+      </EventProvider>
+
+    </BrowserRouter>
   );
 }
 
