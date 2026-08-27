@@ -4,18 +4,20 @@ import { Link } from "react-router-dom";
 import { events } from "../data/events";
 import EventDetails from "./EventDetails";
 
+import { useEvents } from "../context/EventContext";
+
 import "../styles/events.css";
 
 function Events({ user }) {
-  const [now, setNow] = useState(
-    new Date()
-  );
+  const [now, setNow] = useState(new Date());
 
   const [selectedEvent, setSelectedEvent] =
     useState(null);
 
-  const [joinedEvents, setJoinedEvents] =
-    useState({});
+  const {
+    isJoined,
+    loadingEvents,
+  } = useEvents();
 
 
   /* =========================================
@@ -31,33 +33,6 @@ function Events({ user }) {
       clearInterval(timer);
     };
   }, []);
-
-
-  /* =========================================
-     LOAD JOINED EVENTS
-  ========================================= */
-
-  useEffect(() => {
-    if (!user?.id) {
-      setJoinedEvents({});
-      return;
-    }
-
-    const loaded = {};
-
-    events.forEach((event) => {
-      const key =
-        `vexora_event_joined_${user.id}_${event.id}`;
-
-      if (
-        localStorage.getItem(key) === "true"
-      ) {
-        loaded[event.id] = true;
-      }
-    });
-
-    setJoinedEvents(loaded);
-  }, [user?.id]);
 
 
   /* =========================================
@@ -97,14 +72,10 @@ function Events({ user }) {
     }
 
     const totalSeconds =
-      Math.floor(
-        difference / 1000
-      );
+      Math.floor(difference / 1000);
 
     const days =
-      Math.floor(
-        totalSeconds / 86400
-      );
+      Math.floor(totalSeconds / 86400);
 
     const hours =
       Math.floor(
@@ -153,7 +124,7 @@ function Events({ user }) {
 
 
   /* =========================================
-     EVENT DETAILS VIEW
+     EVENT DETAILS
   ========================================= */
 
   if (selectedEvent) {
@@ -266,8 +237,16 @@ function Events({ user }) {
           const isReferralEvent =
             event.type === "referral";
 
-          const isJoined =
-            joinedEvents[event.id] === true;
+          /*
+           * IMPORTANT:
+           * Joined state now comes from the
+           * shared EventContext.
+           *
+           * That means Supabase is the source
+           * of truth across devices.
+           */
+          const joined =
+            isJoined(event.id);
 
 
           return (
@@ -327,7 +306,7 @@ function Events({ user }) {
 
 
                 {/* =================================
-                    REWARDS
+                    TOP 3 REWARDS
                 ================================= */}
 
                 {isReferralEvent &&
@@ -425,11 +404,9 @@ function Events({ user }) {
                   <div className="event-detail">
 
                     <span>
-                      {status ===
-                      "upcoming"
+                      {status === "upcoming"
                         ? "🚀 STARTS IN"
-                        : status ===
-                          "ended"
+                        : status === "ended"
                           ? "✓ STATUS"
                           : "⏱ ENDS IN"}
                     </span>
@@ -448,16 +425,14 @@ function Events({ user }) {
 
 
                 {/* =================================
-                    ACTION BUTTONS
+                    ACTIONS
                 ================================= */}
 
                 <div className="event-actions">
 
-                  {/* EVENT */}
-
                   <button
                     className={`event-button ${
-                      isJoined
+                      joined
                         ? "event-button-joined"
                         : ""
                     }`}
@@ -465,18 +440,19 @@ function Events({ user }) {
                     onClick={() =>
                       setSelectedEvent(event)
                     }
+                    disabled={loadingEvents}
                   >
 
-                    {isJoined
-                      ? "✓ YOU'RE JOINED"
-                      : status === "live"
-                        ? event.buttonText
-                        : "VIEW EVENT"}
+                    {loadingEvents
+                      ? "CHECKING..."
+                      : joined
+                        ? "✓ YOU'RE JOINED"
+                        : status === "live"
+                          ? event.buttonText
+                          : "VIEW EVENT"}
 
                   </button>
 
-
-                  {/* EVENT LEADERBOARD */}
 
                   <Link
                     to={`/events/${event.id}/leaderboard`}
