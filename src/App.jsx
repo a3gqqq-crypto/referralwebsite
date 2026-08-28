@@ -44,6 +44,56 @@ function App() {
   const [loading, setLoading] =
     useState(true);
 
+
+  /* =========================================
+     GLOBAL BUTTON CLICK SOUND
+  ========================================= */
+
+  useEffect(() => {
+    const handleButtonClick = (event) => {
+      const button =
+        event.target.closest("button");
+
+      if (!button) {
+        return;
+      }
+
+      if (button.disabled) {
+        return;
+      }
+
+      const audio =
+        new Audio("/sounds/click.mp3");
+
+      audio.volume = 0.18;
+
+      audio.play().catch(() => {
+        /*
+         * Ignore browser autoplay/audio errors
+         * so the website never breaks because
+         * of the sound.
+         */
+      });
+    };
+
+    document.addEventListener(
+      "click",
+      handleButtonClick
+    );
+
+    return () => {
+      document.removeEventListener(
+        "click",
+        handleButtonClick
+      );
+    };
+  }, []);
+
+
+  /* =========================================
+     LOAD SESSION
+  ========================================= */
+
   useEffect(() => {
     let mounted = true;
 
@@ -80,10 +130,20 @@ function App() {
     };
   }, []);
 
+
+  /* =========================================
+     AUTHENTICATED
+  ========================================= */
+
   const handleAuthenticated =
     (newSession) => {
       setSession(newSession);
     };
+
+
+  /* =========================================
+     LOGOUT
+  ========================================= */
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -130,7 +190,7 @@ function App() {
 
 
   /* =========================================
-     LOGIN
+     NOT LOGGED IN
   ========================================= */
 
   if (!session) {
@@ -161,12 +221,24 @@ function App() {
 
           <div className="background-glow glow-two"></div>
 
+
+          {/* =================================
+              NAVBAR
+          ================================= */}
+
           <Navbar
             user={session.user}
             onLogout={handleLogout}
           />
 
+
+          {/* =================================
+              ROUTES
+          ================================= */}
+
           <Routes>
+
+            {/* HOME */}
 
             <Route
               path="/"
@@ -177,6 +249,9 @@ function App() {
               }
             />
 
+
+            {/* EVENTS */}
+
             <Route
               path="/events"
               element={
@@ -185,6 +260,9 @@ function App() {
                 />
               }
             />
+
+
+            {/* EVENT DETAILS */}
 
             <Route
               path="/events/:eventId"
@@ -195,6 +273,9 @@ function App() {
               }
             />
 
+
+            {/* EVENT LEADERBOARD */}
+
             <Route
               path="/events/:eventId/leaderboard"
               element={
@@ -203,6 +284,9 @@ function App() {
                 />
               }
             />
+
+
+            {/* INVITES */}
 
             <Route
               path="/invites"
@@ -213,6 +297,9 @@ function App() {
               }
             />
 
+
+            {/* DONATIONS */}
+
             <Route
               path="/donations"
               element={
@@ -221,6 +308,9 @@ function App() {
                 />
               }
             />
+
+
+            {/* UNKNOWN ROUTE */}
 
             <Route
               path="*"
@@ -233,6 +323,11 @@ function App() {
             />
 
           </Routes>
+
+
+          {/* =================================
+              FOOTER
+          ================================= */}
 
           <Footer />
 

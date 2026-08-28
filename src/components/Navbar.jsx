@@ -4,9 +4,29 @@ function Navbar({ user, onLogout }) {
   const username =
     user?.user_metadata?.username || "Member";
 
+  const playClick = () => {
+    try {
+      const audio =
+        new Audio("/sounds/click.mp3");
+
+      audio.volume = 0.18;
+      audio.play().catch(() => {});
+    } catch {
+      // Never let audio break navigation.
+    }
+  };
+
+  const handleNavClick = () => {
+    playClick();
+  };
+
+  const handleLogoutClick = () => {
+    playClick();
+    onLogout();
+  };
+
   return (
     <nav className="navbar">
-
       <div className="navbar-inner">
 
         {/* ===============================
@@ -16,6 +36,7 @@ function Navbar({ user, onLogout }) {
         <NavLink
           to="/"
           className="navbar-brand"
+          onClick={handleNavClick}
         >
           <div className="navbar-logo">
             V
@@ -44,6 +65,7 @@ function Navbar({ user, onLogout }) {
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
+            onClick={handleNavClick}
           >
             Home
           </NavLink>
@@ -53,6 +75,7 @@ function Navbar({ user, onLogout }) {
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
+            onClick={handleNavClick}
           >
             Events
           </NavLink>
@@ -62,6 +85,7 @@ function Navbar({ user, onLogout }) {
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
+            onClick={handleNavClick}
           >
             Event Leaderboard
           </NavLink>
@@ -71,6 +95,7 @@ function Navbar({ user, onLogout }) {
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
+            onClick={handleNavClick}
           >
             Invites
           </NavLink>
@@ -80,6 +105,7 @@ function Navbar({ user, onLogout }) {
             className={({ isActive }) =>
               isActive ? "active" : ""
             }
+            onClick={handleNavClick}
           >
             Donations
           </NavLink>
@@ -100,7 +126,7 @@ function Navbar({ user, onLogout }) {
           <button
             type="button"
             className="navbar-logout"
-            onClick={onLogout}
+            onClick={handleLogoutClick}
           >
             Log Out
           </button>
@@ -108,7 +134,6 @@ function Navbar({ user, onLogout }) {
         </div>
 
       </div>
-
     </nav>
   );
 }
