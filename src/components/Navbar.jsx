@@ -110,6 +110,16 @@ function Navbar({ user, onLogout }) {
             Donations
           </NavLink>
 
+          <NavLink
+            to="/discord"
+            className={({ isActive }) =>
+              isActive ? "active" : ""
+            }
+            onClick={handleNavClick}
+          >
+            Discord
+          </NavLink>
+
         </div>
 
 

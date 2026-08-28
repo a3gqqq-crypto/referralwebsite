@@ -16,6 +16,7 @@ import EventDetailsPage from "./pages/EventDetails";
 import EventLeaderboardPage from "./pages/EventLeaderboardPage";
 import InvitesPage from "./pages/InvitesPage";
 import DonationsPage from "./pages/DonationsPage";
+import DiscordPage from "./pages/DiscordPage";
 
 import { EventProvider } from "./context/EventContext";
 
@@ -36,6 +37,7 @@ import "./styles/eventLeaderboard.css";
 import "./styles/referralPreview.css";
 import "./styles/home.css";
 import "./styles/invites.css";
+import "./styles/discord.css";
 
 function App() {
   const [session, setSession] = useState(null);
@@ -274,6 +276,13 @@ function App() {
                 <DonationsPage
                   user={session.user}
                 />
+              }
+            />
+
+            <Route
+              path="/discord"
+              element={
+                <DiscordPage />
               }
             />
 
