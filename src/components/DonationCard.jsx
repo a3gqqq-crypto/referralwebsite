@@ -17,39 +17,93 @@ function DonationCard() {
 
       <div className="donation-card">
 
-        <div className="donation-header">
+        <div className="donation-card-glow donation-glow-one"></div>
+        <div className="donation-card-glow donation-glow-two"></div>
 
-          <div>
+        <div className="donation-top">
+
+          <div className="donation-copy">
+
             <div className="donation-label">
-              SUPPORT THE COMPETITION
+              KEEP VEXORA MOVING
             </div>
 
             <h2>
-              Help us keep it <span>going.</span>
+              Every bit of support
+              <span> makes a difference.</span>
             </h2>
 
             <p>
-              Your support helps keep the competition
-              running and growing.
+              Your support helps us keep competitions,
+              rewards, and community events running.
             </p>
+
+            <div className="donation-pill-row">
+
+              <span className="donation-pill">
+                ✦ COMMUNITY POWERED
+              </span>
+
+              <span className="donation-pill">
+                🏆 MORE EVENTS
+              </span>
+
+              <span className="donation-pill">
+                💜 MORE REWARDS
+              </span>
+
+            </div>
+
           </div>
 
-          <div className="donation-icon">
-            💜
+          <div className="donation-hero-icon">
+
+            <div className="donation-icon-ring">
+              <div className="donation-icon">
+                💜
+              </div>
+            </div>
+
+            <span>
+              SUPPORTER
+            </span>
+
           </div>
 
         </div>
 
-        <button
-          type="button"
-          className="donation-button"
-          onClick={() =>
-            alert("Donations are coming soon! 💜")
-          }
-        >
-          <span>💰</span>
-          Donate
-        </button>
+
+        <div className="donation-action-panel">
+
+          <div className="donation-action-copy">
+
+            <span>
+              READY TO SUPPORT?
+            </span>
+
+            <strong>
+              Back the next competition.
+            </strong>
+
+            <small>
+              Donations are coming soon.
+            </small>
+
+          </div>
+
+          <button
+            type="button"
+            className="donation-button"
+            onClick={() =>
+              alert("Donations are coming soon! 💜")
+            }
+          >
+            <span>💰</span>
+            Donate
+            <b>→</b>
+          </button>
+
+        </div>
 
 
         <div className="donation-leaderboard">
@@ -57,13 +111,19 @@ function DonationCard() {
           <div className="donation-leaderboard-header">
 
             <div>
+
               <span className="donation-small-label">
-                LEADERBOARD
+                COMMUNITY SUPPORT
               </span>
 
               <h3>
                 Top Donators
               </h3>
+
+              <p>
+                Our community supporters
+              </p>
+
             </div>
 
             <div className="donation-trophy">
@@ -137,6 +197,13 @@ function DonationCard() {
 
           </div>
 
+        </div>
+
+
+        <div className="donation-footer-note">
+          <span>✦</span>
+          Every supporter helps keep Vexora moving forward.
+          <span>✦</span>
         </div>
 
       </div>

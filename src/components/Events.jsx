@@ -14,8 +14,15 @@ function Events({ user }) {
   const [selectedEvent, setSelectedEvent] =
     useState(null);
 
+  const [joiningEventId, setJoiningEventId] =
+    useState(null);
+
+  const [joinError, setJoinError] =
+    useState("");
+
   const {
     isJoined,
+    joinEvent,
     loadingEvents,
   } = useEvents();
 
@@ -124,6 +131,64 @@ function Events({ user }) {
 
 
   /* =========================================
+     EVENT ACTION
+     LIVE EVENT -> join immediately.
+     UPCOMING/ENDED -> open details.
+  ========================================= */
+
+  const handleEventAction = async (event) => {
+    const status = getEventStatus(event);
+
+    setJoinError("");
+
+    /*
+     * Already joined:
+     * stay on this page. Do not open another
+     * screen containing a second Join button.
+     */
+    if (isJoined(event.id)) {
+      return;
+    }
+
+    /*
+     * LIVE EVENT:
+     * join directly from this card.
+     * Never open EventDetails from this action.
+     */
+    if (status === "live" && user?.id) {
+      setJoiningEventId(event.id);
+
+      try {
+        const result = await joinEvent(event.id);
+
+        if (!result?.success) {
+          setJoinError(
+            result?.error ||
+              "Could not join the event. Please try again."
+          );
+        }
+      } catch (error) {
+        console.error("Join event error:", error);
+
+        setJoinError(
+          "Could not join the event. Please try again."
+        );
+      } finally {
+        setJoiningEventId(null);
+      }
+
+      return;
+    }
+
+    /*
+     * Upcoming / ended:
+     * opening details is still useful.
+     */
+    setSelectedEvent(event);
+  };
+
+
+  /* =========================================
      EVENT DETAILS
   ========================================= */
 
@@ -226,6 +291,19 @@ function Events({ user }) {
       {/* =========================================
           EVENT GRID
       ========================================= */}
+
+      {joinError && (
+        <div
+          className="auth-message error"
+          role="alert"
+          style={{
+            maxWidth: "720px",
+            margin: "0 auto 18px",
+          }}
+        >
+          {joinError}
+        </div>
+      )}
 
       <div className="events-grid">
 
@@ -438,18 +516,23 @@ function Events({ user }) {
                     }`}
                     type="button"
                     onClick={() =>
-                      setSelectedEvent(event)
+                      handleEventAction(event)
                     }
-                    disabled={loadingEvents}
+                    disabled={
+                      loadingEvents ||
+                      joiningEventId === event.id
+                    }
                   >
 
                     {loadingEvents
                       ? "CHECKING..."
-                      : joined
-                        ? "✓ YOU'RE JOINED"
-                        : status === "live"
-                          ? event.buttonText
-                          : "VIEW EVENT"}
+                      : joiningEventId === event.id
+                        ? "JOINING..."
+                        : joined
+                          ? "✓ YOU'RE JOINED"
+                          : status === "live"
+                            ? event.buttonText
+                            : "VIEW EVENT"}
 
                   </button>
 

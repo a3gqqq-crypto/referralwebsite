@@ -38,42 +38,40 @@ import "./styles/home.css";
 import "./styles/invites.css";
 
 function App() {
-  const [session, setSession] =
-    useState(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   /* =========================================
-     GLOBAL BUTTON CLICK SOUND
+     PRELOAD BUTTON SOUND
   ========================================= */
 
   useEffect(() => {
+    const audio = new Audio("/sounds/click.mp3");
+
+    audio.preload = "auto";
+    audio.volume = 0.18;
+
+    // Force the browser to begin loading it.
+    audio.load();
+
     const handleButtonClick = (event) => {
-      const button =
-        event.target.closest("button");
+      const button = event.target.closest("button");
 
-      if (!button) {
+      if (!button || button.disabled) {
         return;
       }
 
-      if (button.disabled) {
-        return;
+      try {
+        audio.currentTime = 0;
+
+        const playPromise = audio.play();
+
+        if (playPromise) {
+          playPromise.catch(() => {});
+        }
+      } catch {
+        // Never let the sound break the website.
       }
-
-      const audio =
-        new Audio("/sounds/click.mp3");
-
-      audio.volume = 0.18;
-
-      audio.play().catch(() => {
-        /*
-         * Ignore browser autoplay/audio errors
-         * so the website never breaks because
-         * of the sound.
-         */
-      });
     };
 
     document.addEventListener(
@@ -86,6 +84,9 @@ function App() {
         "click",
         handleButtonClick
       );
+
+      audio.pause();
+      audio.currentTime = 0;
     };
   }, []);
 
@@ -102,8 +103,7 @@ function App() {
         data: {
           session: currentSession,
         },
-      } =
-        await supabase.auth.getSession();
+      } = await supabase.auth.getSession();
 
       if (mounted) {
         setSession(currentSession);
@@ -117,12 +117,11 @@ function App() {
       data: {
         subscription,
       },
-    } =
-      supabase.auth.onAuthStateChange(
-        (_event, newSession) => {
-          setSession(newSession);
-        }
-      );
+    } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
+      }
+    );
 
     return () => {
       mounted = false;
@@ -135,10 +134,9 @@ function App() {
      AUTHENTICATED
   ========================================= */
 
-  const handleAuthenticated =
-    (newSession) => {
-      setSession(newSession);
-    };
+  const handleAuthenticated = (newSession) => {
+    setSession(newSession);
+  };
 
 
   /* =========================================
@@ -147,7 +145,6 @@ function App() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-
     setSession(null);
   };
 
@@ -190,7 +187,7 @@ function App() {
 
 
   /* =========================================
-     NOT LOGGED IN
+     LOGIN
   ========================================= */
 
   if (!session) {
@@ -211,9 +208,7 @@ function App() {
   return (
     <BrowserRouter>
 
-      <EventProvider
-        user={session.user}
-      >
+      <EventProvider user={session.user}>
 
         <div className="app">
 
@@ -221,24 +216,12 @@ function App() {
 
           <div className="background-glow glow-two"></div>
 
-
-          {/* =================================
-              NAVBAR
-          ================================= */}
-
           <Navbar
             user={session.user}
             onLogout={handleLogout}
           />
 
-
-          {/* =================================
-              ROUTES
-          ================================= */}
-
           <Routes>
-
-            {/* HOME */}
 
             <Route
               path="/"
@@ -249,9 +232,6 @@ function App() {
               }
             />
 
-
-            {/* EVENTS */}
-
             <Route
               path="/events"
               element={
@@ -260,9 +240,6 @@ function App() {
                 />
               }
             />
-
-
-            {/* EVENT DETAILS */}
 
             <Route
               path="/events/:eventId"
@@ -273,9 +250,6 @@ function App() {
               }
             />
 
-
-            {/* EVENT LEADERBOARD */}
-
             <Route
               path="/events/:eventId/leaderboard"
               element={
@@ -284,9 +258,6 @@ function App() {
                 />
               }
             />
-
-
-            {/* INVITES */}
 
             <Route
               path="/invites"
@@ -297,9 +268,6 @@ function App() {
               }
             />
 
-
-            {/* DONATIONS */}
-
             <Route
               path="/donations"
               element={
@@ -308,9 +276,6 @@ function App() {
                 />
               }
             />
-
-
-            {/* UNKNOWN ROUTE */}
 
             <Route
               path="*"
@@ -323,11 +288,6 @@ function App() {
             />
 
           </Routes>
-
-
-          {/* =================================
-              FOOTER
-          ================================= */}
 
           <Footer />
 

@@ -107,49 +107,119 @@ function Home({ user }) {
     <main className="home-page">
 
       {/* =========================================
-          HERO
+          PREMIUM HERO
       ========================================= */}
 
       <section className="home-hero">
 
-        <div className="home-hero-badge">
-          <span className="home-badge-dot"></span>
-          VEXORA COMPETITION
-        </div>
+        <div className="home-hero-noise"></div>
+        <div className="home-hero-grid"></div>
+        <div className="home-hero-orbit orbit-one"></div>
+        <div className="home-hero-orbit orbit-two"></div>
+        <div className="home-hero-beam beam-one"></div>
+        <div className="home-hero-beam beam-two"></div>
 
-        <h1>
-          Compete.
-          <span> Invite.</span>
-          <br />
-          <strong>Climb higher.</strong>
-        </h1>
-
-        <p>
-          Welcome back,{" "}
-          <span className="home-username">
-            {username}
+        <div className="hero-float hero-float-left">
+          <span className="hero-float-icon">✦</span>
+          <span className="hero-float-label">
+            LIVE EVENTS
           </span>
-          . Join events, invite friends, and
-          compete for exclusive rewards.
-        </p>
+          <strong>COMPETE</strong>
+        </div>
 
-        <div className="home-hero-actions">
+        <div className="hero-float hero-float-right">
+          <span className="hero-float-icon">♛</span>
+          <span className="hero-float-label">
+            TOP REWARDS
+          </span>
+          <strong>WIN BIG</strong>
+        </div>
 
-          <Link
-            to="/events"
-            className="home-primary-button"
-          >
-            EXPLORE EVENTS
-          </Link>
+        <div className="home-hero-core">
 
-          <Link
-            to="/invites"
-            className="home-secondary-button"
-          >
-            MY REFERRALS
-          </Link>
+          <div className="home-hero-badge">
+            <span className="home-badge-dot"></span>
+            THE NEXT LEVEL OF COMPETITION
+          </div>
+
+          <h1>
+            <span className="hero-line-one">
+              Rise.
+            </span>{" "}
+            <span className="hero-line-two">
+              Compete.
+            </span>
+            <br />
+            <strong>
+              Leave your mark.
+            </strong>
+          </h1>
+
+          <p className="home-hero-subtitle">
+            Welcome back,{" "}
+            <span className="home-username">
+              {username}
+            </span>
+            .
+            <br />
+            Enter the arena, invite your crew,
+            and chase the next reward.
+          </p>
+
+          <div className="home-hero-actions">
+
+            <Link
+              to="/events"
+              className="home-primary-button"
+            >
+              <span className="hero-button-icon">
+                ↗
+              </span>
+              EXPLORE EVENTS
+            </Link>
+
+            <Link
+              to="/invites"
+              className="home-secondary-button"
+            >
+              <span className="hero-button-icon">
+                ◇
+              </span>
+              MY REFERRALS
+            </Link>
+
+          </div>
+
+          <div className="home-hero-trust">
+
+            <span>
+              <b>01</b>
+              LIVE COMPETITIONS
+            </span>
+
+            <i></i>
+
+            <span>
+              <b>∞</b>
+              WAYS TO CLIMB
+            </span>
+
+            <i></i>
+
+            <span>
+              <b>✦</b>
+              EXCLUSIVE REWARDS
+            </span>
+
+          </div>
 
         </div>
+
+        <div className="home-hero-particle particle-one"></div>
+        <div className="home-hero-particle particle-two"></div>
+        <div className="home-hero-particle particle-three"></div>
+        <div className="home-hero-particle particle-four"></div>
+        <div className="home-hero-particle particle-five"></div>
 
       </section>
 
@@ -181,6 +251,14 @@ function Home({ user }) {
             </div>
 
             <div className="home-live-right">
+
+              <div className="home-live-signal">
+                <span className="home-live-signal-dot"></span>
+                <div>
+                  <strong>LIVE</strong>
+                  <span>ACTIVE ARENA</span>
+                </div>
+              </div>
 
               <div className="home-live-prize">
 
@@ -276,6 +354,11 @@ function Home({ user }) {
                 <span>→</span>
               </div>
 
+              <div className="home-quick-meta">
+                <span>LIVE &amp; UPCOMING</span>
+                <b>01</b>
+              </div>
+
             </div>
 
           </Link>
@@ -308,6 +391,11 @@ function Home({ user }) {
               <div className="home-quick-link">
                 Open referrals
                 <span>→</span>
+              </div>
+
+              <div className="home-quick-meta">
+                <span>BUILD YOUR RANK</span>
+                <b>∞</b>
               </div>
 
             </div>
@@ -344,9 +432,58 @@ function Home({ user }) {
                 <span>→</span>
               </div>
 
+              <div className="home-quick-meta">
+                <span>POWER THE NEXT EVENT</span>
+                <b>✦</b>
+              </div>
+
             </div>
 
           </Link>
+
+        </div>
+
+      </section>
+
+
+      {/* =========================================
+          VEXORA PULSE
+      ========================================= */}
+
+      <section className="home-pulse-section">
+
+        <div className="home-pulse-card">
+
+          <div className="home-pulse-head">
+            <span className="home-section-label">VEXORA PULSE</span>
+            <span className="home-pulse-live">● SYSTEM LIVE</span>
+          </div>
+
+          <div className="home-pulse-grid">
+
+            <div className="home-pulse-item">
+              <span>YOUR POSITION</span>
+              <strong>#1</strong>
+              <small>Keep climbing</small>
+            </div>
+
+            <div className="home-pulse-divider"></div>
+
+            <div className="home-pulse-item">
+              <span>NEXT MOVE</span>
+              <strong>INVITE</strong>
+              <small>Bring someone into the arena</small>
+            </div>
+
+            <div className="home-pulse-divider"></div>
+
+            <div className="home-pulse-item">
+              <span>REWARD STATUS</span>
+              <strong>ACTIVE</strong>
+              <small>Rewards are waiting</small>
+            </div>
+
+          </div>
 
         </div>
 
@@ -358,9 +495,7 @@ function Home({ user }) {
       ========================================= */}
 
       <section className="home-referral-section">
-
         <ReferralPreview />
-
       </section>
 
 

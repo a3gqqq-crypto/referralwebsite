@@ -72,18 +72,34 @@
 }
 
 .invites-header h1 span {
-  background:
-    linear-gradient(
-      90deg,
-      #a78bfa,
-      #818cf8,
-      #60a5fa
-    );
+  display: inline-block;
 
-  -webkit-background-clip: text;
-  background-clip: text;
+  background: linear-gradient(
+    90deg,
+    #c4b5fd 0%,
+    #8b5cf6 42%,
+    #818cf8 72%,
+    #60a5fa 100%
+  ) !important;
 
-  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    #c4b5fd 0%,
+    #8b5cf6 42%,
+    #818cf8 72%,
+    #60a5fa 100%
+  ) !important;
+
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  background-size: 180% 100%;
+  background-repeat: no-repeat;
+
+  animation: invites-title-shift 7s ease-in-out infinite;
 }
 
 .invites-header p {
@@ -745,4 +761,792 @@
     height: 36px;
   }
 
+}
+
+/* =========================================
+   VEXORA PREMIUM INVITES OVERRIDES
+   Based on the current project version.
+========================================= */
+
+.invites-page {
+  max-width: 1220px;
+  padding:
+    52px 24px 100px;
+}
+
+
+/* =========================================
+   PREMIUM INTRO
+========================================= */
+
+.invites-header {
+  position: relative;
+
+  max-width: 1000px;
+
+  margin:
+    34px auto 52px;
+
+  padding:
+    18px 10px 8px;
+}
+
+.invites-header::before {
+  content: "";
+
+  position: absolute;
+
+  width: 520px;
+  height: 220px;
+
+  left: 50%;
+  top: 0;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(139, 92, 246, 0.14),
+      transparent 68%
+    );
+
+  filter: blur(22px);
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+
+.invites-header-label {
+  padding:
+    8px 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.11),
+      rgba(96, 165, 250, 0.06)
+    );
+
+  border-color:
+    rgba(167, 139, 250, 0.2);
+
+  box-shadow:
+    0 0 30px rgba(139, 92, 246, 0.08);
+}
+
+.invites-header h1 {
+  margin-top: 18px;
+
+  font-size:
+    clamp(42px, 6.2vw, 68px);
+
+  line-height: 0.98;
+
+  letter-spacing: -4px;
+
+  text-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.25);
+}
+
+.invites-header h1 span {
+  display: inline-block;
+
+  background: linear-gradient(
+    90deg,
+    #c4b5fd 0%,
+    #8b5cf6 42%,
+    #818cf8 72%,
+    #60a5fa 100%
+  ) !important;
+
+  background-image: linear-gradient(
+    90deg,
+    #c4b5fd 0%,
+    #8b5cf6 42%,
+    #818cf8 72%,
+    #60a5fa 100%
+  ) !important;
+
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  background-size: 180% 100%;
+  background-repeat: no-repeat;
+
+  animation: invites-title-shift 7s ease-in-out infinite;
+}
+
+.invites-header p {
+  max-width: 660px;
+
+  margin-top: 17px;
+
+  color: #858092;
+
+  font-size: 12px;
+
+  line-height: 1.75;
+}
+
+
+/* =========================================
+   PERSONAL DASHBOARD WRAPPER
+========================================= */
+
+.invites-page > .referral-section {
+  position: relative;
+
+  max-width: 980px;
+
+  margin:
+    0 auto;
+
+  padding:
+    0 0 10px;
+}
+
+.invites-page > .referral-section::before {
+  content: "";
+
+  position: absolute;
+
+  width: 360px;
+  height: 260px;
+
+  left: -80px;
+  top: 40px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(96, 165, 250, 0.055);
+
+  filter: blur(80px);
+
+  pointer-events: none;
+}
+
+
+/* =========================================
+   REFERRAL CARD — PREMIUM DASHBOARD
+========================================= */
+
+.invites-page > .referral-section .referral-card {
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 28px;
+
+  border-radius: 24px;
+
+  border:
+    1px solid rgba(167, 139, 250, 0.17);
+
+  background:
+    radial-gradient(
+      circle at 92% 0%,
+      rgba(139, 92, 246, 0.13),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 5% 100%,
+      rgba(96, 165, 250, 0.06),
+      transparent 25%
+    ),
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.invites-page > .referral-section .referral-card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 42%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #a78bfa,
+      rgba(96, 165, 250, 0.45),
+      transparent
+    );
+
+  box-shadow:
+    0 0 24px rgba(139, 92, 246, 0.23);
+
+  pointer-events: none;
+}
+
+.invites-page > .referral-section .referral-card-top {
+  padding-bottom: 5px;
+}
+
+.invites-page > .referral-section .referral-label {
+  color: #777181;
+
+  font-size: 7px;
+
+  letter-spacing: 1.9px;
+}
+
+.invites-page > .referral-section .referral-card h2 {
+  font-size: 24px;
+
+  letter-spacing: -0.9px;
+}
+
+.invites-page > .referral-section .referral-icon {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(139, 92, 246, 0.18),
+      rgba(96, 165, 250, 0.07)
+    );
+
+  border:
+    1px solid rgba(167, 139, 250, 0.19);
+
+  box-shadow:
+    0 0 30px rgba(139, 92, 246, 0.1);
+}
+
+.invites-page > .referral-section .referral-stat {
+  min-height: 76px;
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border-color:
+    rgba(255, 255, 255, 0.065);
+}
+
+.invites-page > .referral-section .referral-stat-label {
+  color: #6b6574;
+
+  font-size: 6px;
+}
+
+.invites-page > .referral-section .referral-stat strong {
+  font-size: 21px;
+}
+
+.invites-page > .referral-section .referral-link-box {
+  border-color:
+    rgba(167, 139, 250, 0.1);
+
+  background:
+    rgba(0, 0, 0, 0.23);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.invites-page > .referral-section .referral-link-box button {
+  min-width: 102px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8b5cf6,
+      #6366f1 60%,
+      #60a5fa
+    );
+}
+
+.invites-page > .referral-section .share-button {
+  height: 41px;
+
+  border-radius: 10px;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.invites-page > .referral-section .referral-tip {
+  padding-top: 4px;
+
+  color: #625d69;
+}
+
+
+/* =========================================
+   COMPETITION AREA
+========================================= */
+
+.invites-competition {
+  position: relative;
+
+  margin-top: 76px;
+}
+
+.invites-competition-heading {
+  margin-bottom: 20px;
+}
+
+.invites-section-label {
+  color: #9a88ff;
+}
+
+.invites-competition-heading h2 {
+  font-size: 30px;
+
+  letter-spacing: -1.1px;
+}
+
+.invites-competition-heading::after {
+  content: "LIVE RANKINGS • TRACK YOUR NETWORK";
+
+  align-self: flex-end;
+
+  margin-bottom: 3px;
+
+  color: #575260;
+
+  font-size: 6px;
+  font-weight: 900;
+
+  letter-spacing: 1.3px;
+}
+
+
+/* =========================================
+   PANELS
+========================================= */
+
+.invites-panels {
+  grid-template-columns:
+    minmax(0, 0.88fr)
+    minmax(0, 1.12fr);
+
+  gap: 18px;
+}
+
+.invites-panel {
+  position: relative;
+
+  border-radius: 22px;
+
+  border-color:
+    rgba(167, 139, 250, 0.105);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.012)
+    );
+
+  box-shadow:
+    0 25px 75px rgba(0, 0, 0, 0.27),
+    inset 0 1px 0 rgba(255, 255, 255, 0.028);
+}
+
+.invites-panel::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 0 20% auto 0;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(167, 139, 250, 0.45),
+      transparent
+    );
+
+  pointer-events: none;
+}
+
+
+/* =========================================
+   HISTORY PANEL
+========================================= */
+
+.invites-panel
+.referral-history-section {
+  padding:
+    23px;
+}
+
+.invites-panel
+.referral-history-heading {
+  margin-bottom: 17px;
+}
+
+.invites-panel
+.referral-history-heading h2 {
+  font-size: 21px;
+
+  letter-spacing: -0.8px;
+}
+
+.invites-panel
+.referral-count-badge {
+  min-width: 78px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(139, 92, 246, 0.12),
+      rgba(96, 165, 250, 0.035)
+    );
+
+  border-color:
+    rgba(167, 139, 250, 0.15);
+
+  box-shadow:
+    0 0 25px rgba(139, 92, 246, 0.07);
+}
+
+.invites-panel
+.referral-history-card {
+  max-height: 485px;
+
+  border-radius: 16px;
+
+  background:
+    rgba(0, 0, 0, 0.13);
+
+  border-color:
+    rgba(255, 255, 255, 0.055);
+}
+
+.invites-panel
+.referral-history-row {
+  min-height: 61px;
+
+  padding:
+    12px 14px;
+
+  border-bottom-color:
+    rgba(255, 255, 255, 0.045);
+}
+
+.invites-panel
+.referral-history-row:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(139, 92, 246, 0.065),
+      rgba(139, 92, 246, 0.015)
+    );
+}
+
+.invites-panel
+.referral-history-avatar {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.24),
+      rgba(96, 165, 250, 0.09)
+    );
+
+  box-shadow:
+    0 0 18px rgba(139, 92, 246, 0.06);
+}
+
+
+/* =========================================
+   LEADERBOARD PANEL
+========================================= */
+
+.invites-panel
+.leaderboard-section {
+  padding:
+    23px;
+}
+
+.invites-panel
+.section-heading {
+  margin-bottom: 17px;
+}
+
+.invites-panel
+.section-heading h2 {
+  font-size: 21px;
+}
+
+.invites-panel
+.updated {
+  padding:
+    6px 8px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(74, 222, 128, 0.045);
+
+  border:
+    1px solid rgba(74, 222, 128, 0.08);
+
+  color: #6c7580;
+
+  font-size: 7px;
+}
+
+.invites-panel
+.podium {
+  gap: 9px;
+
+  margin-bottom: 11px;
+}
+
+.invites-panel
+.podium-card {
+  min-height: 230px;
+
+  padding:
+    16px 10px;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.035),
+      rgba(255, 255, 255, 0.01)
+    );
+
+  border-color:
+    rgba(255, 255, 255, 0.055);
+}
+
+.invites-panel
+.podium-card.first {
+  border-color:
+    rgba(167, 139, 250, 0.28);
+
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(139, 92, 246, 0.2),
+      transparent 52%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(124, 58, 237, 0.12),
+      rgba(255, 255, 255, 0.02)
+    );
+
+  box-shadow:
+    0 18px 45px rgba(124, 58, 237, 0.1);
+}
+
+.invites-panel
+.podium-card:hover {
+  transform:
+    translateY(-4px);
+
+  border-color:
+    rgba(167, 139, 250, 0.18);
+}
+
+.invites-panel
+.podium-card.first:hover {
+  transform:
+    translateY(-6px);
+}
+
+.invites-panel
+.avatar {
+  box-shadow:
+    0 0 25px rgba(0, 0, 0, 0.16);
+}
+
+.invites-panel
+.podium-card.first .avatar {
+  box-shadow:
+    0 0 32px rgba(139, 92, 246, 0.2);
+}
+
+.invites-panel
+.leaderboard-list {
+  max-height: 300px;
+
+  padding:
+    4px;
+
+  margin:
+    0 -4px;
+}
+
+.invites-panel
+.leaderboard-row {
+  min-height: 48px;
+
+  padding:
+    8px 10px;
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.018);
+}
+
+.invites-panel
+.leaderboard-row:hover {
+  background:
+    rgba(139, 92, 246, 0.055);
+}
+
+.invites-panel
+.leaderboard-row.current-user {
+  box-shadow:
+    inset 3px 0 0 var(--purple),
+    0 0 22px rgba(139, 92, 246, 0.06);
+}
+
+.invites-panel
+.your-rank-card {
+  position: relative;
+
+  margin-top: 11px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(139, 92, 246, 0.085),
+      rgba(96, 165, 250, 0.035)
+    );
+
+  border-color:
+    rgba(167, 139, 250, 0.15);
+}
+
+
+/* =========================================
+   ANIMATED PANEL EDGE
+========================================= */
+
+.invites-panel:hover {
+  border-color:
+    rgba(167, 139, 250, 0.16);
+
+  box-shadow:
+    0 30px 85px rgba(0, 0, 0, 0.3),
+    0 0 35px rgba(139, 92, 246, 0.04);
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .invites-page {
+    padding:
+      38px 18px 75px;
+  }
+
+  .invites-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .invites-competition-heading::after {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .invites-page {
+    padding:
+      25px 12px 55px;
+  }
+
+  .invites-header {
+    margin:
+      17px auto 35px;
+  }
+
+  .invites-header h1 {
+    font-size:
+      clamp(35px, 11vw, 50px);
+
+    letter-spacing: -2.8px;
+  }
+
+  .invites-header p {
+    font-size: 10px;
+  }
+
+  .invites-page > .referral-section .referral-card {
+    padding: 20px 16px;
+    border-radius: 19px;
+  }
+
+  .invites-page > .referral-section .referral-card h2 {
+    font-size: 19px;
+  }
+
+  .invites-competition {
+    margin-top: 55px;
+  }
+
+  .invites-competition-heading h2 {
+    font-size: 23px;
+  }
+
+  .invites-panel .referral-history-section,
+  .invites-panel .leaderboard-section {
+    padding: 16px;
+  }
+
+  .invites-panel .podium-card,
+  .invites-panel .podium-card.first {
+    min-height: 0;
+  }
+
+  .invites-panel .leaderboard-list {
+    max-height: 260px;
+  }
+}
+
+@keyframes invites-title-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
 }
