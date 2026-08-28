@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { events } from "../data/events";
 import ReferralPreview from "../components/ReferralPreview";
+import { supabase } from "../lib/supabaseClient";
 
 import "../styles/home.css";
 
@@ -12,6 +13,9 @@ function Home({ user }) {
 
   const [now, setNow] = useState(new Date());
 
+  const [userRank, setUserRank] =
+    useState(null);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
@@ -19,6 +23,73 @@ function Home({ user }) {
 
     return () => clearInterval(timer);
   }, []);
+
+  /* =========================================
+     LOAD REAL REFERRAL RANK
+  ========================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRank = async () => {
+      if (!user?.id) {
+        setUserRank(null);
+        return;
+      }
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("profiles")
+        .select("id, referral_count")
+        .order("referral_count", {
+          ascending: false,
+        });
+
+      if (cancelled) {
+        return;
+      }
+
+      if (error) {
+        console.error(
+          "Could not load referral rank:",
+          error
+        );
+
+        setUserRank(null);
+        return;
+      }
+
+      const currentIndex =
+        (data || []).findIndex(
+          (profile) =>
+            profile.id === user.id
+        );
+
+      setUserRank(
+        currentIndex >= 0
+          ? currentIndex + 1
+          : null
+      );
+    };
+
+    loadRank();
+
+    /*
+     * Keep the Home rank reasonably fresh
+     * without changing any other Home behavior.
+     */
+    const rankTimer = setInterval(
+      loadRank,
+      10000
+    );
+
+    return () => {
+      cancelled = true;
+      clearInterval(rankTimer);
+    };
+  }, [user?.id]);
 
   /* =========================================
      FIND LIVE EVENT
@@ -463,8 +534,16 @@ function Home({ user }) {
 
             <div className="home-pulse-item">
               <span>YOUR POSITION</span>
-              <strong>#1</strong>
-              <small>Keep climbing</small>
+              <strong>
+                {userRank
+                  ? `#${userRank}`
+                  : "—"}
+              </strong>
+              <small>
+                {userRank
+                  ? "Keep climbing"
+                  : "Rank unavailable"}
+              </small>
             </div>
 
             <div className="home-pulse-divider"></div>
