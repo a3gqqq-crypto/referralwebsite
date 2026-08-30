@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/m/:momentId",
+      "destination": "/api/moment-preview?momentId=:momentId"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
