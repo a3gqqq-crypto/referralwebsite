@@ -1174,3 +1174,138 @@
     transition: none !important;
   }
 }
+
+
+/* =========================================
+   REFERRAL LINK — QUICK COPY
+========================================= */
+
+.event-referral-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  margin-top: 14px;
+  padding: 12px 13px;
+
+  border-radius: 13px;
+
+  border: 1px solid rgba(139, 92, 246, 0.16);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.08),
+      rgba(59, 130, 246, 0.035)
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.event-referral-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-referral-copy span {
+  color: #a78bfa;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 1.15px;
+}
+
+.event-referral-copy strong {
+  color: #d4d4dc;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.event-referral-button {
+  flex-shrink: 0;
+
+  min-height: 36px;
+  padding: 0 13px;
+
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.18),
+      rgba(96, 165, 250, 0.10)
+    );
+
+  color: #c4b5fd;
+
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 24px rgba(124, 58, 237, 0.08);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.event-referral-button:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(167, 139, 250, 0.38);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.25),
+      rgba(96, 165, 250, 0.14)
+    );
+
+  box-shadow:
+    0 12px 30px rgba(124, 58, 237, 0.15);
+}
+
+.event-referral-button:active {
+  transform: translateY(0);
+}
+
+.event-referral-button.copied {
+  color: #86efac;
+
+  border-color:
+    rgba(74, 222, 128, 0.22);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(34, 197, 94, 0.13),
+      rgba(16, 185, 129, 0.07)
+    );
+
+  box-shadow:
+    0 10px 26px rgba(34, 197, 94, 0.08);
+}
+
+@media (max-width: 520px) {
+  .event-referral-box {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .event-referral-button {
+    width: 100%;
+  }
+}

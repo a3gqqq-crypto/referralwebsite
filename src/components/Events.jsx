@@ -20,6 +20,9 @@ function Events({ user }) {
   const [joinError, setJoinError] =
     useState("");
 
+  const [copiedReferral, setCopiedReferral] =
+    useState(false);
+
   const {
     isJoined,
     joinEvent,
@@ -107,6 +110,46 @@ function Events({ user }) {
       2,
       "0"
     )}s`;
+  };
+
+
+  /* =========================================
+     WINNER REWARD
+  ========================================= */
+
+  /* =========================================
+     COPY REFERRAL LINK
+  ========================================= */
+
+  const copyReferralLink = async () => {
+    const username =
+      user?.user_metadata?.username;
+
+    if (!username) {
+      return;
+    }
+
+    const referralLink =
+      `${window.location.origin}/?ref=${encodeURIComponent(
+        username
+      )}`;
+
+    try {
+      await navigator.clipboard.writeText(
+        referralLink
+      );
+
+      setCopiedReferral(true);
+
+      setTimeout(() => {
+        setCopiedReferral(false);
+      }, 1800);
+    } catch (error) {
+      console.error(
+        "Could not copy referral link:",
+        error
+      );
+    }
   };
 
 
@@ -500,6 +543,42 @@ function Events({ user }) {
                   </div>
 
                 </div>
+
+
+                {/* =================================
+                    REFERRAL LINK
+                ================================= */}
+
+                {isReferralEvent &&
+                  user?.id && (
+                    <div className="event-referral-box">
+
+                      <div className="event-referral-copy">
+                        <span>
+                          🔗 YOUR REFERRAL LINK
+                        </span>
+
+                        <strong>
+                          Invite friends &amp; climb the leaderboard.
+                        </strong>
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`event-referral-button ${
+                          copiedReferral
+                            ? "copied"
+                            : ""
+                        }`}
+                        onClick={copyReferralLink}
+                      >
+                        {copiedReferral
+                          ? "✓ COPIED"
+                          : "COPY LINK"}
+                      </button>
+
+                    </div>
+                  )}
 
 
                 {/* =================================
