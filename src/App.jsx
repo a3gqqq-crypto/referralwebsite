@@ -14,9 +14,12 @@ import Home from "./pages/Home";
 import EventsPage from "./pages/EventsPage";
 import EventDetailsPage from "./pages/EventDetails";
 import EventLeaderboardPage from "./pages/EventLeaderboardPage";
+import TopInviterEventPage from "./pages/TopInviterEventPage";
 import InvitesPage from "./pages/InvitesPage";
 import DonationsPage from "./pages/DonationsPage";
 import DiscordPage from "./pages/DiscordPage";
+import MomentsPage from "./pages/MomentsPage";
+import MomentViewPage from "./pages/MomentViewPage";
 
 import { EventProvider } from "./context/EventContext";
 
@@ -38,6 +41,90 @@ import "./styles/referralPreview.css";
 import "./styles/home.css";
 import "./styles/invites.css";
 import "./styles/discord.css";
+import "./styles/moments.css";
+import "./styles/topInviterEvent.css";
+
+function AuthenticatedApp({ session, onLogout }) {
+  return (
+    <EventProvider user={session.user}>
+      <div className="app">
+        <div className="background-glow glow-one"></div>
+        <div className="background-glow glow-two"></div>
+
+        <Navbar
+          user={session.user}
+          onLogout={onLogout}
+        />
+
+        <Routes>
+          <Route
+            path="/"
+            element={<Home user={session.user} />}
+          />
+
+          <Route
+            path="/events"
+            element={<EventsPage user={session.user} />}
+          />
+
+          <Route
+            path="/events/top-inviter"
+            element={
+              <TopInviterEventPage
+                user={session.user}
+              />
+            }
+          />
+
+          <Route
+            path="/events/:eventId"
+            element={
+              <EventDetailsPage
+                user={session.user}
+              />
+            }
+          />
+
+          <Route
+            path="/events/:eventId/leaderboard"
+            element={
+              <EventLeaderboardPage
+                user={session.user}
+              />
+            }
+          />
+
+          <Route
+            path="/invites"
+            element={<InvitesPage user={session.user} />}
+          />
+
+          <Route
+            path="/donations"
+            element={<DonationsPage user={session.user} />}
+          />
+
+          <Route
+            path="/discord"
+            element={<DiscordPage />}
+          />
+
+          <Route
+            path="/moments"
+            element={<MomentsPage user={session.user} />}
+          />
+
+          <Route
+            path="*"
+            element={<Navigate to="/" replace />}
+          />
+        </Routes>
+
+        <Footer />
+      </div>
+    </EventProvider>
+  );
+}
 
 function App() {
   const [session, setSession] = useState(null);
@@ -52,8 +139,6 @@ function App() {
 
     audio.preload = "auto";
     audio.volume = 0.18;
-
-    // Force the browser to begin loading it.
     audio.load();
 
     const handleButtonClick = (event) => {
@@ -66,7 +151,8 @@ function App() {
       try {
         audio.currentTime = 0;
 
-        const playPromise = audio.play();
+        const playPromise =
+          audio.play();
 
         if (playPromise) {
           playPromise.catch(() => {});
@@ -92,7 +178,6 @@ function App() {
     };
   }, []);
 
-
   /* =========================================
      LOAD SESSION
   ========================================= */
@@ -105,7 +190,8 @@ function App() {
         data: {
           session: currentSession,
         },
-      } = await supabase.auth.getSession();
+      } =
+        await supabase.auth.getSession();
 
       if (mounted) {
         setSession(currentSession);
@@ -116,14 +202,13 @@ function App() {
     loadSession();
 
     const {
-      data: {
-        subscription,
-      },
-    } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        setSession(newSession);
-      }
-    );
+      data: { subscription },
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, newSession) => {
+          setSession(newSession);
+        }
+      );
 
     return () => {
       mounted = false;
@@ -131,15 +216,15 @@ function App() {
     };
   }, []);
 
-
   /* =========================================
      AUTHENTICATED
   ========================================= */
 
-  const handleAuthenticated = (newSession) => {
+  const handleAuthenticated = (
+    newSession
+  ) => {
     setSession(newSession);
   };
-
 
   /* =========================================
      LOGOUT
@@ -150,160 +235,54 @@ function App() {
     setSession(null);
   };
 
-
-  /* =========================================
-     LOADING
-  ========================================= */
-
-  if (loading) {
-    return (
-      <div className="auth-page">
-
-        <div className="auth-container">
-
-          <div className="auth-card">
-
-            <div className="auth-heading">
-
-              <div className="auth-badge">
-                VEXORA
-              </div>
-
-              <h1>
-                Loading...
-              </h1>
-
-              <p>
-                Checking your account session.
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-    );
-  }
-
-
-  /* =========================================
-     LOGIN
-  ========================================= */
-
-  if (!session) {
-    return (
-      <Auth
-        onAuthenticated={
-          handleAuthenticated
-        }
-      />
-    );
-  }
-
-
-  /* =========================================
-     LOGGED IN
-  ========================================= */
-
   return (
     <BrowserRouter>
+      <Routes>
+        {/* Public Moment links work even before login. */}
+        <Route
+          path="/m/:momentId"
+          element={<MomentViewPage />}
+        />
 
-      <EventProvider user={session.user}>
+        {/* Everything else keeps the existing login gate. */}
+        <Route
+          path="*"
+          element={
+            loading ? (
+              <div className="auth-page">
+                <div className="auth-container">
+                  <div className="auth-card">
+                    <div className="auth-heading">
+                      <div className="auth-badge">
+                        VEXORA
+                      </div>
 
-        <div className="app">
+                      <h1>
+                        Loading...
+                      </h1>
 
-          <div className="background-glow glow-one"></div>
-
-          <div className="background-glow glow-two"></div>
-
-          <Navbar
-            user={session.user}
-            onLogout={handleLogout}
-          />
-
-          <Routes>
-
-            <Route
-              path="/"
-              element={
-                <Home
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/events"
-              element={
-                <EventsPage
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/events/:eventId"
-              element={
-                <EventDetailsPage
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/events/:eventId/leaderboard"
-              element={
-                <EventLeaderboardPage
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/invites"
-              element={
-                <InvitesPage
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/donations"
-              element={
-                <DonationsPage
-                  user={session.user}
-                />
-              }
-            />
-
-            <Route
-              path="/discord"
-              element={
-                <DiscordPage />
-              }
-            />
-
-            <Route
-              path="*"
-              element={
-                <Navigate
-                  to="/"
-                  replace
-                />
-              }
-            />
-
-          </Routes>
-
-          <Footer />
-
-        </div>
-
-      </EventProvider>
-
+                      <p>
+                        Checking your account session.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : !session ? (
+              <Auth
+                onAuthenticated={
+                  handleAuthenticated
+                }
+              />
+            ) : (
+              <AuthenticatedApp
+                session={session}
+                onLogout={handleLogout}
+              />
+            )
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

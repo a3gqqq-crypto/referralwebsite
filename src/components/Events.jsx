@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { events } from "../data/events";
-import EventDetails from "./EventDetails";
-
 import { useEvents } from "../context/EventContext";
 
 import "../styles/events.css";
@@ -11,66 +9,28 @@ import "../styles/events.css";
 function Events({ user }) {
   const [now, setNow] = useState(new Date());
 
-  const [selectedEvent, setSelectedEvent] =
-    useState(null);
-
-  const [joiningEventId, setJoiningEventId] =
-    useState(null);
-
-  const [joinError, setJoinError] =
-    useState("");
-
-  const [copiedReferral, setCopiedReferral] =
-    useState(false);
-
   const {
     isJoined,
-    joinEvent,
     loadingEvents,
   } = useEvents();
-
-
-  /* =========================================
-     CLOCK
-  ========================================= */
 
   useEffect(() => {
     const timer = setInterval(() => {
       setNow(new Date());
     }, 1000);
 
-    return () => {
-      clearInterval(timer);
-    };
+    return () => clearInterval(timer);
   }, []);
 
-
-  /* =========================================
-     EVENT STATUS
-  ========================================= */
-
   const getEventStatus = (event) => {
-    const start =
-      new Date(event.startDate);
+    const start = new Date(event.startDate);
+    const end = new Date(event.endDate);
 
-    const end =
-      new Date(event.endDate);
-
-    if (now < start) {
-      return "upcoming";
-    }
-
-    if (now > end) {
-      return "ended";
-    }
+    if (now < start) return "upcoming";
+    if (now > end) return "ended";
 
     return "live";
   };
-
-
-  /* =========================================
-     TIME LEFT
-  ========================================= */
 
   const formatTimeLeft = (endDate) => {
     const difference =
@@ -112,162 +72,14 @@ function Events({ user }) {
     )}s`;
   };
 
-
-  /* =========================================
-     WINNER REWARD
-  ========================================= */
-
-  /* =========================================
-     COPY REFERRAL LINK
-  ========================================= */
-
-  const copyReferralLink = async () => {
-    const username =
-      user?.user_metadata?.username;
-
-    if (!username) {
-      return;
-    }
-
-    const referralLink =
-      `${window.location.origin}/?ref=${encodeURIComponent(
-        username
-      )}`;
-
-    try {
-      await navigator.clipboard.writeText(
-        referralLink
-      );
-
-      setCopiedReferral(true);
-
-      setTimeout(() => {
-        setCopiedReferral(false);
-      }, 1800);
-    } catch (error) {
-      console.error(
-        "Could not copy referral link:",
-        error
-      );
-    }
-  };
-
-
-  /* =========================================
-     WINNER REWARD
-  ========================================= */
-
-  const getWinnerReward = (
-    event,
-    position
-  ) => {
-    const winners =
-      event?.rules?.winners || [];
-
-    const winner = winners.find(
-      (item) =>
-        item.position === position
-    );
-
-    return winner?.reward || "—";
-  };
-
-
-  /* =========================================
-     EVENT ACTION
-     LIVE EVENT -> join immediately.
-     UPCOMING/ENDED -> open details.
-  ========================================= */
-
-  const handleEventAction = async (event) => {
-    const status = getEventStatus(event);
-
-    setJoinError("");
-
-    /*
-     * Already joined:
-     * stay on this page. Do not open another
-     * screen containing a second Join button.
-     */
-    if (isJoined(event.id)) {
-      return;
-    }
-
-    /*
-     * LIVE EVENT:
-     * join directly from this card.
-     * Never open EventDetails from this action.
-     */
-    if (status === "live" && user?.id) {
-      setJoiningEventId(event.id);
-
-      try {
-        const result = await joinEvent(event.id);
-
-        if (!result?.success) {
-          setJoinError(
-            result?.error ||
-              "Could not join the event. Please try again."
-          );
-        }
-      } catch (error) {
-        console.error("Join event error:", error);
-
-        setJoinError(
-          "Could not join the event. Please try again."
-        );
-      } finally {
-        setJoiningEventId(null);
-      }
-
-      return;
-    }
-
-    /*
-     * Upcoming / ended:
-     * opening details is still useful.
-     */
-    setSelectedEvent(event);
-  };
-
-
-  /* =========================================
-     EVENT DETAILS
-  ========================================= */
-
-  if (selectedEvent) {
-    return (
-      <EventDetails
-        event={selectedEvent}
-        user={user}
-        onBack={() =>
-          setSelectedEvent(null)
-        }
-      />
-    );
-  }
-
-
-  /* =========================================
-     ACTIVE EVENTS
-  ========================================= */
-
-  const activeEvents =
-    events.filter(
-      (event) => event.active
-    );
-
-
-  /* =========================================
-     EMPTY
-  ========================================= */
+  const activeEvents = events.filter(
+    (event) => event.active
+  );
 
   if (activeEvents.length === 0) {
     return (
       <section className="events-section">
-
         <div className="events-heading">
-
           <div className="events-label">
             VEXORA EVENTS
           </div>
@@ -280,12 +92,9 @@ function Events({ user }) {
             New events and rewards will appear
             here when they go live.
           </p>
-
         </div>
 
-
         <div className="events-empty">
-
           <div className="events-empty-icon">
             ✨
           </div>
@@ -298,13 +107,10 @@ function Events({ user }) {
             Check back soon for the next Vexora
             competition.
           </p>
-
         </div>
-
       </section>
     );
   }
-
 
   return (
     <section className="events-section">
@@ -314,7 +120,6 @@ function Events({ user }) {
       ========================================= */}
 
       <div className="events-heading">
-
         <div className="events-label">
           VEXORA EVENTS
         </div>
@@ -324,303 +129,175 @@ function Events({ user }) {
         </h2>
 
         <p>
-          Join live competitions, invite people,
-          and compete for exclusive rewards.
+          Live competitions, special events,
+          and experiences built to keep Vexora moving.
         </p>
-
       </div>
 
 
       {/* =========================================
-          EVENT GRID
+          EVENT LIST
       ========================================= */}
 
-      {joinError && (
-        <div
-          className="auth-message error"
-          role="alert"
-          style={{
-            maxWidth: "720px",
-            margin: "0 auto 18px",
-          }}
-        >
-          {joinError}
-        </div>
-      )}
-
-      <div className="events-grid">
+      <div className="events-list">
 
         {activeEvents.map((event) => {
-
           const status =
             getEventStatus(event);
+
+          const joined =
+            isJoined(event.id);
 
           const isReferralEvent =
             event.type === "referral";
 
-          /*
-           * IMPORTANT:
-           * Joined state now comes from the
-           * shared EventContext.
-           *
-           * That means Supabase is the source
-           * of truth across devices.
-           */
-          const joined =
-            isJoined(event.id);
-
-
           return (
             <article
-              className={`event-card ${status}`}
+              className={`event-list-card ${status}`}
               key={event.id}
             >
 
-              {/* =================================
-                  IMAGE
-              ================================= */}
+              {/* =====================================
+                  EVENT VISUAL
+              ===================================== */}
 
-              <div className="event-image">
+              <div className="event-list-visual">
 
                 <img
                   src={event.image}
-                  alt={event.title}
+                  alt=""
                 />
 
-                <div
-                  className={`event-status ${status}`}
-                >
+                <div className="event-list-visual-overlay"></div>
 
+                <div
+                  className={`event-list-status ${status}`}
+                >
                   <span></span>
 
-                  {status === "live" &&
-                    "LIVE NOW"}
+                  {status === "live"
+                    ? "LIVE NOW"
+                    : status === "upcoming"
+                      ? "UPCOMING"
+                      : "ENDED"}
+                </div>
 
-                  {status === "upcoming" &&
-                    "UPCOMING"}
-
-                  {status === "ended" &&
-                    "ENDED"}
-
+                <div className="event-list-visual-mark">
+                  {isReferralEvent
+                    ? "↗"
+                    : "✦"}
                 </div>
 
               </div>
 
 
-              {/* =================================
-                  CONTENT
-              ================================= */}
+              {/* =====================================
+                  EVENT INFO
+              ===================================== */}
 
-              <div className="event-content">
+              <div className="event-list-main">
 
-                <div className="event-subtitle">
-                  {event.subtitle}
+                <div className="event-list-copy">
+
+                  <div className="event-list-kicker">
+                    {isReferralEvent
+                      ? "REFERRAL COMPETITION"
+                      : "VEXORA EVENT"}
+                  </div>
+
+                  <h3>
+                    {event.title}
+                  </h3>
+
+                  <p>
+                    {event.description}
+                  </p>
+
                 </div>
 
-                <h3>
-                  {event.title}
-                </h3>
-
-                <p className="event-description">
-                  {event.description}
-                </p>
-
 
                 {/* =================================
-                    TOP 3 REWARDS
+                    EVENT META
                 ================================= */}
 
-                {isReferralEvent &&
-                  event.rules?.winners && (
+                <div className="event-list-meta">
 
-                    <div className="event-rewards">
-
-                      <div className="event-rewards-heading">
-
-                        <span>
-                          TOP 3 REWARDS
-                        </span>
-
-                        <strong>
-                          {event.prize}
-                        </strong>
-
-                      </div>
-
-
-                      <div className="event-rewards-grid">
-
-                        <div className="event-reward second">
-
-                          <span>
-                            🥈 2ND
-                          </span>
-
-                          <strong>
-                            {getWinnerReward(
-                              event,
-                              2
-                            )}
-                          </strong>
-
-                        </div>
-
-
-                        <div className="event-reward first">
-
-                          <span>
-                            🥇 1ST
-                          </span>
-
-                          <strong>
-                            {getWinnerReward(
-                              event,
-                              1
-                            )}
-                          </strong>
-
-                        </div>
-
-
-                        <div className="event-reward third">
-
-                          <span>
-                            🥉 3RD
-                          </span>
-
-                          <strong>
-                            {getWinnerReward(
-                              event,
-                              3
-                            )}
-                          </strong>
-
-                        </div>
-
-                      </div>
-
-                    </div>
-                  )}
-
-
-                {/* =================================
-                    EVENT INFO
-                ================================= */}
-
-                <div className="event-details">
-
-                  <div className="event-detail">
-
+                  <div className="event-list-meta-item">
                     <span>
-                      🏆 PRIZE POOL
+                      PRIZE
                     </span>
 
                     <strong>
                       {event.prize}
                     </strong>
-
                   </div>
 
-
-                  <div className="event-detail">
-
+                  <div className="event-list-meta-item">
                     <span>
                       {status === "upcoming"
-                        ? "🚀 STARTS IN"
+                        ? "STARTS"
                         : status === "ended"
-                          ? "✓ STATUS"
-                          : "⏱ ENDS IN"}
+                          ? "STATUS"
+                          : "ENDS IN"}
                     </span>
 
                     <strong>
                       {status === "ended"
-                        ? "Completed"
+                        ? "COMPLETED"
                         : formatTimeLeft(
                             event.endDate
                           )}
                     </strong>
+                  </div>
 
+                  <div className="event-list-meta-item">
+                    <span>
+                      YOUR STATUS
+                    </span>
+
+                    <strong
+                      className={
+                        joined
+                          ? "joined"
+                          : ""
+                      }
+                    >
+                      {loadingEvents
+                        ? "CHECKING"
+                        : joined
+                          ? "JOINED"
+                          : status === "ended"
+                            ? "CLOSED"
+                            : "READY"}
+                    </strong>
                   </div>
 
                 </div>
-
-
-                {/* =================================
-                    REFERRAL LINK
-                ================================= */}
-
-                {isReferralEvent &&
-                  user?.id && (
-                    <div className="event-referral-box">
-
-                      <div className="event-referral-copy">
-                        <span>
-                          🔗 YOUR REFERRAL LINK
-                        </span>
-
-                        <strong>
-                          Invite friends &amp; climb the leaderboard.
-                        </strong>
-                      </div>
-
-                      <button
-                        type="button"
-                        className={`event-referral-button ${
-                          copiedReferral
-                            ? "copied"
-                            : ""
-                        }`}
-                        onClick={copyReferralLink}
-                      >
-                        {copiedReferral
-                          ? "✓ COPIED"
-                          : "COPY LINK"}
-                      </button>
-
-                    </div>
-                  )}
 
 
                 {/* =================================
                     ACTIONS
                 ================================= */}
 
-                <div className="event-actions">
+                <div className="event-list-actions">
 
-                  <button
-                    className={`event-button ${
-                      joined
-                        ? "event-button-joined"
-                        : ""
-                    }`}
-                    type="button"
-                    onClick={() =>
-                      handleEventAction(event)
+                  <Link
+                    to={
+                      event.id === "top-inviter"
+                        ? "/events/top-inviter"
+                        : `/events/${event.id}`
                     }
-                    disabled={
-                      loadingEvents ||
-                      joiningEventId === event.id
-                    }
+                    className="event-list-view"
                   >
-
-                    {loadingEvents
-                      ? "CHECKING..."
-                      : joiningEventId === event.id
-                        ? "JOINING..."
-                        : joined
-                          ? "✓ YOU'RE JOINED"
-                          : status === "live"
-                            ? event.buttonText
-                            : "VIEW EVENT"}
-
-                  </button>
-
+                    VIEW EVENT
+                    <span>→</span>
+                  </Link>
 
                   <Link
                     to={`/events/${event.id}/leaderboard`}
-                    className="event-leaderboard-link"
+                    className="event-list-board"
                   >
-                    🏆 EVENT LEADERBOARD
+                    🏆 LEADERBOARD
                   </Link>
 
                 </div>
@@ -632,6 +309,119 @@ function Events({ user }) {
         })}
 
       </div>
+
+
+      {/* =========================================
+          VEXORA MOMENTS
+      ========================================= */}
+
+      <section className="events-moments-section">
+
+        <div className="events-moments-card">
+
+          <div className="events-moments-art">
+
+  <img
+    src="/events/moments-event.png"
+    alt="Vexora Moments"
+    style={{
+      width: "100%",
+      height: "100%",
+      display: "block",
+      objectFit: "cover",
+      objectPosition: "center",
+      borderRadius: "inherit",
+    }}
+  />
+
+  <div className="moments-image-status">
+    <span></span>
+    LIVE NOW
+  </div>
+
+  <div className="moments-image-arrow">
+    ↗
+  </div>
+
+</div>
+
+
+          <div className="events-moments-main">
+
+            <div className="events-moments-header">
+
+              <div className="events-moments-badge">
+                ✦ SPECIAL EVENT
+              </div>
+
+              <div className="events-moments-live">
+                <span></span>
+                VEXORA MOMENTS
+              </div>
+
+            </div>
+
+
+            <div className="events-moments-copy">
+
+              <h2>
+                Vexora Moments
+                <span> worth sharing.</span>
+              </h2>
+
+              <p>
+                Create a beautiful personalized Moment,
+                share it with someone, and bring new
+                people into Vexora.
+              </p>
+
+            </div>
+
+
+            <div className="events-moments-meta">
+
+              <div>
+                <span>CREATE</span>
+                <strong>6 unique vibes</strong>
+              </div>
+
+              <div>
+                <span>SHARE</span>
+                <strong>Instant link</strong>
+              </div>
+
+              <div>
+                <span>LIFETIME</span>
+                <strong>5 days</strong>
+              </div>
+
+            </div>
+
+
+            <div className="events-moments-bottom">
+
+              <div className="events-moments-tags">
+                <span>💜 Someone Special</span>
+                <span>🎂 Birthday</span>
+                <span>💙 Best Friend</span>
+                <span>✨ Festival</span>
+              </div>
+
+              <Link
+                to="/moments"
+                className="events-moments-button"
+              >
+                VIEW EVENT
+                <span>→</span>
+              </Link>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
 
     </section>
   );
