@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 
 import Icon from "./Icon";
-import { events } from "../data/events";
+import SkeletonRows from "./SkeletonRows";
+import { useEventList } from "../data/events";
 import { useEvents } from "../context/EventContext";
 import {
   useNow,
@@ -37,6 +38,8 @@ function Events() {
 
   const [momentsRef, momentsVisible] = useReveal();
 
+  const { events, loading } = useEventList();
+
   const activeEvents = events
     .filter((event) => event.active)
     .map((event) => ({
@@ -69,7 +72,7 @@ function Events() {
       </header>
 
 
-      {!hasOpenEvent && (
+      {!hasOpenEvent && !loading && (
         <div className="events-idle">
           <span className="chip chip-ended">Between events</span>
 
@@ -85,7 +88,11 @@ function Events() {
       )}
 
 
-      {activeEvents.length === 0 ? (
+      {loading ? (
+        <div className="card" aria-busy="true">
+          <SkeletonRows count={3} />
+        </div>
+      ) : activeEvents.length === 0 ? (
         <div className="card empty-state">
           <div className="empty-state-icon" aria-hidden="true">✨</div>
 

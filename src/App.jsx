@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import { featuredEvent } from "./data/events";
+import { featuredEvent, useEventList } from "./data/events";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -29,6 +29,9 @@ import ShopPage from "./pages/ShopPage";
 import PeoplePage from "./pages/PeoplePage";
 import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
+import PageLoading from "./components/PageLoading";
+
+const AdminPage = lazy(() => import("./pages/AdminPage"));
 
 import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
@@ -52,6 +55,16 @@ function ScrollToTop() {
   return null;
 }
 
+function LeaderboardRedirect() {
+  const { events, loading } = useEventList();
+
+  if (loading) return <PageLoading />;
+
+  const featured = featuredEvent(events);
+
+  return <Navigate to={featured ? `/events/${featured.id}/leaderboard` : "/events"} replace />;
+}
+
 function AuthenticatedApp({ session, onLogout }) {
   const user = session.user;
   const { pathname } = useLocation();
@@ -69,10 +82,7 @@ function AuthenticatedApp({ session, onLogout }) {
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/events" element={<EventsPage />} />
-              <Route
-                path="/leaderboard"
-                element={<Navigate to={`/events/${featuredEvent()?.id}/leaderboard`} replace />}
-              />
+              <Route path="/leaderboard" element={<LeaderboardRedirect />} />
               <Route path="/events/:eventId" element={<EventDetailsPage user={user} />} />
               <Route path="/events/:eventId/leaderboard" element={<EventLeaderboardPage user={user} />} />
               <Route path="/invites" element={<InvitesPage user={user} />} />
@@ -85,6 +95,14 @@ function AuthenticatedApp({ session, onLogout }) {
               <Route path="/chat/:username" element={<ChatPage />} />
               <Route path="/donations" element={<DonationsPage />} />
               <Route path="/discord" element={<DiscordPage />} />
+              <Route
+                path="/admin"
+                element={
+                  <Suspense fallback={<PageLoading />}>
+                    <AdminPage />
+                  </Suspense>
+                }
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
 

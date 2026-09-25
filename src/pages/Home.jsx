@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { events } from "../data/events";
+import { useEventList } from "../data/events";
 import { supabase } from "../lib/supabaseClient";
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
+import SkeletonRows from "../components/SkeletonRows";
 import { useMyProfile } from "../context/ProfileContext";
 import { equippedFrom } from "../data/cosmetics";
 import {
@@ -95,6 +96,7 @@ function Home({ user }) {
      EVENTS
   ========================================= */
 
+  const { events, loading: loadingEvents } = useEventList();
   const activeEvents = events.filter((event) => event.active);
 
   const liveEvent =
@@ -221,7 +223,11 @@ function Home({ user }) {
         ref={statusRef}
         className={`home-status ${revealClass(statusVisible)}`}
       >
-        {liveEvent ? (
+        {loadingEvents ? (
+          <div className="home-event card" aria-busy="true">
+            <SkeletonRows count={2} />
+          </div>
+        ) : liveEvent ? (
           <div className="home-event home-event-live card">
             <div className="home-event-main">
               <span className="chip chip-live">

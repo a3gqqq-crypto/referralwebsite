@@ -42,7 +42,7 @@ function playClick() {
 }
 
 function Navbar({ user, onLogout }) {
-  const { profile, username: profileName } = useMyProfile();
+  const { profile, username: profileName, isAdmin } = useMyProfile();
   const { badgeCount } = useSocial();
 
   const username =
@@ -119,6 +119,18 @@ function Navbar({ user, onLogout }) {
             <LevelBadge xp={profile?.xp} />
           </Link>
 
+          {isAdmin && (
+            <NavLink
+              to="/admin"
+              className="navbar-logout navbar-admin"
+              onClick={playClick}
+              aria-label="Admin panel"
+              title="Admin panel"
+            >
+              <Icon name="shield" size={18} />
+            </NavLink>
+          )}
+
           <button
             type="button"
             className="navbar-logout"
@@ -154,6 +166,12 @@ function Navbar({ user, onLogout }) {
         <nav aria-label="Main mobile">
           <NavLink to="/" end onClick={playClick}>Home</NavLink>
           {links}
+          {isAdmin && (
+            <NavLink to="/admin" onClick={playClick}>
+              <Icon name="shield" size={15} />
+              Admin
+            </NavLink>
+          )}
         </nav>
 
         <div className="navbar-mobile-footer">

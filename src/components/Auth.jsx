@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { events } from "../data/events";
+import { useEventList } from "../data/events";
 import {
   BadgeRow,
   FramedAvatar,
@@ -211,6 +211,8 @@ function Auth({ onAuthenticated }) {
   /* =========================================
      LIVE EVENT (FOR REFERRAL BANNER)
   ========================================= */
+
+  const { events } = useEventList();
 
   const liveEvent = events.find((event) => {
     const now = new Date();

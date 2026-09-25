@@ -544,6 +544,10 @@ h3 {
   font-size: 14px;
 }
 
+.app-loading.page-loading {
+  min-height: 60vh;
+}
+
 @keyframes app-loading-bob {
   to {
     transform: translateY(-6px);
@@ -700,7 +704,8 @@ h3 {
 }
 
 .field input,
-.field textarea {
+.field textarea,
+.field select {
   width: 100%;
   min-height: 48px;
 
@@ -724,7 +729,8 @@ h3 {
 }
 
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   outline: none;
 
   border-color: var(--gold);

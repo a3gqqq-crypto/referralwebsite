@@ -22,7 +22,24 @@ export function ProfileProvider({ user, children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [checkin, setCheckin] = useState(null);
+  // null until the check comes back, so /admin can wait instead of flashing "not found".
+  const [isAdmin, setIsAdmin] = useState(null);
   const checkedIn = useRef(false);
+
+  // Only decides whether to show the Admin link; every admin RPC re-checks on the server.
+  useEffect(() => {
+    if (!userId) return;
+
+    let cancelled = false;
+
+    supabase.rpc("is_admin").then(({ data }) => {
+      if (!cancelled) setIsAdmin(data === true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   const refresh = useCallback(async () => {
     if (!userId) return;
@@ -98,6 +115,7 @@ export function ProfileProvider({ user, children }) {
     loading,
     error,
     refresh,
+    isAdmin,
     username: profile?.username || user?.user_metadata?.username || "",
     equip: (slot, cosmeticId) =>
       callAndRefresh("equip_cosmetic", {

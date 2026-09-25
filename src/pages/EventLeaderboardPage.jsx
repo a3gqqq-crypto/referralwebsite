@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
-import { events } from "../data/events";
+import { useEventList } from "../data/events";
 import Icon from "../components/Icon";
+import PageLoading from "../components/PageLoading";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
@@ -19,6 +20,7 @@ function EventLeaderboardPage({ user }) {
   const { eventId } = useParams();
   const now = useNow(30000);
 
+  const { events, loading: loadingEvents } = useEventList();
   const event = events.find((item) => item.id === eventId);
 
   const [players, setPlayers] = useState([]);
@@ -63,6 +65,8 @@ function EventLeaderboardPage({ user }) {
       clearInterval(timer);
     };
   }, [event]);
+
+  if (!event && loadingEvents) return <PageLoading />;
 
   if (!event) {
     return (

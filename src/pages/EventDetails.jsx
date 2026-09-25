@@ -1,13 +1,17 @@
 import { useParams } from "react-router-dom";
 
-import { events } from "../data/events";
+import { useEventList } from "../data/events";
 import EventDetailsComponent from "../components/EventDetails";
 import NotFound from "./NotFound";
+import PageLoading from "../components/PageLoading";
 
 function EventDetailsPage({ user }) {
   const { eventId } = useParams();
+  const { events, loading } = useEventList();
 
   const event = events.find((item) => item.id === eventId);
+
+  if (!event && loading) return <PageLoading />;
 
   if (!event) {
     return (

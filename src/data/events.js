@@ -1,121 +1,86 @@
-// Dates carry an explicit offset (IST) so every visitor sees the same start/end,
-// and the event leaderboard counts only referrals made inside that window.
-export const events = [
-  {
-    id: "top-inviter-2",
+import { useEffect, useSyncExternalStore } from "react";
 
-    title: "Vexora Top Inviter · Round 2",
+import { supabase } from "../lib/supabaseClient";
 
-    subtitle: "EVERYONE STARTS AT ZERO.",
+// Events are managed from the admin panel and live in the `events` table.
+// Rows are mapped to the shape the pages already use (startDate/endDate/rules).
+export const EVENT_COLUMNS =
+  "id, title, subtitle, description, prize, starts_at, ends_at, image, type, active, winners";
 
-    description:
-      "Round 2 is on. Only invites made during these 15 days count — invite the most new members and finish top three to win cash.",
-
-    prize: "$35 Total",
-
-    startDate: "2026-09-25T20:00:00+05:30",
-
-    endDate: "2026-10-10T20:00:00+05:30",
-
-    image: "/events/summer.png",
-
-    buttonText: "JOIN EVENT",
-
-    active: true,
-
-    type: "referral",
-
+export function toEvent(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    subtitle: row.subtitle || "",
+    description: row.description,
+    prize: row.prize,
+    startDate: row.starts_at,
+    endDate: row.ends_at,
+    image: row.image,
+    type: row.type,
+    active: row.active,
     rules: {
       ranking: "referrals_during_event",
-
-      winners: [
-        { position: 1, reward: "$20" },
-        { position: 2, reward: "$10" },
-        { position: 3, reward: "$5" },
-      ],
+      winners: Array.isArray(row.winners) ? row.winners : [],
     },
-  },
+  };
+}
 
-  {
-    id: "top-inviter",
+let state = { events: [], loading: true, error: "" };
+let pending = null;
+let loaded = false;
+const listeners = new Set();
 
-    title: "Vexora Top Inviter",
+const setState = (next) => {
+  state = { ...state, ...next };
+  listeners.forEach((listener) => listener());
+};
 
-    subtitle: "INVITE THE MOST. WIN THE MOST.",
+export function loadEvents({ force = false } = {}) {
+  if (pending) return pending;
+  if (loaded && !force) return Promise.resolve(state.events);
 
-    description:
-      "Invite new members to Vexora, climb the referral leaderboard, and finish in the top three to win cash rewards.",
+  pending = supabase
+    .from("events")
+    .select(EVENT_COLUMNS)
+    .eq("active", true)
+    .order("starts_at", { ascending: false })
+    .then(({ data, error }) => {
+      pending = null;
 
-    prize: "$35 Total",
+      if (error) {
+        console.error("Could not load events:", error);
+        setState({ loading: false, error: "Could not load events." });
+        return state.events;
+      }
 
-    startDate: "2026-08-27T00:00:00+05:30",
+      loaded = true;
+      setState({ events: (data || []).map(toEvent), loading: false, error: "" });
+      return state.events;
+    });
 
-    endDate: "2026-09-11T23:59:59+05:30",
+  return pending;
+}
 
-    image: "/events/summer.png",
+const subscribe = (listener) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
 
-    buttonText: "JOIN EVENT",
+const snapshot = () => state;
 
-    active: true,
+export function useEventList() {
+  const current = useSyncExternalStore(subscribe, snapshot);
 
-    type: "referral",
+  useEffect(() => {
+    loadEvents();
+  }, []);
 
-    rules: {
-      ranking: "referrals_during_event",
-
-      winners: [
-        {
-          position: 1,
-          reward: "$20",
-        },
-        {
-          position: 2,
-          reward: "$10",
-        },
-        {
-          position: 3,
-          reward: "$5",
-        },
-      ],
-    },
-  },
-
-  /*
-   * =========================================
-   * FUTURE EVENTS
-   * =========================================
-   *
-   * Copy an event below when creating a new one.
-   *
-   * {
-   *   id: "halloween",
-   *
-   *   title: "Halloween Mayhem",
-   *
-   *   subtitle: "SPOOKY SEASON",
-   *
-   *   description:
-   *     "Compete in the Halloween event and win exclusive rewards.",
-   *
-   *   prize: "$50 Total",
-   *
-   *   startDate: "2026-10-01T00:00:00",
-   *
-   *   endDate: "2026-10-15T23:59:59",
-   *
-   *   image: "/events/halloween.png",
-   *
-   *   buttonText: "JOIN EVENT",
-   *
-   *   active: true,
-   *
-   *   type: "custom",
-   * }
-   */
-];
+  return current;
+}
 
 // The event the nav "Leaderboard" link should open: live, else next up, else most recent.
-export function featuredEvent(now = new Date()) {
+export function featuredEvent(events, now = new Date()) {
   const active = events.filter((event) => event.active);
   const start = (event) => new Date(event.startDate);
   const end = (event) => new Date(event.endDate);
