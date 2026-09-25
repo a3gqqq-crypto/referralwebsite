@@ -13,6 +13,7 @@ import {
   StyledName,
 } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
+import StaffTag from "../components/StaffTag";
 import { equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
@@ -44,6 +45,7 @@ function PersonCard({ person }) {
           <div className="person-card-name">
             <StyledName name={person.username} effect={equipped.name} />
             <span className="person-card-tags">
+              <StaffTag userId={person.id} />
               <LevelBadge xp={person.xp} />
               <BadgeRow ids={equipped.badges} size={18} />
             </span>

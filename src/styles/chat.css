@@ -180,6 +180,11 @@
   min-width: 0;
 }
 
+.chat-request .level-badge,
+.chat-request .badge-row {
+  display: none;
+}
+
 .chat-request-actions {
   display: flex;
   gap: 6px;

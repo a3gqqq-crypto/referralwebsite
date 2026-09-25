@@ -5,10 +5,12 @@ import {
   StyledName,
 } from "./Cosmetics";
 import { LevelBadge, LevelProgress } from "./Level";
+import StaffTag from "./StaffTag";
 
 import "../styles/profile.css";
 
 function ProfileCard({
+  userId,
   username,
   equipped,
   bio,
@@ -39,6 +41,8 @@ function ProfileCard({
           <h2 className="profile-card-name">
             <StyledName name={username || "you"} effect={equipped.name} />
           </h2>
+
+          <StaffTag userId={userId} size={size === "lg" ? "lg" : "sm"} />
 
           <LevelBadge xp={xp} size={size === "lg" ? "lg" : "sm"} />
 

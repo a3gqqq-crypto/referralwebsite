@@ -6,6 +6,7 @@ import PlayerChip, { PLAYER_COLUMNS } from "../PlayerChip";
 import SkeletonRows from "../SkeletonRows";
 import { COSMETICS, SLOTS } from "../../data/cosmetics";
 import { useMyProfile } from "../../context/ProfileContext";
+import { loadStaff, useStaff } from "../../data/staff";
 import { adminCall, timeAgo } from "./adminApi";
 
 const COLUMNS = `${PLAYER_COLUMNS}, chat_banned`;
@@ -14,16 +15,79 @@ const COLUMNS = `${PLAYER_COLUMNS}, chat_banned`;
 const toPattern = (query) =>
   query.replace(/[^a-zA-Z0-9_]/g, "").replace(/_/g, "\\_");
 
-function UserRow({ person, isMe, onUpdated }) {
+function RoleButtons({ person, role, busy, run }) {
+  const setRole = (next, text, confirmText) => {
+    if (confirmText && !window.confirm(confirmText)) return;
+    run("admin_set_role", { p_user: person.id, p_role: next }, text, () => loadStaff({ force: true }));
+  };
+
+  if (!role) {
+    return (
+      <button
+        type="button"
+        className="btn btn-sm"
+        disabled={busy}
+        onClick={() =>
+          setRole("admin", "Now an admin.", `Make ${person.username} an admin? They'll get the admin panel.`)
+        }
+      >
+        <Icon name="shield" size={14} />
+        Make admin
+      </button>
+    );
+  }
+
+  return (
+    <>
+      {role === "admin" ? (
+        <button
+          type="button"
+          className="btn btn-sm"
+          disabled={busy}
+          onClick={() =>
+            setRole("owner", "Now an owner.", `Make ${person.username} an owner? Owners can add and remove admins.`)
+          }
+        >
+          <Icon name="crown" size={14} />
+          Make owner
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="btn btn-sm"
+          disabled={busy}
+          onClick={() => setRole("admin", "Now an admin.")}
+        >
+          Change to admin
+        </button>
+      )}
+
+      <button
+        type="button"
+        className="btn btn-sm"
+        disabled={busy}
+        onClick={() =>
+          setRole(null, "Staff role removed.", `Remove ${person.username}'s ${role} role and admin access?`)
+        }
+      >
+        Remove {role}
+      </button>
+    </>
+  );
+}
+
+function UserRow({ person, isMe, role, canManageRoles, onUpdated }) {
   const [item, setItem] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
 
-  const run = async (fn, args, successText) => {
+  const run = async (fn, args, successText, afterSuccess) => {
     setBusy(true);
     setNotice(null);
 
     const result = await adminCall(fn, args);
+
+    if (result.ok) await afterSuccess?.();
 
     setBusy(false);
     setNotice(result.ok ? { type: "success", text: successText } : { type: "error", text: result.error });
@@ -45,6 +109,10 @@ function UserRow({ person, isMe, onUpdated }) {
       </div>
 
       <div className="admin-actions">
+        {canManageRoles && !isMe && (
+          <RoleButtons person={person} role={role} busy={busy} run={run} />
+        )}
+
         {person.avatar && (
           <button
             type="button"
@@ -66,7 +134,7 @@ function UserRow({ person, isMe, onUpdated }) {
           </button>
         )}
 
-        {!isMe && (
+        {!isMe && !role && (
           <button
             type="button"
             className="btn btn-sm"
@@ -129,6 +197,12 @@ function AdminUsers() {
   const [people, setPeople] = useState(null);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
+  const [staffOnly, setStaffOnly] = useState(false);
+
+  const staff = useStaff();
+  const myRole = staff.get(profile?.id);
+  const staffIds = [...staff.keys()];
+  const staffKey = staffIds.join(",");
 
   useEffect(() => {
     const pattern = toPattern(query.trim());
@@ -136,6 +210,8 @@ function AdminUsers() {
 
     const timer = setTimeout(async () => {
       let request = supabase.from("profiles").select(COLUMNS).not("username", "is", null);
+
+      if (staffOnly) request = request.in("id", staffIds.length ? staffIds : ["00000000-0000-0000-0000-000000000000"]);
 
       request = pattern
         ? request.ilike("username", `%${pattern}%`).order("referral_count", { ascending: false })
@@ -158,7 +234,7 @@ function AdminUsers() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [query, version]);
+  }, [query, version, staffOnly, staffKey]);
 
   return (
     <div className="admin-section">
@@ -175,9 +251,28 @@ function AdminUsers() {
         />
       </div>
 
-      <p className="admin-meta">
-        {query.trim() ? "Matching members" : "Newest members"}
-      </p>
+      <div className="admin-toolbar admin-members-bar">
+        <p className="admin-meta">
+          {staffOnly ? "Owners and admins" : query.trim() ? "Matching members" : "Newest members"}
+        </p>
+
+        <button
+          type="button"
+          className={`btn btn-sm ${staffOnly ? "btn-sun" : "btn-ghost"}`}
+          onClick={() => setStaffOnly((value) => !value)}
+          aria-pressed={staffOnly}
+        >
+          <Icon name="shield" size={14} />
+          Staff only
+        </button>
+      </div>
+
+      {myRole === "owner" && (
+        <p className="admin-hint">
+          As an owner you can make members admins (they get this panel) or owners
+          (they can also manage admins).
+        </p>
+      )}
 
       {error && <div className="notice notice-error">{error}</div>}
 
@@ -192,6 +287,8 @@ function AdminUsers() {
               key={person.id}
               person={person}
               isMe={person.id === profile?.id}
+              role={staff.get(person.id) || null}
+              canManageRoles={myRole === "owner"}
               onUpdated={() => setVersion((value) => value + 1)}
             />
           ))}

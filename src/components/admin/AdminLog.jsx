@@ -9,6 +9,7 @@ const ACTION_LABEL = {
   chat_ban: "Banned from chat",
   chat_unban: "Unbanned from chat",
   clear_avatar: "Removed picture",
+  set_role: "Changed staff role",
   delete_lounge_message: "Removed lounge message",
   grant_cosmetic: "Gave item",
   save_event: "Saved event",
@@ -29,6 +30,7 @@ function describe(entry) {
     return `${who} · #${details.place} ${details.reward || ""} · ${entry.target}`;
   }
   if (entry.action.startsWith("chat_") || entry.action === "clear_avatar") return who;
+  if (entry.action === "set_role") return `${who} → ${details.role || "no role"}`;
 
   return entry.target;
 }

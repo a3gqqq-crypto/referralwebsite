@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 import { BadgeRow, FramedAvatar, StyledName } from "./Cosmetics";
 import { LevelBadge } from "./Level";
+import StaffTag from "./StaffTag";
 import { equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
@@ -18,6 +19,8 @@ function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
       <span className="player-chip-name">
         <StyledName name={name} effect={equipped.name} />
       </span>
+
+      <StaffTag userId={player?.id} />
 
       <LevelBadge xp={player?.xp} />
 

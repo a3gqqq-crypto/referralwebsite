@@ -170,6 +170,7 @@ function LockerPage() {
       <div className="locker-layout">
         <aside className="locker-preview">
           <ProfileCard
+            userId={profile?.id}
             username={username}
             equipped={equipped}
             bio={bio.trim() || profile?.bio}

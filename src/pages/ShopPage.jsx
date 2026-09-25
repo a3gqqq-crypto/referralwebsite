@@ -189,6 +189,7 @@ function ShopPage() {
 
           <ProfileCard
             size="sm"
+            userId={profile?.id}
             username={username || "you"}
             equipped={tryOn}
             bio={profile?.bio}

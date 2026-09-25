@@ -15,6 +15,7 @@ import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
+import StaffTag from "../components/StaffTag";
 import { equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
@@ -52,6 +53,7 @@ function MessageRow({ message, sender, grouped, isMine, onReport }) {
             <Link to={`/u/${encodeURIComponent(name)}`} className="chat-msg-name">
               <StyledName name={name} effect={equipped.name} />
             </Link>
+            <StaffTag userId={message.sender_id} />
             <LevelBadge xp={sender?.xp} />
             <BadgeRow ids={equipped.badges} size={16} />
             <time dateTime={message.created_at}>{formatTime(message.created_at)}</time>

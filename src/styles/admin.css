@@ -64,6 +64,11 @@
   gap: 12px;
 }
 
+.admin-members-bar {
+  align-items: center;
+  justify-content: space-between;
+}
+
 .admin-segment {
   display: flex;
   gap: 4px;

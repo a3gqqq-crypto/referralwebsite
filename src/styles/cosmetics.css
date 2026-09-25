@@ -196,6 +196,53 @@
 
 
 /* =========================================
+   STAFF TAGS
+========================================= */
+
+.staff-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  flex-shrink: 0;
+
+  padding: 1px 7px 1px 5px;
+
+  border-radius: 999px;
+
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  vertical-align: middle;
+}
+
+.staff-tag-lg {
+  padding: 3px 11px 3px 8px;
+
+  font-size: 12.5px;
+}
+
+.staff-owner {
+  background: var(--accent-grad);
+  color: #fff;
+
+  box-shadow: 0 0 14px -3px rgba(255, 92, 141, 0.8);
+}
+
+.staff-admin {
+  border: 1px solid rgba(124, 196, 255, 0.45);
+
+  background: var(--sky-wash);
+  color: var(--sky);
+}
+
+
+/* =========================================
    BADGES
 ========================================= */
 

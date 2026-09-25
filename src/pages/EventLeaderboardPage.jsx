@@ -7,6 +7,7 @@ import Icon from "../components/Icon";
 import PageLoading from "../components/PageLoading";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip from "../components/PlayerChip";
+import StaffTag from "../components/StaffTag";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { equippedFrom } from "../data/cosmetics";
 import NotFound from "./NotFound";
@@ -195,6 +196,8 @@ function EventLeaderboardPage({ user }) {
                     />
                   </strong>
                 </Link>
+
+                <StaffTag userId={player.id} />
 
                 <BadgeRow ids={equippedFrom(player).badges} size={18} />
 

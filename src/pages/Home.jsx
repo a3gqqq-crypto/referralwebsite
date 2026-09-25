@@ -227,6 +227,7 @@ function Home({ user }) {
 
         <aside className="home-me" aria-label="Your profile">
           <ProfileCard
+            userId={user?.id}
             username={username}
             equipped={equippedFrom(profile)}
             xp={profile?.xp}

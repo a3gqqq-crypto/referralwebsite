@@ -145,6 +145,7 @@ function ProfilePage({ viewer, standalone = false }) {
       <>
         <ProfileCard
           size="lg"
+          userId={profile.id}
           username={profile.username}
           equipped={equipped}
           bio={profile.bio}
