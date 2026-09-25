@@ -2,695 +2,475 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { events } from "../data/events";
-import ReferralPreview from "../components/ReferralPreview";
 import { supabase } from "../lib/supabaseClient";
+import Icon from "../components/Icon";
+import ProfileCard from "../components/ProfileCard";
+import { useMyProfile } from "../context/ProfileContext";
+import { equippedFrom } from "../data/cosmetics";
+import {
+  useNow,
+  getEventStatus,
+  formatCountdown,
+} from "../hooks/useCountdown";
+import { useReveal } from "../hooks/useReveal";
+import {
+  useCopy,
+  canNativeShare,
+  nativeShare,
+  referralLinkFor,
+} from "../hooks/useCopy";
 
 import "../styles/home.css";
 
+const SHARE_TEXT =
+  "Join me on Vexora — invite friends, climb the board, win real prizes.";
+
 function Home({ user }) {
+  const { profile } = useMyProfile();
+
   const username =
     user?.user_metadata?.username || "Member";
 
-  const [now, setNow] = useState(new Date());
+  const referralLink = referralLinkFor(
+    user?.user_metadata?.username
+  );
 
-  const [userRank, setUserRank] =
-    useState(null);
+  const now = useNow();
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
+  const [standing, setStanding] = useState({
+    rank: null,
+    referrals: null,
+    players: null,
+  });
 
-    return () => clearInterval(timer);
-  }, []);
+  const [heroCopied, copyHero] = useCopy();
+  const [bandCopied, copyBand] = useCopy();
 
   /* =========================================
-     LOAD REAL REFERRAL RANK
+     LOAD STANDING
   ========================================= */
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadRank = async () => {
-      if (!user?.id) {
-        setUserRank(null);
-        return;
-      }
+    const loadStanding = async () => {
+      if (!user?.id) return;
 
-      const {
-        data,
-        error,
-      } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("id, referral_count")
-        .order("referral_count", {
-          ascending: false,
-        });
+        .order("referral_count", { ascending: false });
 
-      if (cancelled) {
-        return;
-      }
+      if (cancelled) return;
 
       if (error) {
-        console.error(
-          "Could not load referral rank:",
-          error
-        );
-
-        setUserRank(null);
+        console.error("Could not load referral rank:", error);
         return;
       }
 
-      const currentIndex =
-        (data || []).findIndex(
-          (profile) =>
-            profile.id === user.id
-        );
-
-      setUserRank(
-        currentIndex >= 0
-          ? currentIndex + 1
-          : null
+      const rows = data || [];
+      const index = rows.findIndex(
+        (profile) => profile.id === user.id
       );
+
+      setStanding({
+        rank: index >= 0 ? index + 1 : null,
+        referrals:
+          index >= 0 ? rows[index].referral_count || 0 : null,
+        players: rows.length,
+      });
     };
 
-    loadRank();
+    loadStanding();
 
-    /*
-     * Keep the Home rank reasonably fresh
-     * without changing any other Home behavior.
-     */
-    const rankTimer = setInterval(
-      loadRank,
-      10000
-    );
+    const timer = setInterval(loadStanding, 15000);
 
     return () => {
       cancelled = true;
-      clearInterval(rankTimer);
+      clearInterval(timer);
     };
   }, [user?.id]);
 
   /* =========================================
-     FIND LIVE EVENT
+     EVENTS
   ========================================= */
+
+  const activeEvents = events.filter((event) => event.active);
 
   const liveEvent =
-    events.find((event) => {
-      const start = new Date(event.startDate);
-      const end = new Date(event.endDate);
-
-      return (
-        event.active &&
-        now >= start &&
-        now <= end
-      );
-    }) || null;
-
-  /* =========================================
-     FIND NEXT UPCOMING EVENT
-  ========================================= */
+    activeEvents.find(
+      (event) => getEventStatus(event, now) === "live"
+    ) || null;
 
   const upcomingEvent =
-    events
-      .filter((event) => {
-        const start = new Date(event.startDate);
-
-        return (
-          event.active &&
-          start > now
-        );
-      })
+    activeEvents
+      .filter(
+        (event) => getEventStatus(event, now) === "upcoming"
+      )
       .sort(
-        (a, b) =>
-          new Date(a.startDate) -
-          new Date(b.startDate)
+        (a, b) => new Date(a.startDate) - new Date(b.startDate)
+      )[0] || null;
+
+  const lastEndedEvent =
+    events
+      .filter(
+        (event) => getEventStatus(event, now) === "ended"
+      )
+      .sort(
+        (a, b) => new Date(b.endDate) - new Date(a.endDate)
       )[0] || null;
 
   /* =========================================
-     COUNTDOWN
+     REVEAL
   ========================================= */
 
-  const formatCountdown = (date) => {
-    const difference =
-      new Date(date).getTime() -
-      now.getTime();
+  const [statusRef, statusVisible] = useReveal();
+  const [doRef, doVisible] = useReveal();
+  const [howRef, howVisible] = useReveal();
+  const [bandRef, bandVisible] = useReveal();
 
-    if (difference <= 0) {
-      return "00d 00h 00m 00s";
-    }
-
-    const totalSeconds =
-      Math.floor(difference / 1000);
-
-    const days =
-      Math.floor(totalSeconds / 86400);
-
-    const hours =
-      Math.floor(
-        (totalSeconds % 86400) / 3600
-      );
-
-    const minutes =
-      Math.floor(
-        (totalSeconds % 3600) / 60
-      );
-
-    const seconds =
-      totalSeconds % 60;
-
-    return `${String(days).padStart(
-      2,
-      "0"
-    )}d ${String(hours).padStart(
-      2,
-      "0"
-    )}h ${String(minutes).padStart(
-      2,
-      "0"
-    )}m ${String(seconds).padStart(
-      2,
-      "0"
-    )}s`;
-  };
+  const revealClass = (visible) =>
+    `reveal-section ${visible ? "reveal-visible" : ""}`;
 
   return (
-    <main className="home-page">
+    <main className="page home-page">
 
       {/* =========================================
-          PREMIUM HERO
+          HERO
       ========================================= */}
 
       <section className="home-hero">
 
-        <div className="home-hero-noise"></div>
-        <div className="home-hero-grid"></div>
-        <div className="home-hero-orbit orbit-one"></div>
-        <div className="home-hero-orbit orbit-two"></div>
-        <div className="home-hero-beam beam-one"></div>
-        <div className="home-hero-beam beam-two"></div>
-
-        <div className="hero-float hero-float-left">
-          <span className="hero-float-icon">✦</span>
-          <span className="hero-float-label">
-            LIVE EVENTS
+        <div className="home-hero-copy">
+          <span className="eyebrow">
+            Hey {username} 👋
           </span>
-          <strong>COMPETE</strong>
-        </div>
-
-        <div className="hero-float hero-float-right">
-          <span className="hero-float-icon">♛</span>
-          <span className="hero-float-label">
-            TOP REWARDS
-          </span>
-          <strong>WIN BIG</strong>
-        </div>
-
-        <div className="home-hero-core">
-
-          <div className="home-hero-badge">
-            <span className="home-badge-dot"></span>
-            THE NEXT LEVEL OF COMPETITION
-          </div>
 
           <h1>
-            <span className="hero-line-one">
-              Rise.
-            </span>{" "}
-            <span className="hero-line-two">
-              Compete.
-            </span>
-            <br />
-            <strong>
-              Leave your mark.
-            </strong>
+            Bring your friends.{" "}
+            <span className="mark">Take the top spot.</span>
           </h1>
 
-          <p className="home-hero-subtitle">
-            Welcome back,{" "}
-            <span className="home-username">
-              {username}
-            </span>
-            .
-            <br />
-            Enter the arena, invite your crew,
-            and chase the next reward.
+          <p>
+            Every friend who signs up with your link
+            counts toward your rank. Most invites when
+            the event ends wins the prize pool.
           </p>
 
           <div className="home-hero-actions">
-
-            <Link
-              to="/events"
-              className="home-primary-button"
+            <button
+              type="button"
+              className={`btn ${heroCopied ? "btn-success" : "btn-primary"}`}
+              onClick={() => copyHero(referralLink)}
+              disabled={!referralLink}
             >
-              <span className="hero-button-icon">
-                ↗
-              </span>
-              EXPLORE EVENTS
+              <Icon name={heroCopied ? "check" : "copy"} />
+              {heroCopied ? "Link copied" : "Copy my invite link"}
+            </button>
+
+            <Link to="/events" className="btn">
+              See events
+              <Icon name="arrowRight" />
             </Link>
-
-            <Link
-              to="/invites"
-              className="home-secondary-button"
-            >
-              <span className="hero-button-icon">
-                ◇
-              </span>
-              MY REFERRALS
-            </Link>
-
           </div>
-
-          <div className="home-hero-trust">
-
-            <span>
-              <b>01</b>
-              LIVE COMPETITIONS
-            </span>
-
-            <i></i>
-
-            <span>
-              <b>∞</b>
-              WAYS TO CLIMB
-            </span>
-
-            <i></i>
-
-            <span>
-              <b>✦</b>
-              EXCLUSIVE REWARDS
-            </span>
-
-          </div>
-
         </div>
 
-        <div className="home-hero-particle particle-one"></div>
-        <div className="home-hero-particle particle-two"></div>
-        <div className="home-hero-particle particle-three"></div>
-        <div className="home-hero-particle particle-four"></div>
-        <div className="home-hero-particle particle-five"></div>
+        <aside className="home-me" aria-label="Your profile">
+          <ProfileCard
+            username={username}
+            equipped={equippedFrom(profile)}
+            stats={[
+              { label: "Rank", value: standing.rank ? `#${standing.rank}` : "—" },
+              { label: "Referrals", value: standing.referrals ?? "—" },
+              { label: "Players", value: standing.players ?? "—" },
+            ]}
+          >
+            <p className="home-me-caption">
+              {standing.rank === 1
+                ? "You're in first. Hold it."
+                : standing.rank
+                  ? `${standing.rank - 1} ${standing.rank - 1 === 1 ? "person" : "people"} ahead of you.`
+                  : "Invite someone to get on the board."}
+            </p>
+
+            <div className="home-me-actions">
+              <Link to="/profile" className="btn btn-sm">
+                <Icon name="edit" size={15} />
+                Customize
+              </Link>
+
+              <Link to="/shop" className="btn btn-sm btn-sun">
+                <Icon name="sparkles" size={15} />
+                Shop
+              </Link>
+            </div>
+          </ProfileCard>
+        </aside>
 
       </section>
 
 
       {/* =========================================
-          LIVE AT VEXORA
+          EVENT STATUS
       ========================================= */}
 
-      {liveEvent && (
-        <section className="home-live-section">
+      <section
+        ref={statusRef}
+        className={`home-status ${revealClass(statusVisible)}`}
+      >
+        {liveEvent ? (
+          <div className="home-event home-event-live card">
+            <div className="home-event-main">
+              <span className="chip chip-live">
+                <span className="live-dot" />
+                Live now
+              </span>
 
-          <div className="home-live-card">
+              <h2>{liveEvent.title}</h2>
 
-            <div className="home-live-left">
-
-              <div className="home-live-label">
-                <span className="home-live-dot"></span>
-                LIVE NOW
-              </div>
-
-              <div className="home-live-title">
-                {liveEvent.title}
-              </div>
-
-              <div className="home-live-description">
-                {liveEvent.description}
-              </div>
-
+              <p>{liveEvent.description}</p>
             </div>
 
-            <div className="home-live-right">
-
-              <div className="home-live-signal">
-                <span className="home-live-signal-dot"></span>
-                <div>
-                  <strong>LIVE</strong>
-                  <span>ACTIVE ARENA</span>
-                </div>
-              </div>
-
-              <div className="home-live-prize">
-
-                <span>
-                  🏆 PRIZE
-                </span>
-
-                <strong>
+            <div className="home-event-side">
+              <div>
+                <span className="eyebrow">Prize pool</span>
+                <strong className="home-event-prize">
                   {liveEvent.prize}
                 </strong>
-
               </div>
 
-              <div className="home-live-countdown">
-
-                <span>
-                  ENDS IN
-                </span>
-
-                <strong>
-                  {formatCountdown(
-                    liveEvent.endDate
-                  )}
+              <div>
+                <span className="eyebrow">Ends in</span>
+                <strong className="home-event-timer mono">
+                  {formatCountdown(liveEvent.endDate, now)}
                 </strong>
-
               </div>
 
               <Link
                 to={`/events/${liveEvent.id}`}
-                className="home-live-button"
+                className="btn btn-dark"
               >
-                VIEW EVENT →
+                View event
+                <Icon name="arrowRight" />
+              </Link>
+            </div>
+          </div>
+        ) : upcomingEvent ? (
+          <div className="home-event home-event-upcoming card">
+            <div className="home-event-main">
+              <span className="chip chip-upcoming">
+                Next up
+              </span>
+
+              <h2>{upcomingEvent.title}</h2>
+
+              <p>{upcomingEvent.description}</p>
+            </div>
+
+            <div className="home-event-side">
+              <div>
+                <span className="eyebrow">Prize pool</span>
+                <strong className="home-event-prize">
+                  {upcomingEvent.prize}
+                </strong>
+              </div>
+
+              <div>
+                <span className="eyebrow">Starts in</span>
+                <strong className="home-event-timer mono">
+                  {formatCountdown(upcomingEvent.startDate, now)}
+                </strong>
+              </div>
+
+              <Link
+                to={`/events/${upcomingEvent.id}`}
+                className="btn btn-dark"
+              >
+                View event
+                <Icon name="arrowRight" />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="home-event home-event-idle">
+            <div className="home-event-main">
+              <span className="chip chip-ended">
+                Between events
+              </span>
+
+              <h2>The next competition is on its way.</h2>
+
+              <p>
+                {lastEndedEvent
+                  ? `${lastEndedEvent.title} has wrapped. `
+                  : ""}
+                New events get announced in the Discord
+                first — and invites you send now still
+                count toward your total.
+              </p>
+            </div>
+
+            <div className="home-event-actions">
+              <Link to="/discord" className="btn btn-dark">
+                Get notified on Discord
               </Link>
 
+              {lastEndedEvent && (
+                <Link
+                  to={`/events/${lastEndedEvent.id}/leaderboard`}
+                  className="btn"
+                >
+                  Final results
+                </Link>
+              )}
             </div>
-
           </div>
-
-        </section>
-      )}
-
-
-      {/* =========================================
-          QUICK ACCESS
-      ========================================= */}
-
-      <section className="home-quick-section">
-
-        <div className="home-section-heading">
-
-          <div>
-
-            <div className="home-section-label">
-              QUICK ACCESS
-            </div>
-
-            <h2>
-              Everything in one place.
-            </h2>
-
-          </div>
-
-        </div>
-
-        <div className="home-quick-grid">
-
-          <Link
-            to="/events"
-            className="home-quick-card"
-          >
-
-            <div className="home-quick-icon purple">
-              ⚡
-            </div>
-
-            <div className="home-quick-content">
-
-              <span>
-                COMPETE
-              </span>
-
-              <h3>
-                Events
-              </h3>
-
-              <p>
-                Discover live and upcoming Vexora
-                competitions and rewards.
-              </p>
-
-              <div className="home-quick-link">
-                View events
-                <span>→</span>
-              </div>
-
-              <div className="home-quick-meta">
-                <span>LIVE &amp; UPCOMING</span>
-                <b>01</b>
-              </div>
-
-            </div>
-
-          </Link>
-
-
-          <Link
-            to="/invites"
-            className="home-quick-card"
-          >
-
-            <div className="home-quick-icon blue">
-              🔗
-            </div>
-
-            <div className="home-quick-content">
-
-              <span>
-                GROW
-              </span>
-
-              <h3>
-                Invites
-              </h3>
-
-              <p>
-                Share your referral link and climb
-                the competition.
-              </p>
-
-              <div className="home-quick-link">
-                Open referrals
-                <span>→</span>
-              </div>
-
-              <div className="home-quick-meta">
-                <span>BUILD YOUR RANK</span>
-                <b>∞</b>
-              </div>
-
-            </div>
-
-          </Link>
-
-
-          <Link
-            to="/donations"
-            className="home-quick-card"
-          >
-
-            <div className="home-quick-icon pink">
-              💜
-            </div>
-
-            <div className="home-quick-content">
-
-              <span>
-                SUPPORT
-              </span>
-
-              <h3>
-                Donations
-              </h3>
-
-              <p>
-                Support the competition and help keep
-                future events running.
-              </p>
-
-              <div className="home-quick-link">
-                Support Vexora
-                <span>→</span>
-              </div>
-
-              <div className="home-quick-meta">
-                <span>POWER THE NEXT EVENT</span>
-                <b>✦</b>
-              </div>
-
-            </div>
-
-          </Link>
-
-        </div>
-
+        )}
       </section>
 
 
       {/* =========================================
-          VEXORA PULSE
+          THINGS TO DO
       ========================================= */}
 
-      <section className="home-pulse-section">
-
-        <div className="home-pulse-card">
-
-          <div className="home-pulse-head">
-            <span className="home-section-label">VEXORA PULSE</span>
-            <span className="home-pulse-live">● SYSTEM LIVE</span>
-          </div>
-
-          <div className="home-pulse-grid">
-
-            <div className="home-pulse-item">
-              <span>YOUR POSITION</span>
-              <strong>
-                {userRank
-                  ? `#${userRank}`
-                  : "—"}
-              </strong>
-              <small>
-                {userRank
-                  ? "Keep climbing"
-                  : "Rank unavailable"}
-              </small>
-            </div>
-
-            <div className="home-pulse-divider"></div>
-
-            <div className="home-pulse-item">
-              <span>NEXT MOVE</span>
-              <strong>INVITE</strong>
-              <small>Bring someone into the arena</small>
-            </div>
-
-            <div className="home-pulse-divider"></div>
-
-            <div className="home-pulse-item">
-              <span>REWARD STATUS</span>
-              <strong>ACTIVE</strong>
-              <small>Rewards are waiting</small>
-            </div>
-
-          </div>
-
+      <section
+        ref={doRef}
+        className={`home-do ${revealClass(doVisible)}`}
+      >
+        <div className="home-section-head">
+          <span className="eyebrow">Your next move</span>
+          <h2>Three ways to climb.</h2>
         </div>
 
-      </section>
-
-
-      {/* =========================================
-          REFERRAL PREVIEW
-      ========================================= */}
-
-      <section className="home-referral-section">
-        <ReferralPreview />
-      </section>
-
-
-      {/* =========================================
-          NEXT EVENT
-      ========================================= */}
-
-      {upcomingEvent && (
-        <section className="home-next-section">
-
-          <div className="home-section-heading">
-
-            <div>
-
-              <div className="home-section-label">
-                WHAT'S NEXT
-              </div>
-
-              <h2>
-                Coming to Vexora.
-              </h2>
-
-              <p>
-                The next competition is already
-                waiting.
-              </p>
-
-            </div>
-
-          </div>
-
-          <Link
-            to={`/events/${upcomingEvent.id}`}
-            className="home-next-card"
-          >
-
-            <div className="home-next-image">
-
-              <img
-                src={upcomingEvent.image}
-                alt={upcomingEvent.title}
-              />
-
-              <div className="home-next-overlay"></div>
-
-            </div>
-
-            <div className="home-next-content">
-
-              <div className="home-next-label">
-                UPCOMING EVENT
-              </div>
-
-              <h3>
-                {upcomingEvent.title}
-              </h3>
-
-              <p>
-                {upcomingEvent.description}
-              </p>
-
-              <div className="home-next-bottom">
-
-                <span>
-                  STARTS{" "}
-                  {new Date(
-                    upcomingEvent.startDate
-                  ).toLocaleDateString()}
-                </span>
-
-                <strong>
-                  VIEW EVENT →
-                </strong>
-
-              </div>
-
-            </div>
-
+        <div className="home-do-grid">
+          <Link to="/invites" className="home-do-card">
+            <span className="home-do-icon" aria-hidden="true">
+              <Icon name="link" size={22} />
+            </span>
+            <h3>Share your link</h3>
+            <p>
+              Send it in group chats, bios, stories.
+              Track who joined and where you rank.
+            </p>
+            <span className="home-do-cta">
+              Open invites <Icon name="arrowRight" size={16} />
+            </span>
           </Link>
 
-        </section>
-      )}
+          <Link to="/moments" className="home-do-card">
+            <span className="home-do-icon" aria-hidden="true">
+              <Icon name="heart" size={22} />
+            </span>
+            <h3>Send a Moment</h3>
+            <p>
+              Make a little card for a friend. It carries
+              your invite, so it counts when they join.
+            </p>
+            <span className="home-do-cta">
+              Make one <Icon name="arrowRight" size={16} />
+            </span>
+          </Link>
+
+          <Link to="/profile" className="home-do-card home-do-card-gold">
+            <span className="home-do-icon" aria-hidden="true">
+              <Icon name="crown" size={22} />
+            </span>
+            <h3>Dress up your profile</h3>
+            <p>
+              Frames, name effects, banners and badges.
+              Your profile link is an invite link too.
+            </p>
+            <span className="home-do-cta">
+              Customize <Icon name="arrowRight" size={16} />
+            </span>
+          </Link>
+        </div>
+      </section>
 
 
       {/* =========================================
-          BOTTOM CTA
+          HOW IT WORKS
       ========================================= */}
 
-      <section className="home-bottom-cta">
-
-        <div className="home-cta-glow"></div>
-
-        <div className="home-cta-content">
-
-          <div className="home-section-label">
-            READY?
-          </div>
-
-          <h2>
-            Your next win starts here.
-          </h2>
-
-          <p>
-            Explore what's happening across Vexora
-            and make your move.
-          </p>
-
+      <section
+        ref={howRef}
+        className={`home-how ${revealClass(howVisible)}`}
+      >
+        <div className="home-section-head">
+          <span className="eyebrow">How it works</span>
+          <h2>Simple on purpose.</h2>
         </div>
 
-        <Link
-          to="/events"
-          className="home-cta-button"
-        >
-          SEE EVENTS
-        </Link>
+        <ol className="home-how-steps">
+          <li>
+            <span className="home-how-num">01</span>
+            <h3>Share your link</h3>
+            <p>Your link is tied to your username. Anyone can use it.</p>
+          </li>
 
+          <li>
+            <span className="home-how-num">02</span>
+            <h3>Friends sign up</h3>
+            <p>Each new account made through your link adds one to your count.</p>
+          </li>
+
+          <li>
+            <span className="home-how-num">03</span>
+            <h3>Top 3 get paid</h3>
+            <p>When an event ends, the highest counts win the prize pool.</p>
+          </li>
+        </ol>
+      </section>
+
+
+      {/* =========================================
+          INVITE BAND
+      ========================================= */}
+
+      <section
+        ref={bandRef}
+        className={`home-band ${revealClass(bandVisible)}`}
+      >
+        <div className="home-band-copy">
+          <h2>Your link is your ticket.</h2>
+          <p>Copy it once, paste it everywhere.</p>
+        </div>
+
+        <div className="home-band-link">
+          <code className="mono">
+            {referralLink || "Set a username to get your link"}
+          </code>
+
+          <div className="home-band-buttons">
+            <button
+              type="button"
+              className={`btn ${bandCopied ? "btn-success" : "btn-sun"}`}
+              onClick={() => copyBand(referralLink)}
+              disabled={!referralLink}
+            >
+              <Icon name={bandCopied ? "check" : "copy"} />
+              {bandCopied ? "Copied" : "Copy"}
+            </button>
+
+            {canNativeShare && (
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  nativeShare({
+                    title: "Vexora",
+                    text: SHARE_TEXT,
+                    url: referralLink,
+                  })
+                }
+                disabled={!referralLink}
+              >
+                <Icon name="share" />
+                Share
+              </button>
+            )}
+          </div>
+        </div>
       </section>
 
     </main>

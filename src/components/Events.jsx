@@ -1,429 +1,259 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import Icon from "./Icon";
 import { events } from "../data/events";
 import { useEvents } from "../context/EventContext";
+import {
+  useNow,
+  getEventStatus,
+  formatCountdown,
+} from "../hooks/useCountdown";
+import { useReveal } from "../hooks/useReveal";
 
 import "../styles/events.css";
 
-function Events({ user }) {
-  const [now, setNow] = useState(new Date());
+const STATUS_LABEL = {
+  live: "Live now",
+  upcoming: "Upcoming",
+  ended: "Ended",
+};
 
-  const {
-    isJoined,
-    loadingEvents,
-  } = useEvents();
+const STATUS_ORDER = {
+  live: 0,
+  upcoming: 1,
+  ended: 2,
+};
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+  });
 
-    return () => clearInterval(timer);
-  }, []);
+function Events() {
+  const now = useNow();
 
-  const getEventStatus = (event) => {
-    const start = new Date(event.startDate);
-    const end = new Date(event.endDate);
+  const { isJoined, loadingEvents } = useEvents();
 
-    if (now < start) return "upcoming";
-    if (now > end) return "ended";
+  const [momentsRef, momentsVisible] = useReveal();
 
-    return "live";
-  };
+  const activeEvents = events
+    .filter((event) => event.active)
+    .map((event) => ({
+      ...event,
+      status: getEventStatus(event, now),
+    }))
+    .sort(
+      (a, b) =>
+        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
+        new Date(b.startDate) - new Date(a.startDate)
+    );
 
-  const formatTimeLeft = (endDate) => {
-    const difference =
-      new Date(endDate).getTime() -
-      now.getTime();
-
-    if (difference <= 0) {
-      return "Event ended";
-    }
-
-    const totalSeconds =
-      Math.floor(difference / 1000);
-
-    const days =
-      Math.floor(totalSeconds / 86400);
-
-    const hours =
-      Math.floor(
-        (totalSeconds % 86400) / 3600
-      );
-
-    const minutes =
-      Math.floor(
-        (totalSeconds % 3600) / 60
-      );
-
-    const seconds =
-      totalSeconds % 60;
-
-    return `${days}d ${String(hours).padStart(
-      2,
-      "0"
-    )}h ${String(minutes).padStart(
-      2,
-      "0"
-    )}m ${String(seconds).padStart(
-      2,
-      "0"
-    )}s`;
-  };
-
-  const activeEvents = events.filter(
-    (event) => event.active
+  const hasOpenEvent = activeEvents.some(
+    (event) => event.status !== "ended"
   );
 
-  if (activeEvents.length === 0) {
-    return (
-      <section className="events-section">
-        <div className="events-heading">
-          <div className="events-label">
-            VEXORA EVENTS
-          </div>
-
-          <h2>
-            No active competitions.
-          </h2>
-
-          <p>
-            New events and rewards will appear
-            here when they go live.
-          </p>
-        </div>
-
-        <div className="events-empty">
-          <div className="events-empty-icon">
-            ✨
-          </div>
-
-          <h3>
-            Nothing is live right now
-          </h3>
-
-          <p>
-            Check back soon for the next Vexora
-            competition.
-          </p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="events-section">
+    <>
+      <header className="page-header">
+        <span className="eyebrow">Events</span>
 
-      {/* =========================================
-          HEADER
-      ========================================= */}
-
-      <div className="events-heading">
-        <div className="events-label">
-          VEXORA EVENTS
-        </div>
-
-        <h2>
-          Compete for the top.
-        </h2>
+        <h1>
+          Compete for <span className="mark">real prizes.</span>
+        </h1>
 
         <p>
-          Live competitions, special events,
-          and experiences built to keep Vexora moving.
+          Each event has a prize pool and a clock. Join,
+          share your link, and finish top three.
         </p>
-      </div>
+      </header>
 
 
-      {/* =========================================
-          EVENT LIST
-      ========================================= */}
+      {!hasOpenEvent && (
+        <div className="events-idle">
+          <span className="chip chip-ended">Between events</span>
 
-      <div className="events-list">
+          <p>
+            Nothing's running right now. The next event gets
+            announced in the Discord first.
+          </p>
 
-        {activeEvents.map((event) => {
-          const status =
-            getEventStatus(event);
+          <Link to="/discord" className="btn btn-sm btn-dark">
+            Get notified
+          </Link>
+        </div>
+      )}
 
-          const joined =
-            isJoined(event.id);
 
-          const isReferralEvent =
-            event.type === "referral";
+      {activeEvents.length === 0 ? (
+        <div className="card empty-state">
+          <div className="empty-state-icon" aria-hidden="true">✨</div>
 
-          return (
-            <article
-              className={`event-list-card ${status}`}
-              key={event.id}
-            >
+          <h3>No events yet</h3>
 
-              {/* =====================================
-                  EVENT VISUAL
-              ===================================== */}
+          <p>
+            The first competition is on its way. Hang out in
+            the Discord or send someone a Moment meanwhile.
+          </p>
 
-              <div className="event-list-visual">
+          <div className="empty-state-actions">
+            <Link to="/discord" className="btn btn-primary">
+              Join Discord
+            </Link>
 
-                <img
-                  src={event.image}
-                  alt=""
-                />
-
-                <div className="event-list-visual-overlay"></div>
-
-                <div
-                  className={`event-list-status ${status}`}
-                >
-                  <span></span>
-
-                  {status === "live"
-                    ? "LIVE NOW"
-                    : status === "upcoming"
-                      ? "UPCOMING"
-                      : "ENDED"}
-                </div>
-
-                <div className="event-list-visual-mark">
-                  {isReferralEvent
-                    ? "↗"
-                    : "✦"}
-                </div>
-
-              </div>
-
-
-              {/* =====================================
-                  EVENT INFO
-              ===================================== */}
-
-              <div className="event-list-main">
-
-                <div className="event-list-copy">
-
-                  <div className="event-list-kicker">
-                    {isReferralEvent
-                      ? "REFERRAL COMPETITION"
-                      : "VEXORA EVENT"}
-                  </div>
-
-                  <h3>
-                    {event.title}
-                  </h3>
-
-                  <p>
-                    {event.description}
-                  </p>
-
-                </div>
-
-
-                {/* =================================
-                    EVENT META
-                ================================= */}
-
-                <div className="event-list-meta">
-
-                  <div className="event-list-meta-item">
-                    <span>
-                      PRIZE
-                    </span>
-
-                    <strong>
-                      {event.prize}
-                    </strong>
-                  </div>
-
-                  <div className="event-list-meta-item">
-                    <span>
-                      {status === "upcoming"
-                        ? "STARTS"
-                        : status === "ended"
-                          ? "STATUS"
-                          : "ENDS IN"}
-                    </span>
-
-                    <strong>
-                      {status === "ended"
-                        ? "COMPLETED"
-                        : formatTimeLeft(
-                            event.endDate
-                          )}
-                    </strong>
-                  </div>
-
-                  <div className="event-list-meta-item">
-                    <span>
-                      YOUR STATUS
-                    </span>
-
-                    <strong
-                      className={
-                        joined
-                          ? "joined"
-                          : ""
-                      }
-                    >
-                      {loadingEvents
-                        ? "CHECKING"
-                        : joined
-                          ? "JOINED"
-                          : status === "ended"
-                            ? "CLOSED"
-                            : "READY"}
-                    </strong>
-                  </div>
-
-                </div>
-
-
-                {/* =================================
-                    ACTIONS
-                ================================= */}
-
-                <div className="event-list-actions">
-
-                  <Link
-                    to={
-                      event.id === "top-inviter"
-                        ? "/events/top-inviter"
-                        : `/events/${event.id}`
-                    }
-                    className="event-list-view"
-                  >
-                    VIEW EVENT
-                    <span>→</span>
-                  </Link>
-
-                  <Link
-                    to={`/events/${event.id}/leaderboard`}
-                    className="event-list-board"
-                  >
-                    🏆 LEADERBOARD
-                  </Link>
-
-                </div>
-
-              </div>
-
-            </article>
-          );
-        })}
-
-      </div>
-
-
-      {/* =========================================
-          VEXORA MOMENTS
-      ========================================= */}
-
-      <section className="events-moments-section">
-
-        <div className="events-moments-card">
-
-          <div className="events-moments-art">
-
-  <img
-    src="/events/moments-event.png"
-    alt="Vexora Moments"
-    style={{
-      width: "100%",
-      height: "100%",
-      display: "block",
-      objectFit: "cover",
-      objectPosition: "center",
-      borderRadius: "inherit",
-    }}
-  />
-
-  <div className="moments-image-status">
-    <span></span>
-    LIVE NOW
-  </div>
-
-  <div className="moments-image-arrow">
-    ↗
-  </div>
-
-</div>
-
-
-          <div className="events-moments-main">
-
-            <div className="events-moments-header">
-
-              <div className="events-moments-badge">
-                ✦ SPECIAL EVENT
-              </div>
-
-              <div className="events-moments-live">
-                <span></span>
-                VEXORA MOMENTS
-              </div>
-
-            </div>
-
-
-            <div className="events-moments-copy">
-
-              <h2>
-                Vexora Moments
-                <span> worth sharing.</span>
-              </h2>
-
-              <p>
-                Create a beautiful personalized Moment,
-                share it with someone, and bring new
-                people into Vexora.
-              </p>
-
-            </div>
-
-
-            <div className="events-moments-meta">
-
-              <div>
-                <span>CREATE</span>
-                <strong>6 unique vibes</strong>
-              </div>
-
-              <div>
-                <span>SHARE</span>
-                <strong>Instant link</strong>
-              </div>
-
-              <div>
-                <span>LIFETIME</span>
-                <strong>5 days</strong>
-              </div>
-
-            </div>
-
-
-            <div className="events-moments-bottom">
-
-              <div className="events-moments-tags">
-                <span>💜 Someone Special</span>
-                <span>🎂 Birthday</span>
-                <span>💙 Best Friend</span>
-                <span>✨ Festival</span>
-              </div>
-
-              <Link
-                to="/moments"
-                className="events-moments-button"
-              >
-                VIEW EVENT
-                <span>→</span>
-              </Link>
-
-            </div>
-
+            <Link to="/moments" className="btn">
+              Send a Moment
+            </Link>
           </div>
+        </div>
+      ) : (
+        <div className="events-list">
+          {activeEvents.map((event) => {
+            const { status } = event;
+            const joined = isJoined(event.id);
 
+            return (
+              <article
+                key={event.id}
+                className={`event-card card is-${status}`}
+              >
+                <Link
+                  to={`/events/${event.id}`}
+                  className="event-card-art"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  <img src={event.image} alt="" />
+                </Link>
+
+                <div className="event-card-body">
+                  <div className="event-card-chips">
+                    <span className={`chip chip-${status}`}>
+                      {status === "live" && <span className="live-dot" />}
+                      {STATUS_LABEL[status]}
+                    </span>
+
+                    {event.type === "referral" && (
+                      <span className="chip">Referral race</span>
+                    )}
+
+                    {joined && !loadingEvents && (
+                      <span className="chip event-card-joined">
+                        <Icon name="check" size={14} />
+                        Joined
+                      </span>
+                    )}
+                  </div>
+
+                  <h2>
+                    <Link to={`/events/${event.id}`}>
+                      {event.title}
+                    </Link>
+                  </h2>
+
+                  <p>{event.description}</p>
+
+                  <dl className="event-card-meta">
+                    <div>
+                      <dt>Prize pool</dt>
+                      <dd className="event-card-prize">
+                        {event.prize}
+                      </dd>
+                    </div>
+
+                    <div>
+                      <dt>
+                        {status === "upcoming"
+                          ? "Starts in"
+                          : status === "live"
+                            ? "Ends in"
+                            : "Ran"}
+                      </dt>
+                      <dd className="mono">
+                        {status === "upcoming"
+                          ? formatCountdown(event.startDate, now)
+                          : status === "live"
+                            ? formatCountdown(event.endDate, now)
+                            : `${formatDate(event.startDate)} – ${formatDate(event.endDate)}`}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="event-card-actions">
+                    <Link
+                      to={`/events/${event.id}`}
+                      className={`btn btn-sm ${status === "ended" ? "" : "btn-primary"}`}
+                    >
+                      {status === "ended" ? "Event details" : "View event"}
+                      <Icon name="arrowRight" size={16} />
+                    </Link>
+
+                    <Link
+                      to={`/events/${event.id}/leaderboard`}
+                      className="btn btn-sm"
+                    >
+                      <Icon name="trophy" size={16} />
+                      {status === "ended" ? "Final results" : "Leaderboard"}
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+
+      {/* =========================================
+          MOMENTS PROMO
+      ========================================= */}
+
+      <section
+        ref={momentsRef}
+        className={`events-moments reveal-section ${
+          momentsVisible ? "reveal-visible" : ""
+        }`}
+      >
+        <div className="events-moments-copy">
+          <span className="eyebrow">Always on</span>
+
+          <h2>Vexora Moments</h2>
+
+          <p>
+            Make a little card for someone — a birthday, a
+            thank-you, a “proud of you.” Send the link. If
+            they sign up after opening it, you get the
+            referral.
+          </p>
+
+          <ul className="events-moments-facts">
+            <li>6 styles</li>
+            <li>Free</li>
+            <li>Lives 5 days</li>
+          </ul>
+
+          <Link to="/moments" className="btn btn-primary">
+            Make a Moment
+            <Icon name="arrowRight" />
+          </Link>
         </div>
 
-      </section>
+        <div className="events-moments-demo" aria-hidden="true">
+          <div className="demo-moment demo-moment-back">
+            <span>💙</span>
+            <strong>For Leo</strong>
+          </div>
 
-    </section>
+          <div className="demo-moment demo-moment-front">
+            <span className="demo-moment-emoji">🎂</span>
+            <span className="demo-moment-label">Birthday</span>
+            <strong>For Maya</strong>
+            <p>happy birthday to the only person who laughs at my jokes</p>
+            <em>— sam</em>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 

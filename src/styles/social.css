@@ -1,0 +1,103 @@
+.friend-button {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.friend-state {
+  cursor: default;
+
+  color: var(--mint);
+}
+
+.friend-button-error {
+  width: 100%;
+
+  color: var(--rose);
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   REPORT MODAL
+========================================= */
+
+.report-modal {
+  width: min(440px, calc(100vw - 32px));
+
+  margin: auto;
+  padding: 0;
+
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+  color: var(--text);
+
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+}
+
+.report-modal::backdrop {
+  background: rgba(8, 7, 10, 0.7);
+
+  backdrop-filter: blur(4px);
+}
+
+.report-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 26px;
+}
+
+.report-modal-body h2 {
+  font-size: 32px;
+}
+
+.report-modal-body p {
+  color: var(--text-soft);
+}
+
+.report-modal-body > .btn {
+  align-self: flex-start;
+}
+
+.report-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  border: none;
+}
+
+.report-reasons label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  cursor: pointer;
+}
+
+.report-reasons label:has(input:checked) {
+  border-color: var(--gold);
+
+  background: var(--gold-wash);
+}
+
+.report-reasons input {
+  accent-color: var(--gold);
+}
+
+.report-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

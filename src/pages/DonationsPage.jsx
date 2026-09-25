@@ -1,29 +1,22 @@
 import DonationCard from "../components/DonationCard";
 
-function DonationsPage({ user }) {
+function DonationsPage() {
   return (
     <main className="page donation-page">
-
-      <section className="page-header donation-page-header">
-
-        <div className="page-header-label">
-          SUPPORT VEXORA
-        </div>
+      <header className="page-header">
+        <span className="eyebrow">Support Vexora</span>
 
         <h1>
-          Power the
-          <span> next event.</span>
+          Help keep the <span className="mark">prizes coming.</span>
         </h1>
 
         <p>
-          Support the competition, help fund future events,
-          and keep the Vexora community growing.
+          Vexora is a small, independent project. Support
+          goes toward prize pools and running more events.
         </p>
+      </header>
 
-      </section>
-
-      <DonationCard user={user} />
-
+      <DonationCard />
     </main>
   );
 }

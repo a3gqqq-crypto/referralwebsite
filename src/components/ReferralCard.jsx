@@ -1,272 +1,182 @@
 import { useEffect, useState } from "react";
+
 import { supabase } from "../lib/supabaseClient";
-import "../styles/referral.css";
+import Icon from "./Icon";
+import {
+  useCopy,
+  canNativeShare,
+  nativeShare,
+  referralLinkFor,
+} from "../hooks/useCopy";
+
+import "../styles/invites.css";
+
+const SHARE_MESSAGE =
+  "Join me on Vexora — invite friends, climb the leaderboard, win real prizes 🏆";
 
 function ReferralCard({ user }) {
-  const [profile, setProfile] = useState(null);
-  const [rank, setRank] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
+  const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
+  const [copied, copy] = useCopy();
 
   useEffect(() => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
+    if (!user?.id) return;
 
-    const loadReferralData = async () => {
-      setLoading(true);
-      setError("");
+    let cancelled = false;
 
-      const { data: profileData, error: profileError } =
-        await supabase
-          .from("profiles")
-          .select("id, username, referral_count")
-          .eq("id", user.id)
-          .single();
+    const load = async () => {
+      const { data, error: loadError } = await supabase
+        .from("profiles")
+        .select("id, username, referral_count");
 
-      if (profileError) {
-        console.error(profileError);
-        setError("Could not load your referral profile.");
-        setLoading(false);
+      if (cancelled) return;
+
+      if (loadError) {
+        console.error(loadError);
+        setError("Could not load your referral stats.");
         return;
       }
 
-      setProfile(profileData);
-
-      const { data: profiles, error: leaderboardError } =
-        await supabase
-          .from("profiles")
-          .select("id, referral_count");
-
-      if (leaderboardError) {
-        console.error(leaderboardError);
-        setError("Could not calculate your rank.");
-        setLoading(false);
-        return;
-      }
-
-      const sortedProfiles = [...(profiles || [])].sort(
-        (a, b) =>
-          (b.referral_count || 0) -
-          (a.referral_count || 0)
+      const sorted = [...(data || [])].sort(
+        (a, b) => (b.referral_count || 0) - (a.referral_count || 0)
       );
 
-      const userIndex = sortedProfiles.findIndex(
-        (item) => item.id === user.id
-      );
+      const index = sorted.findIndex((row) => row.id === user.id);
 
-      setRank(userIndex !== -1 ? userIndex + 1 : null);
-      setLoading(false);
+      setStats({
+        username: index >= 0 ? sorted[index].username : null,
+        referrals: index >= 0 ? sorted[index].referral_count || 0 : 0,
+        rank: index >= 0 ? index + 1 : null,
+        players: sorted.length,
+        nextUp: index > 0 ? sorted[index - 1] : null,
+      });
     };
 
-    loadReferralData();
-  }, [user]);
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   const username =
-    profile?.username ||
-    user?.user_metadata?.username ||
-    "";
+    stats?.username || user?.user_metadata?.username || "";
 
-  const referralLink = username
-    ? `${window.location.origin}/?ref=${encodeURIComponent(
-        username
-      )}`
-    : "";
+  const referralLink = referralLinkFor(username);
 
-  const shareMessage =
-    "Join the referral competition and climb the leaderboard! 🏆";
+  const gap =
+    stats?.nextUp
+      ? (stats.nextUp.referral_count || 0) - stats.referrals + 1
+      : null;
 
-  const copyReferralLink = async () => {
-    if (!referralLink) return;
-
-    try {
-      await navigator.clipboard.writeText(referralLink);
-
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (copyError) {
-      console.error(copyError);
-      setError("Could not copy the referral link.");
-    }
-  };
-
-  const shareWhatsApp = () => {
-    if (!referralLink) return;
-
-    const text = `${shareMessage}\n\n${referralLink}`;
-
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(text)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
-  const shareTelegram = () => {
-    if (!referralLink) return;
-
-    window.open(
-      `https://t.me/share/url?url=${encodeURIComponent(
-        referralLink
-      )}&text=${encodeURIComponent(shareMessage)}`,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
-  if (loading) {
-    return (
-      <section className="referral-section">
-        <div className="referral-card">
-          <div className="referral-loading">
-            Loading your referral dashboard...
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const openShare = (url) =>
+    window.open(url, "_blank", "noopener,noreferrer");
 
   return (
-    <section className="referral-section">
-      <div className="referral-card">
+    <section className="invite-card card">
 
-        {/* Header */}
-        <div className="referral-card-top">
-          <div>
-            <div className="referral-label">
-              YOUR REFERRAL DASHBOARD
-            </div>
+      <div className="invite-card-link">
+        <span className="eyebrow">Your invite link</span>
 
-            <h2>
-              Welcome{" "}
-              <span>{username || "Member"}</span> 👋
-            </h2>
-          </div>
+        <code className="invite-card-url mono">
+          {referralLink || "Set a username to get your link"}
+        </code>
 
-          <div className="referral-icon">
-            🔗
-          </div>
-        </div>
+        <div className="invite-card-buttons">
+          <button
+            type="button"
+            className={`btn ${copied ? "btn-success" : "btn-primary"}`}
+            onClick={() => copy(referralLink)}
+            disabled={!referralLink}
+          >
+            <Icon name={copied ? "check" : "copy"} />
+            {copied ? "Copied" : "Copy link"}
+          </button>
 
-        {/* Stats */}
-        <div className="referral-stats">
+          <button
+            type="button"
+            className="btn invite-share-whatsapp"
+            onClick={() =>
+              openShare(
+                `https://wa.me/?text=${encodeURIComponent(
+                  `${SHARE_MESSAGE}\n\n${referralLink}`
+                )}`
+              )
+            }
+            disabled={!referralLink}
+          >
+            WhatsApp
+          </button>
 
-          <div className="referral-stat">
-            <span className="referral-stat-label">
-              REFERRALS
-            </span>
+          <button
+            type="button"
+            className="btn invite-share-telegram"
+            onClick={() =>
+              openShare(
+                `https://t.me/share/url?url=${encodeURIComponent(
+                  referralLink
+                )}&text=${encodeURIComponent(SHARE_MESSAGE)}`
+              )
+            }
+            disabled={!referralLink}
+          >
+            Telegram
+          </button>
 
-            <strong>
-              {profile?.referral_count ?? 0}
-            </strong>
-          </div>
-
-          <div className="referral-stat">
-            <span className="referral-stat-label">
-              STATUS
-            </span>
-
-            <strong className="status-online">
-              ACTIVE
-            </strong>
-          </div>
-
-          <div className="referral-stat">
-            <span className="referral-stat-label">
-              RANK
-            </span>
-
-            <strong>
-              {rank ? `#${rank}` : "—"}
-            </strong>
-          </div>
-
-        </div>
-
-        {/* Referral link */}
-        <div className="referral-link-area">
-
-          <div className="referral-link-heading">
-            <span>
-              Your unique referral link
-            </span>
-
-            <small>
-              Share it with your friends
-            </small>
-          </div>
-
-          <div className="referral-link-box">
-
-            <input
-              type="text"
-              value={referralLink}
-              readOnly
-              aria-label="Your referral link"
-            />
-
+          {canNativeShare && (
             <button
               type="button"
-              onClick={copyReferralLink}
+              className="btn"
+              onClick={() =>
+                nativeShare({
+                  title: "Vexora",
+                  text: SHARE_MESSAGE,
+                  url: referralLink,
+                })
+              }
               disabled={!referralLink}
             >
-              {copied ? "✓ Copied" : "Copy Link"}
+              <Icon name="share" />
+              More
             </button>
-
-          </div>
-
-          {/* Share buttons */}
-          <div className="referral-share-buttons">
-
-            <button
-              type="button"
-              className="share-button whatsapp"
-              onClick={shareWhatsApp}
-              disabled={!referralLink}
-            >
-              <span className="share-icon">
-                ◉
-              </span>
-
-              WhatsApp
-            </button>
-
-            <button
-              type="button"
-              className="share-button telegram"
-              onClick={shareTelegram}
-              disabled={!referralLink}
-            >
-              <span className="share-icon">
-                ➤
-              </span>
-
-              Telegram
-            </button>
-
-          </div>
-
+          )}
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="referral-error">
-            {error}
-          </div>
+          <div className="notice notice-error">{error}</div>
         )}
+      </div>
 
-        {/* Tip */}
-        <div className="referral-tip">
-          💡 The more people who sign up through your
-          link, the higher you climb on the leaderboard.
+
+      <dl className="invite-card-stats">
+        <div className="invite-stat invite-stat-main">
+          <dt>Referrals</dt>
+          <dd className="mono">{stats ? stats.referrals : "—"}</dd>
         </div>
 
-      </div>
+        <div className="invite-stat">
+          <dt>Rank</dt>
+          <dd className="mono">
+            {stats?.rank ? `#${stats.rank}` : "—"}
+          </dd>
+        </div>
+
+        <div className="invite-stat">
+          <dt>Players</dt>
+          <dd className="mono">{stats ? stats.players : "—"}</dd>
+        </div>
+
+        <p className="invite-card-nudge">
+          {!stats
+            ? "Loading your numbers…"
+            : stats.rank === 1
+              ? "You're #1. Everyone's chasing you now."
+              : gap
+                ? `${gap} more ${gap === 1 ? "invite" : "invites"} to pass ${stats.nextUp.username}.`
+                : "Share your link to get on the board."}
+        </p>
+      </dl>
+
     </section>
   );
 }

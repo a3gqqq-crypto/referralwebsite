@@ -1,11 +1,9 @@
 import Events from "../components/Events";
 
-function EventsPage({ user }) {
+function EventsPage() {
   return (
-    <main className="page">
-
-      <Events user={user} />
-
+    <main className="page events-page">
+      <Events />
     </main>
   );
 }

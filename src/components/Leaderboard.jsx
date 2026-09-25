@@ -1,367 +1,120 @@
 import { useEffect, useState } from "react";
+
 import { supabase } from "../lib/supabaseClient";
-import "../styles/leaderboard.css";
+import SkeletonRows from "./SkeletonRows";
+import PlayerChip, { PLAYER_COLUMNS } from "./PlayerChip";
+
+import "../styles/eventLeaderboard.css";
+import "../styles/invites.css";
+
+const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
+const LIMIT = 25;
 
 function Leaderboard({ user }) {
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadLeaderboard = async () => {
-    setLoading(true);
-    setError("");
-
-    const { data, error: leaderboardError } = await supabase
-      .from("profiles")
-      .select("id, username, referral_count, created_at")
-      .order("referral_count", {
-        ascending: false,
-      })
-      .order("created_at", {
-        ascending: true,
-      });
-
-    if (leaderboardError) {
-      console.error(leaderboardError);
-
-      setError("Could not load the leaderboard.");
-      setLoading(false);
-
-      return;
-    }
-
-    setLeaderboard(data || []);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    loadLeaderboard();
+    let cancelled = false;
+
+    const load = async () => {
+      const { data, error: loadError } = await supabase
+        .from("profiles")
+        .select(PLAYER_COLUMNS)
+        .order("referral_count", { ascending: false })
+        .order("created_at", { ascending: true });
+
+      if (cancelled) return;
+
+      if (loadError) {
+        console.error(loadError);
+        setError("Could not load the leaderboard.");
+      } else {
+        setError("");
+        setPlayers(
+          (data || []).map((player, index) => ({
+            ...player,
+            rank: index + 1,
+          }))
+        );
+      }
+
+      setLoading(false);
+    };
+
+    load();
 
     const channel = supabase
       .channel("leaderboard-updates")
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "profiles",
-        },
-        () => {
-          loadLeaderboard();
-        }
+        { event: "*", schema: "public", table: "profiles" },
+        load
       )
       .subscribe();
 
     return () => {
+      cancelled = true;
       supabase.removeChannel(channel);
     };
   }, []);
 
-  const getInitial = (username) => {
-    return username?.charAt(0)?.toUpperCase() || "?";
-  };
+  const me = players.find((player) => player.id === user?.id);
+  const visible = players.slice(0, LIMIT);
+  const meIsHidden = me && me.rank > LIMIT;
 
-  const getRank = (profileId) => {
-    const index = leaderboard.findIndex(
-      (profile) => profile.id === profileId
-    );
+  const row = (player, extraClass = "") => (
+    <li
+      key={player.id}
+      className={`board-row ${player.id === user?.id ? "is-me" : ""} ${
+        player.rank <= 3 ? "is-top" : ""
+      } ${extraClass}`}
+    >
+      <span className="board-rank mono">
+        {player.rank <= 3 ? MEDAL[player.rank] : player.rank}
+      </span>
 
-    return index === -1 ? null : index + 1;
-  };
+      <span className="board-player">
+        <PlayerChip player={player} size={34} isMe={player.id === user?.id} />
+      </span>
 
-  const currentUserRank = user
-    ? getRank(user.id)
-    : null;
-
-  const topThree = leaderboard.slice(0, 3);
-  const remainingUsers = leaderboard.slice(3);
-
-  if (loading) {
-    return (
-      <section className="leaderboard-section">
-
-        <div className="section-heading">
-          <div>
-            <div className="section-label">
-              COMPETE
-            </div>
-
-            <h2>
-              Referral Leaderboard
-            </h2>
-          </div>
-        </div>
-
-        <div className="leaderboard-loading">
-          Loading live rankings...
-        </div>
-
-      </section>
-    );
-  }
+      <span className="board-count mono">
+        {player.referral_count || 0}
+      </span>
+    </li>
+  );
 
   return (
-    <section className="leaderboard-section">
-
-      <div className="section-heading">
-
+    <section className="invites-panel">
+      <div className="invites-panel-head">
         <div>
-
-          <div className="section-label">
-            COMPETE
-          </div>
-
-          <h2>
-            Referral Leaderboard
-          </h2>
-
+          <span className="eyebrow">All-time</span>
+          <h2>Leaderboard</h2>
         </div>
 
-        <div className="updated">
-
-          <span className="status-dot"></span>
-
-          Live Rankings
-
-        </div>
-
+        <span className="chip chip-live">
+          <span className="live-dot" />
+          Live
+        </span>
       </div>
 
-      {error && (
-        <div className="leaderboard-error">
-          {error}
-        </div>
-      )}
-
-      {leaderboard.length === 0 ? (
-        <div className="leaderboard-empty">
-
-          <div className="empty-icon">
-            🏆
-          </div>
-
-          <h3>
-            No rankings yet
-          </h3>
-
-          <p>
-            Start inviting friends to claim the top spot.
-          </p>
-
+      {loading ? (
+        <SkeletonRows count={6} />
+      ) : error ? (
+        <div className="notice notice-error">{error}</div>
+      ) : players.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon" aria-hidden="true">🏆</div>
+          <h3>No rankings yet</h3>
+          <p>Invite a friend and you're on the board.</p>
         </div>
       ) : (
-        <>
-          {/* TOP 3 */}
-
-          {topThree.length > 0 && (
-            <div className="podium">
-
-              {/* SECOND */}
-
-              {topThree[1] && (
-                <div className="podium-card second">
-
-                  <div className="rank-circle">
-                    2
-                  </div>
-
-                  <div className="avatar">
-                    {getInitial(
-                      topThree[1].username
-                    )}
-                  </div>
-
-                  <h3>
-                    {topThree[1].username}
-                  </h3>
-
-                  <p>
-                    {topThree[1].referral_count}{" "}
-                    referrals
-                  </p>
-
-                  <div className="podium-place">
-                    2ND
-                  </div>
-
-                </div>
-              )}
-
-              {/* FIRST */}
-
-              {topThree[0] && (
-                <div className="podium-card first">
-
-                  <div className="crown">
-                    👑
-                  </div>
-
-                  <div className="rank-circle">
-                    1
-                  </div>
-
-                  <div className="avatar">
-                    {getInitial(
-                      topThree[0].username
-                    )}
-                  </div>
-
-                  <h3>
-                    {topThree[0].username}
-                  </h3>
-
-                  <p>
-                    {topThree[0].referral_count}{" "}
-                    referrals
-                  </p>
-
-                  <div className="podium-place">
-                    1ST
-                  </div>
-
-                </div>
-              )}
-
-              {/* THIRD */}
-
-              {topThree[2] && (
-                <div className="podium-card third">
-
-                  <div className="rank-circle">
-                    3
-                  </div>
-
-                  <div className="avatar">
-                    {getInitial(
-                      topThree[2].username
-                    )}
-                  </div>
-
-                  <h3>
-                    {topThree[2].username}
-                  </h3>
-
-                  <p>
-                    {topThree[2].referral_count}{" "}
-                    referrals
-                  </p>
-
-                  <div className="podium-place">
-                    3RD
-                  </div>
-
-                </div>
-              )}
-
-            </div>
-          )}
-
-          {/* REMAINING USERS */}
-
-          {remainingUsers.length > 0 && (
-            <div className="leaderboard-list">
-
-              {remainingUsers.map(
-                (profile, index) => {
-
-                  const rank = index + 4;
-
-                  const isCurrentUser =
-                    profile.id === user?.id;
-
-                  return (
-                    <div
-                      className={`leaderboard-row ${
-                        isCurrentUser
-                          ? "current-user"
-                          : ""
-                      }`}
-                      key={profile.id}
-                    >
-
-                      <div className="rank">
-                        #{rank}
-                      </div>
-
-                      <div className="user-info">
-
-                        <div className="avatar small">
-                          {getInitial(
-                            profile.username
-                          )}
-                        </div>
-
-                        <div>
-
-                          <strong>
-                            {profile.username}
-
-                            {isCurrentUser && (
-                              <span className="you-badge">
-                                YOU
-                              </span>
-                            )}
-                          </strong>
-
-                          <span>
-                            Referral member
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                      <div className="referrals">
-
-                        <strong>
-                          {profile.referral_count}
-                        </strong>
-
-                        <span>
-                          referrals
-                        </span>
-
-                      </div>
-
-                    </div>
-                  );
-                }
-              )}
-
-            </div>
-          )}
-
-          {/* CURRENT USER POSITION */}
-
-          {user && currentUserRank && (
-            <div className="your-rank-card">
-
-              <div>
-                <span>
-                  YOUR CURRENT POSITION
-                </span>
-
-                <strong>
-                  #{currentUserRank}
-                </strong>
-              </div>
-
-              <div>
-                <span>
-                  TOTAL PLAYERS
-                </span>
-
-                <strong>
-                  {leaderboard.length}
-                </strong>
-              </div>
-
-            </div>
-          )}
-
-        </>
+        <ol className="board-list board-compact">
+          {visible.map((player) => row(player))}
+          {meIsHidden && row(me, "board-row-gap")}
+        </ol>
       )}
-
     </section>
   );
 }

@@ -1,0 +1,371 @@
+/* =========================================
+   FRAMED AVATAR
+========================================= */
+
+.fav {
+  --fav-size: 40px;
+  --fav-ring: calc(var(--fav-size) * 0.075);
+
+  position: relative;
+
+  width: var(--fav-size);
+  height: var(--fav-size);
+
+  flex-shrink: 0;
+
+  display: inline-grid;
+  place-items: center;
+}
+
+.fav-face {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.08), transparent 60%),
+    var(--surface-3);
+  color: var(--gold-soft);
+
+  font-family: var(--font-display);
+  font-size: calc(var(--fav-size) * 0.48);
+  line-height: 1;
+}
+
+.fav-framed {
+  padding: var(--fav-ring);
+}
+
+.fav-framed .fav-face {
+  border: calc(var(--fav-ring) * 0.6) solid var(--bg);
+}
+
+.fav-framed::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  border-radius: 50%;
+}
+
+.frame-gilded::before {
+  background: conic-gradient(from 210deg, #fff1c9, #c98a1b, #f8d58a, #8a5a10, #fbe2a8, #c98a1b, #fff1c9);
+  box-shadow: 0 4px 18px -4px rgba(242, 181, 68, 0.6);
+}
+
+.frame-ember::before {
+  background: conic-gradient(from 0deg, #ffd06b, #ff4d2e, #ff9a4a, #c2261a, #ffd06b);
+  box-shadow: 0 0 18px -2px rgba(255, 106, 61, 0.55);
+}
+
+.frame-frost::before {
+  background: conic-gradient(from 120deg, #ffffff, #7fc4ff, #e8f6ff, #4e8fd6, #ffffff);
+  box-shadow: 0 0 18px -3px rgba(127, 196, 255, 0.55);
+}
+
+.frame-aurora::before {
+  background: conic-gradient(#6fd7a3, #8ab8ff, #b9a1ff, #ff8ad8, #ffd06b, #6fd7a3);
+  box-shadow: 0 0 22px -4px rgba(185, 161, 255, 0.6);
+
+  animation: fav-spin 6s linear infinite;
+}
+
+.frame-crowned::before {
+  background: conic-gradient(from 210deg, #fff1c9, #c98a1b, #f8d58a, #8a5a10, #fbe2a8, #c98a1b, #fff1c9);
+  box-shadow: 0 0 0 1px rgba(242, 181, 68, 0.35), 0 6px 26px -6px rgba(242, 181, 68, 0.8);
+}
+
+.frame-podium::before {
+  background: conic-gradient(var(--place-1), #fff1c9, var(--place-2), #ffffff, var(--place-3), #fff1c9, var(--place-1));
+  box-shadow: 0 0 26px -4px rgba(242, 181, 68, 0.7);
+
+  animation: fav-spin 10s linear infinite;
+}
+
+.fav-crown {
+  position: absolute;
+  top: calc(var(--fav-size) * -0.28);
+  left: 50%;
+  z-index: 2;
+
+  color: var(--gold);
+
+  transform: translateX(-50%) rotate(-8deg);
+
+  filter: drop-shadow(0 2px 6px rgba(242, 181, 68, 0.6));
+}
+
+.fav-crown svg {
+  fill: var(--gold-wash);
+}
+
+@keyframes fav-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
+   NAME EFFECTS
+========================================= */
+
+.sname {
+  display: inline-block;
+
+  max-width: 100%;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  vertical-align: bottom;
+}
+
+.name-gold,
+.name-ember,
+.name-frost,
+.name-aurora,
+.name-holo {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.name-gold {
+  background-image: linear-gradient(180deg, #fff3cf 10%, #f2b544 55%, #b8770f);
+}
+
+.name-ember {
+  background-image: linear-gradient(90deg, #ffd06b, #ff6a3d 60%, #ff9a4a);
+
+  filter: drop-shadow(0 0 10px rgba(255, 106, 61, 0.35));
+}
+
+.name-frost {
+  background-image: linear-gradient(180deg, #ffffff 20%, #8ecbff);
+
+  filter: drop-shadow(0 0 10px rgba(127, 196, 255, 0.35));
+}
+
+.name-aurora {
+  background-image: linear-gradient(90deg, #6fd7a3, #8ab8ff, #b9a1ff, #ff8ad8, #6fd7a3);
+  background-size: 300% 100%;
+
+  animation: sname-drift 6s linear infinite;
+}
+
+.name-holo {
+  background-image: linear-gradient(110deg, #cfc8ff 20%, #ffffff 38%, #a9f0ff 48%, #ffd6f5 58%, #cfc8ff 78%);
+  background-size: 250% 100%;
+
+  animation: sname-drift 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes sname-drift {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+
+/* =========================================
+   BADGES
+========================================= */
+
+.badge-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  vertical-align: middle;
+}
+
+.badge-icon {
+  --badge-size: 22px;
+  --badge-color: var(--rarity-common);
+
+  width: var(--badge-size);
+  height: var(--badge-size);
+
+  flex-shrink: 0;
+
+  display: inline-grid;
+  place-items: center;
+
+  border: 1px solid color-mix(in srgb, var(--badge-color) 45%, transparent);
+  border-radius: 50%;
+
+  background: color-mix(in srgb, var(--badge-color) 14%, var(--surface-2));
+  color: var(--badge-color);
+}
+
+.badge-icon.rarity-rare {
+  --badge-color: var(--rarity-rare);
+}
+
+.badge-icon.rarity-epic {
+  --badge-color: var(--rarity-epic);
+}
+
+.badge-icon.rarity-legendary {
+  --badge-color: var(--rarity-legendary);
+
+  border-color: transparent;
+
+  background: linear-gradient(145deg, #fff1c9, var(--gold) 55%, var(--gold-deep));
+  color: var(--on-gold);
+
+  box-shadow: 0 0 14px -3px rgba(242, 181, 68, 0.7);
+}
+
+
+/* =========================================
+   BANNERS
+========================================= */
+
+.pbanner {
+  position: relative;
+
+  overflow: hidden;
+
+  background-color: #16151a;
+}
+
+.banner-midnight {
+  background:
+    radial-gradient(500px 200px at 15% 0%, rgba(242, 181, 68, 0.14), transparent 70%),
+    radial-gradient(400px 220px at 90% 100%, rgba(185, 161, 255, 0.1), transparent 70%),
+    linear-gradient(180deg, #1c1b21, #131216);
+}
+
+.banner-dusk {
+  background:
+    radial-gradient(160px 160px at 72% 88%, rgba(255, 196, 120, 0.9), rgba(255, 140, 90, 0.35) 45%, transparent 70%),
+    linear-gradient(180deg, #1d1631 0%, #52304f 45%, #b8555a 78%, #f0a060 100%);
+}
+
+.banner-rose {
+  background:
+    radial-gradient(300px 200px at 20% 30%, rgba(255, 160, 200, 0.45), transparent 70%),
+    radial-gradient(260px 200px at 80% 80%, rgba(255, 200, 170, 0.35), transparent 70%),
+    linear-gradient(135deg, #3a1f2c, #5c2d40 60%, #7a3f4c);
+}
+
+.banner-ocean {
+  background:
+    repeating-radial-gradient(circle at 50% 160%, transparent 0 18px, rgba(140, 230, 230, 0.06) 18px 19px),
+    radial-gradient(420px 220px at 30% 0%, rgba(80, 200, 200, 0.35), transparent 70%),
+    linear-gradient(180deg, #0b2a33, #06161d);
+}
+
+.banner-golddust {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(248, 213, 138, 0.9) 0 1px, transparent 1.5px) 0 0 / 38px 38px,
+    radial-gradient(circle at 70% 60%, rgba(242, 181, 68, 0.7) 0 1px, transparent 1.5px) 0 0 / 53px 53px,
+    radial-gradient(circle at 40% 80%, rgba(255, 241, 201, 0.6) 0 0.8px, transparent 1.3px) 0 0 / 27px 27px,
+    radial-gradient(500px 240px at 50% 120%, rgba(242, 181, 68, 0.25), transparent 70%),
+    linear-gradient(180deg, #17130c, #0f0d0a);
+}
+
+.banner-aurora {
+  background:
+    linear-gradient(115deg, rgba(111, 215, 163, 0.55), rgba(138, 184, 255, 0.45), rgba(185, 161, 255, 0.55), rgba(255, 138, 216, 0.4), rgba(111, 215, 163, 0.55)) 0 0 / 300% 100%,
+    linear-gradient(180deg, #0d1420, #0a0d14);
+
+  animation: banner-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes banner-drift {
+  to {
+    background-position: 100% 0, 0 0;
+  }
+}
+
+
+/* =========================================
+   PLAYER CHIP
+========================================= */
+
+.player-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 0;
+  max-width: 100%;
+
+  text-decoration: none;
+}
+
+.player-chip-name {
+  min-width: 0;
+
+  font-weight: 500;
+
+  overflow: hidden;
+}
+
+a.player-chip:hover .player-chip-name {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.player-chip-you {
+  flex-shrink: 0;
+
+  padding: 1px 8px;
+
+  border-radius: 999px;
+
+  background: var(--gold);
+  color: var(--on-gold);
+
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   PREVIEW HELPERS
+========================================= */
+
+.cosmetic-preview-name {
+  font-family: var(--font-display);
+  font-size: 34px;
+}
+
+.cosmetic-preview-banner {
+  width: 100%;
+  height: 100%;
+}
+
+.rarity-text-common {
+  color: var(--rarity-common);
+}
+
+.rarity-text-rare {
+  color: var(--rarity-rare);
+}
+
+.rarity-text-epic {
+  color: var(--rarity-epic);
+}
+
+.rarity-text-legendary {
+  color: var(--rarity-legendary);
+}

@@ -1,73 +1,86 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import Icon from "./Icon";
 import { useEvents } from "../context/EventContext";
+import {
+  useNow,
+  getEventStatus,
+  formatCountdown,
+} from "../hooks/useCountdown";
+import {
+  useCopy,
+  canNativeShare,
+  nativeShare,
+  referralLinkFor,
+} from "../hooks/useCopy";
 
 import "../styles/eventDetails.css";
 
-function EventDetails({ event, user, onBack }) {
-  const [now, setNow] = useState(new Date());
+const STATUS_LABEL = {
+  live: "Live now",
+  upcoming: "Upcoming",
+  ended: "Ended",
+};
+
+const PLACE_LABEL = {
+  1: "1st",
+  2: "2nd",
+  3: "3rd",
+};
+
+const MEDAL = {
+  1: "🥇",
+  2: "🥈",
+  3: "🥉",
+};
+
+const formatDate = (date) =>
+  new Date(date).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "short",
+  });
+
+function EventDetails({ event, user }) {
+  const now = useNow();
+
   const [joining, setJoining] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [copiedReferral, setCopiedReferral] = useState(false);
+
+  const [copied, copy] = useCopy();
 
   const { isJoined, joinEvent, loadingEvents } = useEvents();
 
-  const joined = isJoined(event?.id);
-  const isReferralEvent = event?.type === "referral";
-  const username = user?.user_metadata?.username || "Member";
+  const joined = isJoined(event.id);
+  const status = getEventStatus(event, now);
+  const isReferralEvent = event.type === "referral";
 
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const referralLink = referralLinkFor(
+    user?.user_metadata?.username
+  );
 
-  const getStatus = () => {
-    const start = new Date(event.startDate);
-    const end = new Date(event.endDate);
-    if (now < start) return "upcoming";
-    if (now > end) return "ended";
-    return "live";
-  };
+  const winners = [...(event.rules?.winners || [])].sort(
+    (a, b) => a.position - b.position
+  );
 
-  const status = getStatus();
-
-  const formatTimeLeft = () => {
-    const difference = new Date(event.endDate).getTime() - now.getTime();
-    if (difference <= 0) return "00d 00h 00m 00s";
-
-    const totalSeconds = Math.floor(difference / 1000);
-    const days = Math.floor(totalSeconds / 86400);
-    const hours = Math.floor((totalSeconds % 86400) / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    return `${String(days).padStart(2, "0")}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
-  };
-
-  const referralLink = `${window.location.origin}/?ref=${encodeURIComponent(username)}`;
+  const podiumOrder = [2, 1, 3]
+    .map((position) =>
+      winners.find((winner) => winner.position === position)
+    )
+    .filter(Boolean);
 
   const handleJoin = async () => {
     setMessage("");
     setError("");
 
-    if (!user?.id) {
-      setError("You need to be logged in to join this event.");
-      return;
-    }
-
-    if (status === "ended") {
-      setError("This event has already ended.");
-      return;
-    }
-
-    if (joined) return;
+    if (status === "ended" || joined) return;
 
     setJoining(true);
 
     try {
       const result = await joinEvent(event.id);
+
       if (!result?.success) {
         setError(result?.error || "Could not join the event.");
         return;
@@ -75,8 +88,8 @@ function EventDetails({ event, user, onBack }) {
 
       setMessage(
         result.alreadyJoined
-          ? "You're already participating in this event."
-          : "You're officially in! Good luck 🏆"
+          ? "You're already in this one."
+          : "You're in. Now go share your link. 🏆"
       );
     } catch (joinError) {
       console.error("Join event error:", joinError);
@@ -86,178 +99,261 @@ function EventDetails({ event, user, onBack }) {
     }
   };
 
-  const copyReferralLink = async () => {
-    try {
-      await navigator.clipboard.writeText(referralLink);
-      setCopiedReferral(true);
-      window.setTimeout(() => setCopiedReferral(false), 1800);
-    } catch (copyError) {
-      console.error("Could not copy referral link:", copyError);
-      setError("Could not copy the referral link.");
-    }
-  };
+  const joinLabel = loadingEvents
+    ? "Checking…"
+    : joining
+      ? "Joining…"
+      : joined
+        ? "You're in"
+        : "Join event";
 
   return (
-    <section className={`event-details-page ${isReferralEvent ? "event-details-referral" : ""}`}>
-      <button type="button" className="event-back-button" onClick={onBack}>
-        ← Back to Events
-      </button>
+    <main className="page event-page">
 
-      <div className="event-details-card">
-        <div className="event-details-image">
-          <img src={event.image} alt={event.title} />
-          <div className="event-details-image-glow"></div>
+      <Link to="/events" className="event-back">
+        <Icon name="arrowLeft" size={16} />
+        All events
+      </Link>
 
-          <div className={`event-details-status ${status}`}>
-            <span></span>
-            {status === "live" && "LIVE NOW"}
-            {status === "upcoming" && "UPCOMING"}
-            {status === "ended" && "EVENT ENDED"}
-          </div>
 
-          <div className="event-details-image-copy">
-            <div className="event-details-eyebrow">{event.subtitle}</div>
-            <h1>{event.title}</h1>
-            <p>{event.description}</p>
-          </div>
+      {/* =========================================
+          HERO
+      ========================================= */}
+
+      <section className="event-hero">
+        <div className="event-hero-art">
+          <img src={event.image} alt="" />
+
+          <span className={`chip chip-${status}`}>
+            {status === "live" && <span className="live-dot" />}
+            {STATUS_LABEL[status]}
+          </span>
         </div>
 
-        <div className="event-details-content">
-          <div className="event-details-signal-grid">
-            <div className="event-info-box signal-purple">
-              <span>🏆 PRIZE POOL</span>
-              <strong>{event.prize}</strong>
-            </div>
-
-            <div className="event-info-box signal-blue">
-              <span>📅 START</span>
-              <strong>{new Date(event.startDate).toLocaleDateString()}</strong>
-            </div>
-
-            <div className="event-info-box signal-pink">
-              <span>🏁 END</span>
-              <strong>{new Date(event.endDate).toLocaleDateString()}</strong>
-            </div>
-          </div>
-
-          {status === "live" && (
-            <div className="event-countdown event-details-countdown-panel">
-              <div>
-                <span>EVENT ENDS IN</span>
-                <strong>Keep climbing while the competition is live.</strong>
-              </div>
-              <b>{formatTimeLeft()}</b>
-            </div>
+        <div className="event-hero-copy">
+          {event.subtitle && (
+            <span className="eyebrow">{event.subtitle}</span>
           )}
 
-          {isReferralEvent && (
-            <>
-              <section className="event-referral-hero">
-                <div>
-                  <div className="event-referral-eyebrow">VEXORA REFERRAL COMPETITION</div>
-                  <h2>Invite. <span>Climb.</span> Win.</h2>
-                  <p>Share your personal referral link, bring new members to Vexora, and push your way into the top three.</p>
-                </div>
+          <h1>{event.title}</h1>
 
-                <div className="event-referral-mark">
-                  <span>🏆</span>
-                  <strong>TOP 3</strong>
-                  <small>CASH REWARDS</small>
-                </div>
-              </section>
+          <p>{event.description}</p>
 
-              <section className="event-referral-link-card">
-                <div className="event-referral-link-copy">
-                  <span>YOUR REFERRAL LINK</span>
-                  <strong>Share this link to grow your position.</strong>
-                  <code>{referralLink}</code>
-                </div>
-
+          <div className="event-hero-actions">
+            {status === "ended" ? (
+              <Link
+                to={`/events/${event.id}/leaderboard`}
+                className="btn btn-primary"
+              >
+                <Icon name="trophy" />
+                See final results
+              </Link>
+            ) : (
+              <>
                 <button
                   type="button"
-                  className={`event-referral-copy-button ${copiedReferral ? "copied" : ""}`}
-                  onClick={copyReferralLink}
+                  className={`btn ${joined ? "btn-success" : "btn-primary"}`}
+                  onClick={handleJoin}
+                  disabled={loadingEvents || joining || joined}
                 >
-                  {copiedReferral ? "✓ COPIED" : "COPY LINK"}
+                  {joined && <Icon name="check" />}
+                  {joinLabel}
                 </button>
-              </section>
-            </>
+
+                <Link
+                  to={`/events/${event.id}/leaderboard`}
+                  className="btn"
+                >
+                  <Icon name="trophy" />
+                  Leaderboard
+                </Link>
+              </>
+            )}
+          </div>
+
+          {error && (
+            <div className="notice notice-error" role="alert">
+              {error}
+            </div>
           )}
 
-          {event.rules?.winners && (
-            <section className="event-details-rewards">
-              <div className="event-details-rewards-heading">
-                <div>
-                  <span>TOP 3 REWARDS</span>
-                  <h2>Finish on top.</h2>
-                </div>
-                <strong>{event.prize}</strong>
-              </div>
-
-              <div className="event-details-reward-grid">
-                {event.rules.winners.map((winner) => (
-                  <div
-                    className={`event-details-reward reward-${winner.position}`}
-                    key={winner.position}
-                  >
-                    <div className="event-details-reward-position">
-                      {winner.position === 1 && "🥇"}
-                      {winner.position === 2 && "🥈"}
-                      {winner.position === 3 && "🥉"}
-                      <span>
-                        {winner.position === 1 && "1ST"}
-                        {winner.position === 2 && "2ND"}
-                        {winner.position === 3 && "3RD"}
-                      </span>
-                    </div>
-                    <strong>{winner.reward}</strong>
-                  </div>
-                ))}
-              </div>
-            </section>
+          {message && (
+            <div className="notice notice-success" role="status">
+              {message}
+            </div>
           )}
+        </div>
+      </section>
 
-          <section className="event-participation">
-            <div className="event-participation-icon">✦</div>
+
+      {/* =========================================
+          FACTS
+      ========================================= */}
+
+      <section className="event-facts">
+        <div className="event-fact event-fact-prize">
+          <span className="eyebrow">Prize pool</span>
+          <strong>{event.prize}</strong>
+        </div>
+
+        <div className="event-fact">
+          <span className="eyebrow">
+            {status === "upcoming"
+              ? "Starts in"
+              : status === "live"
+                ? "Ends in"
+                : "Ran"}
+          </span>
+
+          <strong className="mono">
+            {status === "upcoming"
+              ? formatCountdown(event.startDate, now)
+              : status === "live"
+                ? formatCountdown(event.endDate, now)
+                : `${formatDate(event.startDate)} – ${formatDate(event.endDate)}`}
+          </strong>
+        </div>
+
+        <div className="event-fact">
+          <span className="eyebrow">You</span>
+          <strong>
+            {joined
+              ? "Competing"
+              : status === "ended"
+                ? "Didn't join"
+                : "Not joined yet"}
+          </strong>
+        </div>
+      </section>
+
+
+      {/* =========================================
+          REWARDS
+      ========================================= */}
+
+      {podiumOrder.length > 0 && (
+        <section className="event-section">
+          <div className="event-section-head">
+            <span className="eyebrow">Rewards</span>
+            <h2>Finish top three.</h2>
+          </div>
+
+          <div className="event-podium">
+            {podiumOrder.map((winner) => (
+              <div
+                key={winner.position}
+                className={`event-podium-step place-${winner.position}`}
+              >
+                <span className="event-podium-medal" aria-hidden="true">
+                  {MEDAL[winner.position]}
+                </span>
+
+                <strong>{winner.reward}</strong>
+
+                <span className="event-podium-place">
+                  {PLACE_LABEL[winner.position]} place
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+
+      {/* =========================================
+          REFERRAL LINK
+      ========================================= */}
+
+      {isReferralEvent && status !== "ended" && (
+        <section className="event-section">
+          <div className="event-link card card-gold">
             <div>
-              <h3>How to participate</h3>
+              <span className="eyebrow">Your invite link</span>
+              <h2>This is how you climb.</h2>
               <p>
-                Join the event, share your Vexora referral link, and invite as many new members as possible. Your verified referral count determines your position on the leaderboard.
+                Every new account made through this link
+                adds one to your count on the leaderboard.
               </p>
             </div>
-          </section>
 
-          {error && <div className="event-message error">{error}</div>}
-          {message && <div className="event-message success">{message}</div>}
+            <div className="event-link-box">
+              <code className="mono">
+                {referralLink || "Set a username to get your link"}
+              </code>
 
-          <div className="event-details-actions">
-            <button
-              type="button"
-              className={`event-join-button ${joined ? "joined" : ""}`}
-              onClick={handleJoin}
-              disabled={loadingEvents || joining || joined || status === "ended"}
-            >
-              {loadingEvents
-                ? "CHECKING..."
-                : joining
-                  ? "JOINING..."
-                  : joined
-                    ? "✓ YOU'RE JOINED"
-                    : status === "ended"
-                      ? "EVENT ENDED"
-                      : "JOIN EVENT"}
-            </button>
+              <div className="event-link-buttons">
+                <button
+                  type="button"
+                  className={`btn ${copied ? "btn-success" : "btn-sun"}`}
+                  onClick={() => copy(referralLink)}
+                  disabled={!referralLink}
+                >
+                  <Icon name={copied ? "check" : "copy"} />
+                  {copied ? "Copied" : "Copy link"}
+                </button>
 
-            <Link
-              to={`/events/${event.id}/leaderboard`}
-              className="event-leaderboard-button"
-            >
-              🏆 VIEW EVENT LEADERBOARD
-            </Link>
+                {canNativeShare && (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() =>
+                      nativeShare({
+                        title: "Vexora",
+                        text: `Join ${event.title} on Vexora 🏆`,
+                        url: referralLink,
+                      })
+                    }
+                    disabled={!referralLink}
+                  >
+                    <Icon name="share" />
+                    Share
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
+        </section>
+      )}
+
+
+      {/* =========================================
+          HOW IT WORKS
+      ========================================= */}
+
+      <section className="event-section">
+        <div className="event-section-head">
+          <span className="eyebrow">How it works</span>
+          <h2>Four steps. No tricks.</h2>
         </div>
-      </div>
-    </section>
+
+        <ol className="event-steps">
+          <li>
+            <span>01</span>
+            <strong>Join</strong>
+            <p>Hit “Join event” so you show up on this event's board.</p>
+          </li>
+
+          <li>
+            <span>02</span>
+            <strong>Share</strong>
+            <p>Send your invite link anywhere people will see it.</p>
+          </li>
+
+          <li>
+            <span>03</span>
+            <strong>Climb</strong>
+            <p>Each signup through your link adds to your count.</p>
+          </li>
+
+          <li>
+            <span>04</span>
+            <strong>Win</strong>
+            <p>Top three when the clock hits zero take the prizes.</p>
+          </li>
+        </ol>
+      </section>
+
+    </main>
   );
 }
 

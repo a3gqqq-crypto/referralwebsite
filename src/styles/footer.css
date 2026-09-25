@@ -1,38 +1,113 @@
 .site-footer {
-  width: 100%;
-  max-width: 1000px;
+  position: relative;
 
-  margin: auto;
+  border-top: 1px solid var(--line);
 
-  padding: 25px;
+  background:
+    radial-gradient(800px 300px at 50% 120%, rgba(242, 181, 68, 0.08), transparent 70%),
+    var(--bg-raised);
 
-  border-top:
-    1px solid rgba(255, 255, 255, 0.06);
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  gap: 15px;
-
-  color: #55555f;
-
-  font-size: 11px;
+  overflow: hidden;
 }
 
-@media (max-width: 700px) {
+.site-footer-inner {
+  max-width: calc(var(--page-width) + var(--gutter) * 2);
 
-  .site-footer {
+  margin: 0 auto;
+  padding: 64px var(--gutter) 44px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.footer-wordmark {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 10vw, 128px);
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 0.85;
+
+  background: linear-gradient(180deg, var(--text) 30%, rgba(244, 239, 231, 0.25));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-tagline {
+  max-width: 340px;
+
+  margin-top: 18px;
+
+  color: var(--text-mute);
+
+  font-size: 15px;
+}
+
+.footer-links {
+  display: flex;
+  gap: 72px;
+}
+
+.footer-links div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links .eyebrow {
+  margin-bottom: 6px;
+}
+
+.footer-links a {
+  width: fit-content;
+
+  color: var(--text-soft);
+
+  font-size: 15px;
+  text-decoration: none;
+
+  transition: color 0.15s ease;
+}
+
+.footer-links a:hover {
+  color: var(--gold-soft);
+}
+
+.footer-bottom {
+  max-width: calc(var(--page-width) + var(--gutter) * 2);
+
+  margin: 0 auto;
+  padding: 20px var(--gutter) 30px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+
+  border-top: 1px solid var(--line);
+
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .site-footer-inner {
     flex-direction: column;
+    gap: 36px;
 
-    gap: 8px;
-
-    padding:
-      22px 15px;
-
-    text-align: center;
+    padding-top: 48px;
+    padding-bottom: 32px;
   }
 
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 32px 48px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 4px;
+  }
 }

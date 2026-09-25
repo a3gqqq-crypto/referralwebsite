@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     `${forwardedProto}://${requestHost}`;
 
   const momentsImage =
-    `${siteUrl}/events/moments-event.png`;
+    `${siteUrl}/og-moment.png`;
 
   let creatorName = "Someone";
   let fromName = "Someone";

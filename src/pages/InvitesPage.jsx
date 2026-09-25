@@ -1,88 +1,40 @@
 import ReferralCard from "../components/ReferralCard";
 import ReferralHistory from "../components/ReferralHistory";
 import Leaderboard from "../components/Leaderboard";
+import { useReveal } from "../hooks/useReveal";
 
 import "../styles/invites.css";
 
 function InvitesPage({ user }) {
+  const [panelsRef, panelsVisible] = useReveal();
+
   return (
-    <main className="invites-page">
+    <main className="page invites-page">
 
-      {/* =========================================
-          PAGE INTRO
-      ========================================= */}
-
-      <section className="invites-header">
-
-        <div className="invites-header-label">
-          VEXORA REFERRALS
-        </div>
+      <header className="page-header">
+        <span className="eyebrow">Invites</span>
 
         <h1>
-          Invite friends.
-          <span> Climb higher.</span>
+          Your people, <span className="mark">your points.</span>
         </h1>
 
         <p>
-          Build your network, track your referrals,
-          and compete for the top spot.
+          One link, one count. Everyone who signs up
+          through it moves you up the board.
         </p>
-
-      </section>
-
-
-      {/* =========================================
-          PERSONAL DASHBOARD
-      ========================================= */}
+      </header>
 
       <ReferralCard user={user} />
 
-
-      {/* =========================================
-          COMPETITION AREA
-      ========================================= */}
-
-      <section className="invites-competition">
-
-        <div className="invites-competition-heading">
-
-          <div>
-
-            <div className="invites-section-label">
-              YOUR COMPETITION
-            </div>
-
-            <h2>
-              Track everything.
-            </h2>
-
-          </div>
-
-        </div>
-
-
-        <div className="invites-panels">
-
-          {/* REFERRAL HISTORY */}
-
-          <div className="invites-panel">
-
-            <ReferralHistory user={user} />
-
-          </div>
-
-
-          {/* LEADERBOARD */}
-
-          <div className="invites-panel">
-
-            <Leaderboard user={user} />
-
-          </div>
-
-        </div>
-
-      </section>
+      <div
+        ref={panelsRef}
+        className={`invites-panels reveal-section ${
+          panelsVisible ? "reveal-visible" : ""
+        }`}
+      >
+        <Leaderboard user={user} />
+        <ReferralHistory user={user} />
+      </div>
 
     </main>
   );

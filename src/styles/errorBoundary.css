@@ -1,0 +1,40 @@
+.error-boundary-page {
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+}
+
+.error-boundary-card {
+  width: 100%;
+  max-width: 440px;
+
+  padding: 44px 32px;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow);
+
+  text-align: center;
+}
+
+.error-boundary-icon {
+  font-size: 40px;
+}
+
+.error-boundary-card h1 {
+  margin-top: 12px;
+
+  font-size: 46px;
+}
+
+.error-boundary-card p {
+  margin: 12px 0 26px;
+
+  color: var(--text-soft);
+}

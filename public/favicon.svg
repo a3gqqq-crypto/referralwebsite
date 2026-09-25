@@ -1,56 +1,11 @@
-<svg
-  width="64"
-  height="64"
-  viewBox="0 0 64 64"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient
-      id="bg"
-      x1="8"
-      y1="8"
-      x2="56"
-      y2="56"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop stop-color="#8B5CF6"/>
-      <stop offset="1" stop-color="#5B5BF7"/>
-    </linearGradient>
-
-    <linearGradient
-      id="v"
-      x1="20"
-      y1="17"
-      x2="45"
-      y2="48"
-      gradientUnits="userSpaceOnUse"
-    >
-      <stop stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#EDE9FE"/>
+    <linearGradient id="g" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBE2A8"/>
+      <stop offset="0.55" stop-color="#F2B544"/>
+      <stop offset="1" stop-color="#C98A1B"/>
     </linearGradient>
   </defs>
-
-  <rect
-    x="2"
-    y="2"
-    width="60"
-    height="60"
-    rx="16"
-    fill="#0B0714"
-  />
-
-  <rect
-    x="5"
-    y="5"
-    width="54"
-    height="54"
-    rx="14"
-    fill="url(#bg)"
-  />
-
-  <path
-    d="M18 18L28 43L32 50L36 43L46 18H38L32 35L26 18H18Z"
-    fill="url(#v)"
-  />
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#g)"/>
+  <path d="M19 16h8.5l5 20.5L43.5 16H49L34.5 48h-6L19 16Z" fill="#1B1405"/>
 </svg>

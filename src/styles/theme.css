@@ -1,19 +1,65 @@
 :root {
-  --bg-primary: #07070a;
+  color-scheme: dark;
 
-  --card: rgba(255, 255, 255, 0.04);
-  --card-hover: rgba(255, 255, 255, 0.08);
+  /* Surfaces — warm, layered darks (never flat black) */
+  --bg: #0f0e11;
+  --bg-raised: #141317;
+  --surface: #1a191e;
+  --surface-2: #222127;
+  --surface-3: #2b2a31;
 
-  --purple: #8b5cf6;
-  --blue: #6366f1;
+  /* Text */
+  --text: #f4efe7;
+  --text-soft: #bdb6aa;
+  --text-mute: #807a70;
 
-  --purple-glow: rgba(139, 92, 246, 0.35);
+  /* Lines */
+  --line: rgba(255, 238, 214, 0.08);
+  --line-strong: rgba(255, 238, 214, 0.16);
+  --line-gold: rgba(242, 181, 68, 0.35);
 
-  --text-primary: #ffffff;
-  --text-muted: #777782;
+  /* Gold */
+  --gold: #f2b544;
+  --gold-soft: #f8d58a;
+  --gold-deep: #c98a1b;
+  --gold-wash: rgba(242, 181, 68, 0.1);
+  --on-gold: #1b1405;
 
-  --border: rgba(255, 255, 255, 0.08);
+  /* Supporting */
+  --mint: #6fd7a3;
+  --mint-wash: rgba(111, 215, 163, 0.12);
+  --rose: #ff8a7a;
+  --rose-wash: rgba(255, 138, 122, 0.12);
+  --sky: #8ab8ff;
+  --sky-wash: rgba(138, 184, 255, 0.12);
+  --violet: #b9a1ff;
+  --violet-wash: rgba(185, 161, 255, 0.12);
 
-  --success: #22c55e;
-  --success-glow: rgba(34, 197, 94, 0.8);
+  /* Podium */
+  --place-1: #f2b544;
+  --place-2: #cfd2da;
+  --place-3: #d48d5a;
+
+  /* Rarity */
+  --rarity-common: #bdb6aa;
+  --rarity-rare: #8ab8ff;
+  --rarity-epic: #b9a1ff;
+  --rarity-legendary: #f2b544;
+
+  /* Type */
+  --font-display: "Instrument Serif", Georgia, serif;
+  --font-body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, Consolas, monospace;
+
+  /* Shape */
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 10px 40px -12px rgba(242, 181, 68, 0.45);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  /* Layout */
+  --page-width: 1120px;
+  --gutter: 24px;
 }

@@ -1,163 +1,128 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+
 import { supabase } from "../lib/supabaseClient";
+import Icon from "../components/Icon";
+import MomentCard from "../components/MomentCard";
+import { templateById } from "../data/momentTemplates";
+import { useCopy, canNativeShare, nativeShare } from "../hooks/useCopy";
+
 import "../styles/moments.css";
 
-const TEMPLATE_META = {
-  teacher: { icon: "🌸", label: "TEACHER'S DAY", accent: "pink" },
-  special: { icon: "💜", label: "SOMEONE SPECIAL", accent: "purple" },
-  friend: { icon: "💙", label: "BEST FRIEND", accent: "blue" },
-  birthday: { icon: "🎂", label: "BIRTHDAY", accent: "gold" },
-  congrats: { icon: "🏆", label: "CONGRATULATIONS", accent: "green" },
-  festival: { icon: "✨", label: "FESTIVAL", accent: "cyan" },
-};
+const escapeXml = (value) =>
+  String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+
+function wrapLines(text, maxChars) {
+  const lines = [];
+  let remaining = text;
+
+  while (remaining.length > maxChars) {
+    let cut = remaining.lastIndexOf(" ", maxChars);
+    if (cut < maxChars / 2) cut = maxChars;
+    lines.push(remaining.slice(0, cut));
+    remaining = remaining.slice(cut).trimStart();
+  }
+
+  if (remaining) lines.push(remaining);
+
+  return lines;
+}
+
+function buildCardSvg(moment) {
+  const template = templateById(moment.template);
+  const lines = wrapLines(moment.message, 34).slice(0, 9);
+
+  const messageSvg = lines
+    .map(
+      (line, index) =>
+        `<text x="170" y="${760 + index * 52}" fill="#1a1612" font-size="38" font-family="Arial, sans-serif">${escapeXml(line)}</text>`
+    )
+    .join("");
+
+  const fromY = 760 + lines.length * 52 + 50;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <defs>
+    <radialGradient id="glow" cx="0.1" cy="0" r="0.9">
+      <stop offset="0" stop-color="#f2b544" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#f2b544" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="1500" fill="#0f0e11"/>
+  <rect width="1200" height="1500" fill="url(#glow)"/>
+  <rect x="120" y="220" width="960" height="1100" rx="56" fill="#000000" fill-opacity="0.45"/>
+  <rect x="110" y="190" width="960" height="1100" rx="56" fill="${template.color}"/>
+  <text x="170" y="360" font-size="110">${escapeXml(template.icon)}</text>
+  <text x="170" y="440" fill="#1a1612" fill-opacity="0.75" font-size="26" letter-spacing="5" font-family="Courier New, monospace">${escapeXml(template.label.toUpperCase())}</text>
+  <text x="170" y="590" fill="#1a1612" font-size="100" font-family="Georgia, serif">For ${escapeXml(moment.to_name)}</text>
+  ${messageSvg}
+  <text x="170" y="${fromY}" fill="#1a1612" font-size="40" font-style="italic" font-family="Georgia, serif">— ${escapeXml(moment.from_name)}</text>
+  <text x="600" y="1410" text-anchor="middle" fill="#f8d58a" font-size="26" font-family="Arial, sans-serif">made on Vexora · joinvexora.com</text>
+</svg>`;
+}
 
 function MomentViewPage() {
   const { momentId } = useParams();
-  const navigate = useNavigate();
+
   const [moment, setMoment] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [expired, setExpired] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState("loading");
+  const [copied, copy] = useCopy();
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadMoment = async () => {
-      setLoading(true);
-
+    const load = async () => {
       const { data, error } = await supabase
         .from("moments")
-        .select("id, creator_username, from_name, to_name, message, template, created_at, expires_at")
+        .select(
+          "id, creator_username, from_name, to_name, message, template, created_at, expires_at"
+        )
         .eq("id", momentId)
         .maybeSingle();
 
       if (cancelled) return;
 
       if (error || !data) {
-        setLoading(false);
-        setMoment(null);
+        setState("missing");
         return;
       }
 
       if (new Date(data.expires_at).getTime() <= Date.now()) {
-        setExpired(true);
-        setMoment(null);
-        setLoading(false);
+        setState("expired");
         return;
       }
 
       setMoment(data);
-      setLoading(false);
+      setState("ready");
     };
 
-    loadMoment();
+    load();
 
     return () => {
       cancelled = true;
     };
   }, [momentId]);
 
-  const meta = useMemo(
-    () => TEMPLATE_META[moment?.template] || TEMPLATE_META.special,
-    [moment?.template]
-  );
-
-  const publicLink = moment
-    ? `${window.location.origin}/m/${moment.id}?ref=${encodeURIComponent(moment.creator_username)}`
+  const ref = moment?.creator_username
+    ? `?ref=${encodeURIComponent(moment.creator_username)}`
     : "";
 
-  const copyLink = async () => {
-    if (!publicLink) return;
-
-    try {
-      await navigator.clipboard.writeText(publicLink);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const shareLink = async () => {
-    if (!publicLink) return;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "A Vexora Moment",
-          text: `${moment.from_name} made you a Vexora Moment ✦`,
-          url: publicLink,
-        });
-        return;
-      } catch {
-        // User cancelled.
-      }
-    }
-
-    await copyLink();
-  };
+  const publicLink = moment
+    ? `${window.location.origin}/m/${moment.id}${ref}`
+    : "";
 
   const downloadCard = () => {
-    if (!moment) return;
+    const blob = new Blob([buildCardSvg(moment)], {
+      type: "image/svg+xml;charset=utf-8",
+    });
 
-    const escaped = (value) =>
-      String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-
-    const messageLines = [];
-    let remaining = moment.message;
-    while (remaining.length > 44) {
-      let cut = remaining.lastIndexOf(" ", 44);
-      if (cut < 20) cut = 44;
-      messageLines.push(remaining.slice(0, cut));
-      remaining = remaining.slice(cut).trimStart();
-    }
-    if (remaining) messageLines.push(remaining);
-
-    const messageSvg = messageLines
-      .slice(0, 8)
-      .map(
-        (line, index) =>
-          `<text x="600" y="${640 + index * 46}" text-anchor="middle" fill="#efefff" font-size="25" font-family="Arial, sans-serif">${escaped(line)}</text>`
-      )
-      .join("");
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
-        <defs>
-          <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-            <stop offset="0" stop-color="#08070d"/>
-            <stop offset="0.5" stop-color="#17112f"/>
-            <stop offset="1" stop-color="#061827"/>
-          </linearGradient>
-          <radialGradient id="glow">
-            <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.45"/>
-            <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="1200" height="1500" fill="url(#bg)"/>
-        <circle cx="950" cy="160" r="360" fill="url(#glow)"/>
-        <circle cx="250" cy="1200" r="300" fill="#ec4899" opacity="0.10"/>
-        <rect x="70" y="70" width="1060" height="1360" rx="42" fill="#ffffff" fill-opacity="0.035" stroke="#ffffff" stroke-opacity="0.10"/>
-        <text x="100" y="140" fill="#c4b5fd" font-size="18" font-weight="700" font-family="Arial, sans-serif" letter-spacing="5">VEXORA MOMENTS</text>
-        <text x="1100" y="140" text-anchor="end" fill="#8af0ae" font-size="18" font-family="Arial, sans-serif">SHAREABLE</text>
-        <text x="600" y="350" text-anchor="middle" font-size="100">${escaped(meta.icon)}</text>
-        <text x="600" y="430" text-anchor="middle" fill="#a78bfa" font-size="18" font-weight="700" font-family="Arial, sans-serif" letter-spacing="4">${escaped(meta.label)}</text>
-        <text x="600" y="520" text-anchor="middle" fill="#ffffff" font-size="48" font-weight="700" font-family="Arial, sans-serif">FOR ${escaped(moment.to_name)}</text>
-        ${messageSvg}
-        <text x="600" y="1080" text-anchor="middle" fill="#c4b5fd" font-size="27" font-family="Arial, sans-serif">— ${escaped(moment.from_name)}</text>
-        <line x1="260" x2="940" y1="1160" y2="1160" stroke="#ffffff" stroke-opacity="0.10"/>
-        <text x="600" y="1240" text-anchor="middle" fill="#777284" font-size="17" font-family="Arial, sans-serif" letter-spacing="3">MADE WITH VEXORA</text>
-        <text x="600" y="1320" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="700" font-family="Arial, sans-serif">joinvexora.com</text>
-      </svg>`;
-
-    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
+
     anchor.href = url;
     anchor.download = `vexora-moment-${moment.id}.svg`;
     document.body.appendChild(anchor);
@@ -166,80 +131,119 @@ function MomentViewPage() {
     URL.revokeObjectURL(url);
   };
 
-  if (loading) {
-    return (
-      <main className="moment-view-page">
-        <div className="moment-view-loading">Opening your Vexora Moment...</div>
-      </main>
-    );
-  }
-
-  if (expired || !moment) {
-    return (
-      <main className="moment-view-page">
-        <div className="moment-expired-card">
-          <div className="moment-expired-icon">⌛</div>
-          <div className="moments-section-label">VEXORA MOMENT</div>
-          <h1>This Moment has expired.</h1>
-          <p>This share link is no longer active. Create a new Moment and give someone another reason to smile.</p>
-          <Link to="/" className="moment-main-button">CREATE YOUR OWN →</Link>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className={`moment-view-page ${meta.accent}`}>
-      <div className="moment-view-orb orb-a"></div>
-      <div className="moment-view-orb orb-b"></div>
-      <div className="moment-view-grid"></div>
+    <div className="moment-view">
 
-      <div className="moment-view-content">
-        <div className="moment-view-topbar">
-          <span>✦ VEXORA MOMENTS</span>
-          <span>5 DAY LINK</span>
-        </div>
+      <header className="moment-view-bar">
+        <Link to={`/${ref}`} className="navbar-brand">
+          <span className="brand-mark" aria-hidden="true">V</span>
+          <span className="brand-word">Vexora</span>
+        </Link>
 
-        <section className="moment-reveal-card">
-          <div className="moment-reveal-glow"></div>
+        <Link to={`/moments${ref}`} className="btn btn-sm">
+          Make your own
+        </Link>
+      </header>
 
-          <div className="moment-reveal-icon">{meta.icon}</div>
-          <div className="moment-reveal-label">{meta.label}</div>
-          <h1>For {moment.to_name}</h1>
 
-          <div className="moment-message">
-            {moment.message}
+      <main className="moment-view-main">
+        {state === "loading" && (
+          <div className="moment-view-loading">
+            <span className="brand-mark" aria-hidden="true">V</span>
+            <p>Opening your Moment…</p>
           </div>
+        )}
 
-          <div className="moment-from">— {moment.from_name}</div>
+        {(state === "expired" || state === "missing") && (
+          <div className="moment-view-gone card">
+            <span className="moment-view-gone-icon" aria-hidden="true">⌛</span>
 
-          <div className="moment-reveal-footer">
-            <span>MADE WITH VEXORA</span>
-            <span>✦</span>
-            <span>OPEN · SHARE · CREATE</span>
+            <h1>
+              {state === "expired"
+                ? "This Moment has expired."
+                : "This Moment doesn't exist."}
+            </h1>
+
+            <p>
+              Moments only last 5 days. Make a new one and
+              give someone else a reason to smile.
+            </p>
+
+            <Link to="/moments" className="btn btn-primary">
+              Make a Moment
+              <Icon name="arrowRight" />
+            </Link>
           </div>
-        </section>
+        )}
 
-        <section className="moment-share-panel">
-          <div>
-            <div className="moments-section-label">LIKE THIS?</div>
-            <h2>Make one for someone else.</h2>
-            <p>Create your own Vexora Moment and share it with a unique link.</p>
-          </div>
+        {state === "ready" && moment && (
+          <>
+            <p className="moment-view-intro">
+              <strong>{moment.from_name}</strong> made you something.
+            </p>
 
-          <div className="moment-share-actions">
-            <button type="button" onClick={shareLink}>SHARE</button>
-            <button type="button" onClick={copyLink}>{copied ? "✓ COPIED" : "COPY LINK"}</button>
-            <button type="button" onClick={downloadCard}>DOWNLOAD</button>
-            <button type="button" onClick={() => navigate(`/moments?ref=${encodeURIComponent(moment.creator_username)}`)}>CREATE YOURS</button>
-          </div>
-        </section>
+            <div className="moment-view-card">
+              <MomentCard
+                templateId={moment.template}
+                to={moment.to_name}
+                message={moment.message}
+                from={moment.from_name}
+                large
+              />
+            </div>
 
-        <div className="moment-view-referral-note">
-          ✦ Shared through <strong>{moment.creator_username}</strong> · New Vexora members who sign up through this Moment support their referrer’s climb.
-        </div>
-      </div>
-    </main>
+            <div className="moment-view-actions">
+              {canNativeShare && (
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() =>
+                    nativeShare({
+                      title: "A Vexora Moment",
+                      text: `${moment.from_name} made you something ✦`,
+                      url: publicLink,
+                    })
+                  }
+                >
+                  <Icon name="share" />
+                  Share
+                </button>
+              )}
+
+              <button
+                type="button"
+                className={`btn ${copied ? "btn-success" : ""}`}
+                onClick={() => copy(publicLink)}
+              >
+                <Icon name={copied ? "check" : "copy"} />
+                {copied ? "Copied" : "Copy link"}
+              </button>
+
+              <button type="button" className="btn" onClick={downloadCard}>
+                <Icon name="download" />
+                Save image
+              </button>
+            </div>
+
+            <section className="moment-view-cta card">
+              <div>
+                <h2>Make one back.</h2>
+                <p>
+                  Free, takes a minute, and Vexora runs
+                  competitions with real prizes for inviting friends.
+                </p>
+              </div>
+
+              <Link to={`/moments${ref}`} className="btn btn-primary">
+                Create your Moment
+                <Icon name="arrowRight" />
+              </Link>
+            </section>
+          </>
+        )}
+      </main>
+
+    </div>
   );
 }
 

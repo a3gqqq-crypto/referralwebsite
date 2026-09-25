@@ -1,546 +1,265 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
 import { events } from "../data/events";
+import Icon from "../components/Icon";
+import SkeletonRows from "../components/SkeletonRows";
+import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
+import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
+import { equippedFrom } from "../data/cosmetics";
+import NotFound from "./NotFound";
+import { useNow, getEventStatus } from "../hooks/useCountdown";
 
 import "../styles/eventLeaderboard.css";
 
+const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
 function EventLeaderboardPage({ user }) {
   const { eventId } = useParams();
+  const now = useNow(30000);
+
+  const event = events.find((item) => item.id === eventId);
 
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const event = useMemo(() => {
-    return events.find(
-      (item) => item.id === eventId
-    );
-  }, [eventId]);
-
   useEffect(() => {
+    if (!event) return;
+
+    let cancelled = false;
+
     const loadLeaderboard = async () => {
       setLoading(true);
       setError("");
 
-      if (!event) {
-        setError("Event not found.");
-        setLoading(false);
-        return;
-      }
+      const { data: participants, error: participantError } =
+        await supabase
+          .from("event_participants")
+          .select("user_id")
+          .eq("event_id", event.id);
 
-      /*
-       * Get everyone who joined this event.
-       */
-      const {
-        data: participants,
-        error: participantError,
-      } = await supabase
-        .from("event_participants")
-        .select("user_id")
-        .eq("event_id", event.id);
+      if (cancelled) return;
 
       if (participantError) {
         console.error(participantError);
-
-        setError(
-          "Could not load the event leaderboard."
-        );
-
+        setError("Could not load the leaderboard.");
         setLoading(false);
         return;
       }
 
-      const participantIds = (
-        participants || []
-      ).map(
-        (participant) =>
-          participant.user_id
-      );
+      const ids = (participants || []).map((row) => row.user_id);
 
-      /*
-       * Nobody has joined yet.
-       */
-      if (participantIds.length === 0) {
+      if (ids.length === 0) {
         setPlayers([]);
         setLoading(false);
         return;
       }
 
-      /*
-       * Load usernames + referral counts.
-       */
-      const {
-        data: profiles,
-        error: profileError,
-      } = await supabase
+      const { data: profiles, error: profileError } = await supabase
         .from("profiles")
-        .select(
-          "id, username, referral_count"
-        )
-        .in("id", participantIds);
+        .select(PLAYER_COLUMNS)
+        .in("id", ids);
+
+      if (cancelled) return;
 
       if (profileError) {
         console.error(profileError);
-
-        setError(
-          "Could not load player rankings."
-        );
-
+        setError("Could not load player rankings.");
         setLoading(false);
         return;
       }
 
-      /*
-       * Highest referral count first.
-       */
-      const rankedPlayers = [
-        ...(profiles || []),
-      ]
-        .sort(
-          (a, b) =>
-            (b.referral_count || 0) -
-            (a.referral_count || 0)
-        )
-        .map((player, index) => ({
-          ...player,
-          rank: index + 1,
-        }));
+      setPlayers(
+        [...(profiles || [])]
+          .sort(
+            (a, b) =>
+              (b.referral_count || 0) - (a.referral_count || 0)
+          )
+          .map((player, index) => ({ ...player, rank: index + 1 }))
+      );
 
-      setPlayers(rankedPlayers);
       setLoading(false);
     };
 
     loadLeaderboard();
-  }, [event, eventId]);
 
-  const getReward = (position) => {
-    const winner =
-      event?.rules?.winners?.find(
-        (item) =>
-          item.position === position
-      );
-
-    return winner?.reward || "—";
-  };
-
-  const currentUser = players.find(
-    (player) =>
-      player.id === user?.id
-  );
-
-  const topThree = players.slice(0, 3);
+    return () => {
+      cancelled = true;
+    };
+  }, [event]);
 
   if (!event) {
     return (
-      <main className="event-leaderboard-page">
-
-        <div className="event-leaderboard-empty">
-
-          <div className="event-leaderboard-empty-icon">
-            🔍
-          </div>
-
-          <div className="event-leaderboard-label">
-            VEXORA EVENTS
-          </div>
-
-          <h1>
-            Event not found
-          </h1>
-
-          <p>
-            This competition could not be found.
-          </p>
-
-          <Link
-            to="/events"
-            className="event-leaderboard-back"
-          >
-            ← Back to Events
-          </Link>
-
-        </div>
-
-      </main>
+      <NotFound
+        title="Leaderboard not found."
+        message="This event doesn't exist or isn't available anymore."
+      />
     );
   }
 
+  const status = getEventStatus(event, now);
+
+  const rewardFor = (position) =>
+    event.rules?.winners?.find((winner) => winner.position === position)
+      ?.reward || null;
+
+  const me = players.find((player) => player.id === user?.id);
+
+  const podium = [players[1], players[0], players[2]].filter(Boolean);
+
   return (
-    <main className="event-leaderboard-page">
+    <main className="page board-page">
 
-      {/* =========================================
-          HEADER
-      ========================================= */}
+      <Link to={`/events/${event.id}`} className="event-back">
+        <Icon name="arrowLeft" size={16} />
+        {event.title}
+      </Link>
 
-      <section className="event-leaderboard-hero">
+      <header className="page-header board-header">
+        <span className="eyebrow">
+          {status === "ended" ? "Final standings" : "Live leaderboard"}
+        </span>
 
-        <Link
-          to="/events"
-          className="event-leaderboard-back"
-        >
-          ← Back to Events
-        </Link>
-
-        <div className="event-leaderboard-label">
-          🏆 EVENT LEADERBOARD
-        </div>
-
-        <h1>
-          {event.title}
-        </h1>
+        <h1>{event.title}</h1>
 
         <p>
-          Invite the most people and finish in
-          the top three to win the rewards.
+          {status === "ended"
+            ? "This event has ended. Top three by referral count take the prizes."
+            : "Ranked by referral count. Top three when the event ends take the prizes."}
         </p>
+      </header>
 
-        <div className="event-leaderboard-stats">
 
-          <div className="event-leaderboard-stat">
-            <span>
-              PRIZE POOL
-            </span>
-
-            <strong>
-              {event.prize}
-            </strong>
-          </div>
-
-          <div className="event-leaderboard-stat">
-            <span>
-              PLAYERS
-            </span>
-
-            <strong>
-              {players.length}
-            </strong>
-          </div>
-
-          <div className="event-leaderboard-stat">
-            <span>
-              YOUR RANK
-            </span>
-
-            <strong>
-              {currentUser
-                ? `#${currentUser.rank}`
-                : "—"}
-            </strong>
-          </div>
-
+      <section className="board-stats">
+        <div className="board-stat board-stat-prize">
+          <span className="eyebrow">Prize pool</span>
+          <strong>{event.prize}</strong>
         </div>
 
+        <div className="board-stat">
+          <span className="eyebrow">Players</span>
+          <strong className="mono">
+            {loading ? "—" : players.length}
+          </strong>
+        </div>
+
+        <div className="board-stat">
+          <span className="eyebrow">Your rank</span>
+          <strong className="mono">
+            {me ? `#${me.rank}` : "—"}
+          </strong>
+        </div>
       </section>
 
 
-      {/* =========================================
-          TOP 3
-      ========================================= */}
-
-      <section className="event-podium-section">
-
-        <div className="event-podium">
-
-          {/* SECOND */}
-
-          {topThree[1] && (
-            <div className="event-podium-card second">
-
-              <div className="event-podium-medal">
-                🥈
-              </div>
-
-              <div className="event-podium-avatar">
-                {(topThree[1].username || "?")
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-
-              <span className="event-podium-place">
-                2ND PLACE
-              </span>
-
-              <h2>
-                {topThree[1].username ||
-                  "Player"}
-              </h2>
-
-              <strong className="event-podium-count">
-                {topThree[1].referral_count || 0}
-              </strong>
-
-              <small>
-                REFERRALS
-              </small>
-
-              <div className="event-podium-prize">
-                {getReward(2)}
-              </div>
-
-            </div>
-          )}
-
-
-          {/* FIRST */}
-
-          {topThree[0] && (
-            <div className="event-podium-card first">
-
-              <div className="event-podium-crown">
-                👑
-              </div>
-
-              <div className="event-podium-medal">
-                🥇
-              </div>
-
-              <div className="event-podium-avatar">
-                {(topThree[0].username || "?")
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-
-              <span className="event-podium-place">
-                1ST PLACE
-              </span>
-
-              <h2>
-                {topThree[0].username ||
-                  "Player"}
-              </h2>
-
-              <strong className="event-podium-count">
-                {topThree[0].referral_count || 0}
-              </strong>
-
-              <small>
-                REFERRALS
-              </small>
-
-              <div className="event-podium-prize">
-                {getReward(1)}
-              </div>
-
-            </div>
-          )}
-
-
-          {/* THIRD */}
-
-          {topThree[2] && (
-            <div className="event-podium-card third">
-
-              <div className="event-podium-medal">
-                🥉
-              </div>
-
-              <div className="event-podium-avatar">
-                {(topThree[2].username || "?")
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-
-              <span className="event-podium-place">
-                3RD PLACE
-              </span>
-
-              <h2>
-                {topThree[2].username ||
-                  "Player"}
-              </h2>
-
-              <strong className="event-podium-count">
-                {topThree[2].referral_count || 0}
-              </strong>
-
-              <small>
-                REFERRALS
-              </small>
-
-              <div className="event-podium-prize">
-                {getReward(3)}
-              </div>
-
-            </div>
-          )}
-
+      {loading ? (
+        <div className="board-list card board-loading">
+          <SkeletonRows count={6} />
         </div>
-
-      </section>
-
-
-      {/* =========================================
-          FULL RANKINGS
-      ========================================= */}
-
-      <section className="event-ranking-section">
-
-        <div className="event-ranking-heading">
-
-          <div>
-
-            <div className="event-ranking-label">
-              LIVE RANKINGS
-            </div>
-
-            <h2>
-              Top Inviter standings
-            </h2>
-
+      ) : error ? (
+        <div className="notice notice-error board-message">{error}</div>
+      ) : players.length === 0 ? (
+        <div className="card empty-state board-message">
+          <div className="empty-state-icon" aria-hidden="true">🏁</div>
+          <h3>No players yet</h3>
+          <p>Be the first to join and claim the top spot.</p>
+          <div className="empty-state-actions">
+            <Link to={`/events/${event.id}`} className="btn btn-primary">
+              Go to event
+            </Link>
           </div>
-
-          <span>
-            {players.length} players
-          </span>
-
         </div>
-
-
-        <div className="event-ranking-card">
-
-          {loading && (
-            <div className="event-ranking-message">
-              Loading rankings...
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="event-ranking-message error">
-              {error}
-            </div>
-          )}
-
-          {!loading &&
-            !error &&
-            players.length === 0 && (
-              <div className="event-ranking-message">
-
-                <strong>
-                  No players yet.
-                </strong>
-
-                <span>
-                  Be the first person to join
-                  this competition.
+      ) : (
+        <>
+          <section className="board-podium" aria-label="Top three">
+            {podium.map((player) => (
+              <div
+                key={player.id}
+                className={`board-podium-step place-${player.rank} ${
+                  player.id === user?.id ? "is-me" : ""
+                }`}
+              >
+                <span className="board-podium-medal" aria-hidden="true">
+                  {MEDAL[player.rank]}
                 </span>
 
+                <Link
+                  to={`/u/${encodeURIComponent(player.username || "")}`}
+                  className="board-podium-who"
+                >
+                  <FramedAvatar
+                    name={player.username}
+                    frame={equippedFrom(player).frame}
+                    size={player.rank === 1 ? 76 : 62}
+                  />
+
+                  <strong className="board-podium-name">
+                    <StyledName
+                      name={player.username || "Player"}
+                      effect={equippedFrom(player).name}
+                    />
+                  </strong>
+                </Link>
+
+                <BadgeRow ids={equippedFrom(player).badges} size={18} />
+
+                <span className="board-podium-count mono">
+                  {player.referral_count || 0} referrals
+                </span>
+
+                {rewardFor(player.rank) && (
+                  <span className="board-podium-reward">
+                    {rewardFor(player.rank)}
+                  </span>
+                )}
               </div>
-            )}
+            ))}
+          </section>
 
 
-          {!loading &&
-            !error &&
-            players.length > 0 && (
+          <section className="board-list card" aria-label="All rankings">
+            <div className="board-row board-row-head" aria-hidden="true">
+              <span>Rank</span>
+              <span>Player</span>
+              <span>Referrals</span>
+              <span>Prize</span>
+            </div>
 
-              <div className="event-ranking-list">
+            <ol>
+              {players.map((player) => (
+                <li
+                  key={player.id}
+                  className={`board-row ${
+                    player.id === user?.id ? "is-me" : ""
+                  } ${player.rank <= 3 ? "is-top" : ""}`}
+                >
+                  <span className="board-rank mono">
+                    {player.rank <= 3 ? MEDAL[player.rank] : player.rank}
+                  </span>
 
-                {players.map((player) => {
+                  <span className="board-player">
+                    <PlayerChip
+                      player={player}
+                      size={36}
+                      isMe={player.id === user?.id}
+                    />
+                  </span>
 
-                  const isCurrentUser =
-                    player.id === user?.id;
+                  <span className="board-count mono">
+                    {player.referral_count || 0}
+                  </span>
 
-                  return (
-                    <div
-                      key={player.id}
-                      className={`event-ranking-row ${
-                        player.rank <= 3
-                          ? "top-player"
-                          : ""
-                      } ${
-                        isCurrentUser
-                          ? "current-player"
-                          : ""
-                      }`}
-                    >
-
-                      <div className="event-ranking-rank">
-                        #{player.rank}
-                      </div>
-
-                      <div className="event-ranking-avatar">
-
-                        {(player.username ||
-                          "?")
-                          .charAt(0)
-                          .toUpperCase()}
-
-                      </div>
-
-                      <div className="event-ranking-name">
-
-                        <strong>
-                          {player.username ||
-                            "Player"}
-                        </strong>
-
-                        {isCurrentUser && (
-                          <span>
-                            YOU
-                          </span>
-                        )}
-
-                      </div>
-
-                      <div className="event-ranking-referrals">
-
-                        <strong>
-                          {player.referral_count ||
-                            0}
-                        </strong>
-
-                        <span>
-                          REFERRALS
-                        </span>
-
-                      </div>
-
-                      <div className="event-ranking-reward">
-
-                        {player.rank <= 3
-                          ? getReward(
-                              player.rank
-                            )
-                          : "—"}
-
-                      </div>
-
-                    </div>
-                  );
-                })}
-
-              </div>
-            )}
-
-        </div>
-
-      </section>
-
-
-      {/* =========================================
-          RULES
-      ========================================= */}
-
-      <section className="event-leaderboard-rules">
-
-        <div className="event-ranking-label">
-          HOW IT WORKS
-        </div>
-
-        <h2>
-          Invite. Climb. Win.
-        </h2>
-
-        <p>
-          Your position is based on your
-          referral count. When the event ends,
-          the three players with the highest
-          referral counts receive the displayed
-          rewards.
-        </p>
-
-      </section>
+                  <span className="board-reward">
+                    {rewardFor(player.rank) || "—"}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        </>
+      )}
 
     </main>
   );

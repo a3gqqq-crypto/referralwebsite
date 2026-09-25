@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
+import { events } from "../data/events";
+import {
+  BadgeRow,
+  FramedAvatar,
+  ProfileBanner,
+  StyledName,
+} from "./Cosmetics";
 import "../styles/auth.css";
 
 
@@ -199,6 +206,19 @@ function Auth({ onAuthenticated }) {
 
   const isLogin =
     mode === "login";
+
+
+  /* =========================================
+     LIVE EVENT (FOR REFERRAL BANNER)
+  ========================================= */
+
+  const liveEvent = events.find((event) => {
+    const now = new Date();
+    const start = new Date(event.startDate);
+    const end = new Date(event.endDate);
+
+    return event.active && now >= start && now <= end;
+  }) || null;
 
 
   /* =========================================
@@ -590,112 +610,128 @@ function Auth({ onAuthenticated }) {
   return (
     <div className="auth-page">
 
-      <div className="auth-glow auth-glow-one"></div>
-
-      <div className="auth-glow auth-glow-two"></div>
-
-
-      <div className="auth-container">
-
-
-        {/* =================================
-            BRAND
-        ================================= */}
+      <aside className="auth-poster">
 
         <div className="auth-brand">
-
-          <div className="auth-logo">
-            R
-          </div>
-
-          <div>
-
-            <strong>
-              REFERRAL
-            </strong>
-
-            <span>
-              COMPETITION
-            </span>
-
-          </div>
-
+          <span className="brand-mark" aria-hidden="true">V</span>
+          <span className="brand-word">Vexora</span>
         </div>
 
+        <div className="auth-poster-body">
+          <span className="eyebrow">Invite · Climb · Win</span>
 
-        {/* =================================
-            CARD
-        ================================= */}
+          <h1>
+            Bring your friends.{" "}
+            <span className="mark">Win real prizes.</span>
+          </h1>
+
+          <ol className="auth-steps">
+            <li>
+              <b>1</b>
+              Grab your personal invite link
+            </li>
+            <li>
+              <b>2</b>
+              Every friend who joins moves you up the board
+            </li>
+            <li>
+              <b>3</b>
+              Finish top 3 when the event ends to win
+            </li>
+          </ol>
+        </div>
+
+        <div className="auth-showcase" aria-hidden="true">
+          <ProfileBanner banner="banner-golddust" className="auth-showcase-banner" />
+
+          <div className="auth-showcase-body">
+            <FramedAvatar name="nova" frame="frame-crowned" size={58} />
+
+            <div className="auth-showcase-id">
+              <StyledName name="nova" effect="name-gold" className="auth-showcase-name" />
+              <BadgeRow ids={["badge-legend", "badge-early", "badge-gem"]} size={20} />
+            </div>
+
+            <div className="auth-showcase-rank">
+              <span className="mono">#1</span>
+              <small>42 invites</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="auth-poster-foot">
+          {liveEvent ? (
+            <>
+              <span className="chip chip-live">
+                <span className="live-dot" />
+                Live now
+              </span>
+              <span>
+                <strong>{liveEvent.title}</strong> ·{" "}
+                {liveEvent.prize} prize pool
+              </span>
+            </>
+          ) : (
+            <span>
+              The next competition drops soon. Get your
+              link ready.
+            </span>
+          )}
+        </div>
+
+      </aside>
+
+
+      <main className="auth-main">
 
         <div className="auth-card">
 
-          <div className="auth-heading">
+          <span className="eyebrow">
+            {isLogin ? "Welcome back" : "Join Vexora"}
+          </span>
 
-            <div className="auth-badge">
+          <h2>
+            {isLogin ? "Log in" : "Create your account"}
+          </h2>
 
-              {isLogin
-                ? "WELCOME BACK"
-                : "JOIN THE COMPETITION"}
-
-            </div>
-
-
-            <h1>
-
-              {isLogin
-                ? "Welcome back."
-                : "Create your account."}
-
-            </h1>
+          <p className="auth-sub">
+            {isLogin
+              ? "Use your email or username."
+              : "Takes 20 seconds. Your invite link is ready the moment you're in."}
+          </p>
 
 
-            <p>
+          {!isLogin && referralUsername && (
+            <div className="auth-invite">
+              <span
+                className="auth-invite-emoji"
+                aria-hidden="true"
+              >
+                🎁
+              </span>
 
-              {isLogin
-                ? "Sign in using your email or username."
-                : "Create an account and start earning referrals."}
-
-            </p>
-
-          </div>
-
-
-          {/* =================================
-              REFERRAL MESSAGE
-          ================================= */}
-
-          {!isLogin &&
-            referralUsername && (
-
-              <div className="auth-message success">
-
-                🎁 You were invited by{" "}
-
+              <div>
                 <strong>
-                  {referralUsername}
+                  {referralUsername} invited you
                 </strong>
 
-                .
-
+                <span>
+                  {liveEvent
+                    ? `Sign up to join ${liveEvent.title} — ${liveEvent.prize} in prizes.`
+                    : "Sign up and they get credit for bringing you in."}
+                </span>
               </div>
+            </div>
+          )}
 
-            )}
-
-
-          {/* =================================
-              FORM
-          ================================= */}
 
           <form
+            className="auth-form"
             onSubmit={handleSubmit}
           >
 
-            {/* USERNAME */}
-
             {!isLogin && (
-
-              <div className="form-group">
-
+              <div className="field">
                 <label htmlFor="username">
                   Username
                 </label>
@@ -705,66 +741,39 @@ function Auth({ onAuthenticated }) {
                   type="text"
                   value={username}
                   onChange={(event) =>
-                    setUsername(
-                      event.target.value
-                    )
+                    setUsername(event.target.value)
                   }
-                  placeholder="Choose your username"
+                  placeholder="Letters, numbers, underscores"
                   autoComplete="username"
                   maxLength={20}
                   disabled={loading}
                 />
-
               </div>
-
             )}
 
-
-            {/* EMAIL */}
-
-            <div className="form-group">
-
+            <div className="field">
               <label htmlFor="email">
-
-                {isLogin
-                  ? "Email or Username"
-                  : "Email"}
-
+                {isLogin ? "Email or username" : "Email"}
               </label>
 
               <input
                 id="email"
-                type={
-                  isLogin
-                    ? "text"
-                    : "email"
-                }
+                type={isLogin ? "text" : "email"}
                 value={email}
                 onChange={(event) =>
-                  setEmail(
-                    event.target.value
-                  )
+                  setEmail(event.target.value)
                 }
                 placeholder={
                   isLogin
-                    ? "Email or username"
+                    ? "you@example.com or username"
                     : "you@example.com"
                 }
-                autoComplete={
-                  isLogin
-                    ? "username"
-                    : "email"
-                }
+                autoComplete={isLogin ? "username" : "email"}
                 disabled={loading}
               />
-
             </div>
 
-
-            {/* PASSWORD */}
-
-            <div className="form-group">
-
+            <div className="field">
               <label htmlFor="password">
                 Password
               </label>
@@ -774,104 +783,62 @@ function Auth({ onAuthenticated }) {
                 type="password"
                 value={password}
                 onChange={(event) =>
-                  setPassword(
-                    event.target.value
-                  )
+                  setPassword(event.target.value)
                 }
-                placeholder="••••••••"
+                placeholder={
+                  isLogin ? "Your password" : "At least 6 characters"
+                }
                 autoComplete={
-                  isLogin
-                    ? "current-password"
-                    : "new-password"
+                  isLogin ? "current-password" : "new-password"
                 }
                 disabled={loading}
               />
-
             </div>
 
-
-            {/* ERROR */}
-
             {error && (
-
-              <div className="auth-message error">
+              <div className="notice notice-error" role="alert">
                 {error}
               </div>
-
             )}
-
-
-            {/* SUCCESS */}
 
             {message && (
-
-              <div className="auth-message success">
+              <div className="notice notice-success" role="status">
                 {message}
               </div>
-
             )}
 
-
-            {/* SUBMIT */}
-
             <button
-              className="auth-submit"
+              className="btn btn-primary btn-block"
               type="submit"
               disabled={loading}
             >
-
               {loading
-                ? "Checking..."
+                ? "Checking…"
                 : isLogin
-                  ? "Log In"
-                  : "Create Account"}
-
+                  ? "Log in"
+                  : "Create account"}
             </button>
 
           </form>
 
 
-          {/* =================================
-              SWITCH
-          ================================= */}
-
-          <div className="auth-switch">
-
-            <span>
-
-              {isLogin
-                ? "Don't have an account?"
-                : "Already have an account?"}
-
-            </span>
-
+          <p className="auth-switch">
+            {isLogin
+              ? "New here?"
+              : "Already have an account?"}{" "}
 
             <button
               type="button"
               onClick={switchMode}
               disabled={loading}
             >
-
-              {isLogin
-                ? "Create one"
-                : "Log in"}
-
+              {isLogin ? "Create an account" : "Log in"}
             </button>
-
-          </div>
+          </p>
 
         </div>
 
-
-        {/* =================================
-            FOOTER
-        ================================= */}
-
-        <p className="auth-footer">
-          Invite friends • Climb the leaderboard • Compete
-        </p>
-
-      </div>
+      </main>
 
     </div>
   );
