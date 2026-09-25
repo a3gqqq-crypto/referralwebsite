@@ -46,7 +46,8 @@ function PersonCard({ person }) {
         </div>
 
         <p className="person-card-meta">
-          <span className="mono">{person.referral_count || 0}</span> referrals
+          <span className="mono">{person.referral_count || 0}</span>{" "}
+          {person.referral_count === 1 ? "referral" : "referrals"}
           {person.bio && <span className="person-card-bio"> · {person.bio}</span>}
         </p>
       </Link>
@@ -58,7 +59,7 @@ function PersonCard({ person }) {
   );
 }
 
-function PersonGrid({ people, loading, empty }) {
+function PersonGrid({ people, loading, empty, rail = false }) {
   if (loading) return <SkeletonRows count={3} />;
 
   if (!people.length) {
@@ -66,7 +67,7 @@ function PersonGrid({ people, loading, empty }) {
   }
 
   return (
-    <div className="people-grid">
+    <div className={`people-grid ${rail ? "is-rail" : ""}`}>
       {people.map((person) => (
         <PersonCard key={person.id} person={person} />
       ))}
@@ -215,17 +216,17 @@ function PeoplePage() {
         <>
           <section className="people-section">
             <h2 className="people-section-title">Top inviters</h2>
-            <PersonGrid people={top} loading={loadingLists} empty="No one yet." />
+            <PersonGrid people={top} loading={loadingLists} empty="No one yet." rail />
           </section>
 
           <section className="people-section">
             <h2 className="people-section-title">Highest levels</h2>
-            <PersonGrid people={leveled} loading={loadingLists} empty="No one yet." />
+            <PersonGrid people={leveled} loading={loadingLists} empty="No one yet." rail />
           </section>
 
           <section className="people-section">
             <h2 className="people-section-title">Just joined</h2>
-            <PersonGrid people={newest} loading={loadingLists} empty="No one yet." />
+            <PersonGrid people={newest} loading={loadingLists} empty="No one yet." rail />
           </section>
         </>
       )}

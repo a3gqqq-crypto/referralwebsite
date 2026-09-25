@@ -464,6 +464,54 @@
   }
 }
 
+@media (max-width: 700px) {
+  .home-page {
+    gap: 64px;
+  }
+
+  /* "Three ways to climb" as compact rows: icon left, text right. */
+  .home-do-grid {
+    gap: 10px;
+  }
+
+  .home-do-card {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 16px;
+
+    padding: 18px;
+  }
+
+  .home-do-card:hover {
+    transform: none;
+  }
+
+  .home-do-icon {
+    grid-row: span 3;
+
+    width: 44px;
+    height: 44px;
+  }
+
+  .home-do-card h3 {
+    margin-top: 0;
+
+    font-size: 25px;
+  }
+
+  .home-do-card p {
+    margin-top: 4px;
+
+    font-size: 14.5px;
+  }
+
+  .home-do-cta {
+    margin-top: 10px;
+
+    font-size: 14.5px;
+  }
+}
+
 @media (max-width: 480px) {
   .home-hero-actions .btn {
     width: 100%;

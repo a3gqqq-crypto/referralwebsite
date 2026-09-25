@@ -275,6 +275,10 @@
   gap: 4px;
 }
 
+.chat-head-icon {
+  display: none;
+}
+
 .chat-head-lounge {
   display: flex;
   align-items: center;
@@ -640,12 +644,64 @@
     display: none;
   }
 
+  .chat-head {
+    gap: 8px;
+  }
+
+  .chat-head .player-chip {
+    min-width: 0;
+  }
+
+  .chat-head-actions {
+    flex-shrink: 0;
+  }
+
+  .chat-head-actions .btn {
+    width: 36px;
+    padding: 0;
+
+    justify-content: center;
+
+    color: var(--text-mute);
+  }
+
+  .chat-head-icon {
+    display: block;
+  }
+
+  .chat-head-label {
+    display: none;
+  }
+
   .chat-msg {
     grid-template-columns: 40px minmax(0, 1fr);
     padding-right: 10px;
   }
 
+  .chat-msg-head {
+    padding-right: 30px;
+  }
+
   .chat-msg-report {
-    opacity: 0.35;
+    top: 2px;
+    right: 2px;
+
+    width: 34px;
+    height: 34px;
+
+    border-color: transparent;
+
+    background: transparent;
+
+    opacity: 0.4;
+  }
+
+  /* 16px stops iOS from zooming in when the box is tapped. */
+  .chat-composer-box textarea {
+    font-size: 16px;
+  }
+
+  .chat-composer {
+    padding: 10px 12px 12px;
   }
 }

@@ -530,8 +530,10 @@ function ChatPage() {
                     type="button"
                     className="btn btn-sm btn-ghost"
                     onClick={() => setReporting({ target, kind: "dm", messageId: null })}
+                    aria-label={`Report ${target.username}`}
                   >
-                    Report
+                    <Icon name="flag" size={15} className="chat-head-icon" />
+                    <span className="chat-head-label">Report</span>
                   </button>
 
                   {relation !== "blocked" && (
@@ -543,8 +545,10 @@ function ChatPage() {
                           social.block(target.id);
                         }
                       }}
+                      aria-label={`Block ${target.username}`}
                     >
-                      Block
+                      <Icon name="block" size={15} className="chat-head-icon" />
+                      <span className="chat-head-label">Block</span>
                     </button>
                   )}
                 </div>

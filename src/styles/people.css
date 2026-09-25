@@ -160,3 +160,59 @@
 .person-card-actions {
   padding: 14px 18px 18px;
 }
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+  .people-section {
+    margin-top: 40px;
+  }
+
+  .people-section-title {
+    margin-bottom: 14px;
+
+    font-size: 30px;
+  }
+
+  /* Browse lists become swipeable rows so the page isn't 27 cards tall. */
+  .people-grid.is-rail {
+    display: flex;
+    gap: 12px;
+
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 4px var(--gutter) 8px;
+
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .people-grid.is-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .people-grid.is-rail .person-card {
+    flex: 0 0 78%;
+
+    scroll-snap-align: start;
+  }
+
+  .person-card:hover {
+    transform: none;
+  }
+
+  .person-card-name {
+    font-size: 24px;
+  }
+
+  .person-card-name .sname {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

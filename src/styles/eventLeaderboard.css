@@ -263,6 +263,10 @@
   font-family: var(--font-mono);
 }
 
+.board-head-short {
+  display: none;
+}
+
 .board-row.is-top .board-reward {
   color: var(--gold-soft);
 }
@@ -346,7 +350,27 @@
     display: none;
   }
 
-  .board-row .badge-row {
+  .board-row .badge-row,
+  .board-row .player-chip-you {
     display: none;
+  }
+
+  .board-head-long {
+    display: none;
+  }
+
+  .board-head-short {
+    display: inline;
+  }
+
+  .board-podium-who,
+  .board-podium-name {
+    max-width: 100%;
+  }
+
+  .board-podium-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

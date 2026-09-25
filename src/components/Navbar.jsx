@@ -162,6 +162,10 @@ function Navbar({ user, onLogout }) {
 
       </div>
 
+      {menuOpen && (
+        <div className="navbar-backdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />
+      )}
+
       <div className="navbar-mobile-menu">
         <nav aria-label="Main mobile">
           <NavLink to="/" end onClick={playClick}>Home</NavLink>

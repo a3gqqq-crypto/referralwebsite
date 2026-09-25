@@ -203,7 +203,10 @@ function EventLeaderboardPage({ user }) {
             <div className="board-row board-row-head" aria-hidden="true">
               <span>Rank</span>
               <span>Player</span>
-              <span>Referrals</span>
+              <span>
+                <span className="board-head-long">Referrals</span>
+                <span className="board-head-short">Invites</span>
+              </span>
               <span>Prize</span>
             </div>
 

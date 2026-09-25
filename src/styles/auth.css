@@ -333,3 +333,49 @@
     font-size: 44px;
   }
 }
+
+/* Phones: the headline and live event stay, the rest tightens so the
+   invite and the sign-up form show up without much scrolling. */
+@media (max-width: 700px) {
+  .auth-poster {
+    gap: 18px;
+
+    padding: 18px var(--gutter) 22px;
+  }
+
+  .auth-poster-body {
+    margin-top: 0;
+  }
+
+  .auth-poster h1 {
+    margin-top: 12px;
+
+    font-size: clamp(38px, 11vw, 52px);
+  }
+
+  .auth-steps {
+    display: none;
+  }
+
+  .auth-main {
+    padding: 26px var(--gutter) 56px;
+  }
+
+  .auth-card h2 {
+    margin-top: 10px;
+
+    font-size: 38px;
+  }
+
+  .auth-sub {
+    font-size: 15px;
+  }
+
+  .auth-invite {
+    margin-top: 18px;
+  }
+
+  .auth-form {
+    margin-top: 22px;
+  }
+}

@@ -11,6 +11,7 @@ import { featuredEvent, useEventList } from "./data/events";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import MobileTabBar from "./components/MobileTabBar";
 import Auth from "./components/Auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -107,6 +108,8 @@ function AuthenticatedApp({ session, onLogout }) {
             </Routes>
 
             {!fullHeight && <Footer />}
+
+            <MobileTabBar />
           </div>
         </SocialProvider>
       </ProfileProvider>

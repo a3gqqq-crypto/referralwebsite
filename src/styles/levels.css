@@ -156,6 +156,17 @@
   font-family: var(--font-mono);
 }
 
+@media (max-width: 700px) {
+  .xp-toast {
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 14px);
+
+    max-width: calc(100vw - 32px);
+
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
 @keyframes xp-toast {
   0% { opacity: 0; transform: translate(-50%, 20px); }
   10% { opacity: 1; transform: translate(-50%, 0); }

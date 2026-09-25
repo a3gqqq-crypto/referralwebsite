@@ -504,6 +504,14 @@
 /* ---------- Mobile ---------- */
 
 @media (max-width: 700px) {
+  .admin-search input,
+  .admin-grant select,
+  .admin-note input,
+  .admin-event-picker select,
+  .admin-winner-row input {
+    font-size: 16px;
+  }
+
   .admin-form-grid {
     grid-template-columns: minmax(0, 1fr);
   }

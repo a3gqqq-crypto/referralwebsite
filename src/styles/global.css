@@ -776,6 +776,34 @@ h3 {
   .page-header p {
     font-size: 16px;
   }
+
+  /* iOS zooms the page into any field under 16px; keep them all at 16. */
+  .field input,
+  .field textarea,
+  .field select {
+    font-size: 16px;
+  }
+
+  /* Small text links get a finger-sized hit area without moving anything. */
+  .event-back,
+  .locker-shop-link,
+  .shop-locker-link {
+    padding-block: 11px;
+    margin-block: -11px;
+  }
+}
+
+/* Touch screens: no sticky hover lifts after a tap, no double-tap zoom delay. */
+@media (hover: none) {
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
