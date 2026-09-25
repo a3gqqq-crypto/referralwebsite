@@ -283,6 +283,20 @@
   font-weight: 500;
 }
 
+.auth-rules {
+  margin-top: 14px;
+
+  font-size: 14px;
+}
+
+.auth-rules a {
+  color: var(--text-mute);
+}
+
+.auth-rules a:hover {
+  color: var(--gold-soft);
+}
+
 .auth-switch button:hover {
   text-decoration: underline;
   text-underline-offset: 4px;

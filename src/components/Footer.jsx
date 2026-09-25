@@ -36,6 +36,7 @@ function Footer() {
             <Link to="/chat">Lounge</Link>
             <Link to="/people">Find people</Link>
             <Link to="/discord">Discord</Link>
+            <Link to="/rules">Rules & FAQ</Link>
             <Link to="/donations">Support us</Link>
           </div>
         </nav>

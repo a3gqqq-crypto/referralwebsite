@@ -36,6 +36,7 @@ const ShopPage = lazyPage(() => import("./pages/ShopPage"));
 const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
 const ChatPage = lazyPage(() => import("./pages/ChatPage"));
 const AdminPage = lazyPage(() => import("./pages/AdminPage"));
+const RulesPage = lazyPage(() => import("./pages/RulesPage"));
 
 import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
@@ -101,6 +102,7 @@ function AuthenticatedApp({ session, onLogout }) {
               <Route path="/donations" element={<DonationsPage />} />
               <Route path="/discord" element={<DiscordPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/rules" element={<RulesPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>
@@ -202,6 +204,17 @@ function App() {
 
           {!loading && !session && (
             <Route path="/u/:username" element={<ProfilePage standalone />} />
+          )}
+
+          {!loading && !session && (
+            <Route
+              path="/rules"
+              element={
+                <Suspense fallback={loadingScreen}>
+                  <RulesPage standalone />
+                </Suspense>
+              }
+            />
           )}
 
           <Route path="*" element={gated} />

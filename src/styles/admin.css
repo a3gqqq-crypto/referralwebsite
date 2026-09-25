@@ -490,6 +490,18 @@
   font-size: 24px;
 }
 
+.admin-quality {
+  flex-basis: 100%;
+
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
+
+.admin-quality.is-suspicious {
+  color: var(--rose);
+}
+
 .admin-note {
   width: 220px;
 }

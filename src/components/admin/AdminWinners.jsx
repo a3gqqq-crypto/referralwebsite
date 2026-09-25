@@ -9,7 +9,23 @@ import { adminCall, formatDateTime } from "./adminApi";
 
 const PODIUM_ITEMS = ["badge-podium", "frame-podium"];
 
-function WinnerRow({ event, place, player, payout, ended, onChanged }) {
+// Invites that never came back or did anything, or arrived in bursts, are worth a look.
+function QualityLine({ quality }) {
+  if (!quality?.invites) return null;
+
+  const { invites, came_back: cameBack, did_something: active, in_bursts: bursts } = quality;
+  const real = Math.max(cameBack, active);
+  const suspicious = invites >= 3 && (real / invites < 0.3 || bursts / invites > 0.5);
+
+  return (
+    <p className={`admin-quality ${suspicious ? "is-suspicious" : ""}`}>
+      {suspicious && <strong>Check these invites · </strong>}
+      {cameBack}/{invites} came back another day · {active}/{invites} did anything · {bursts} signed up in bursts
+    </p>
+  );
+}
+
+function WinnerRow({ event, place, player, payout, quality, ended, onChanged }) {
   const [note, setNote] = useState(payout?.note || "");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -68,6 +84,8 @@ function WinnerRow({ event, place, player, payout, ended, onChanged }) {
         </span>
       </div>
 
+      <QualityLine quality={quality} />
+
       <div className="admin-actions">
         <div className="field admin-note">
           <input
@@ -103,6 +121,7 @@ function AdminWinners() {
   const [eventId, setEventId] = useState("");
   const [standings, setStandings] = useState(null);
   const [payouts, setPayouts] = useState({});
+  const [quality, setQuality] = useState({});
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -138,13 +157,16 @@ function AdminWinners() {
   const load = useCallback(async () => {
     if (!event) return;
 
-    const [standingResult, payoutResult] = await Promise.all([
+    const [standingResult, payoutResult, qualityResult] = await Promise.all([
       supabase.rpc(eventKind(event).rpc, {
         p_event_id: event.id,
         p_starts: new Date(event.startDate).toISOString(),
         p_ends: new Date(event.endDate).toISOString(),
       }),
       adminCall("admin_event_payouts", { p_event_id: event.id }),
+      event.type === "streak"
+        ? Promise.resolve({ ok: true, data: [] })
+        : adminCall("admin_referral_quality", { p_event_id: event.id }),
     ]);
 
     if (standingResult.error || !payoutResult.ok) {
@@ -156,6 +178,7 @@ function AdminWinners() {
     setError("");
     setStandings(standingResult.data || []);
     setPayouts(Object.fromEntries((payoutResult.data || []).map((row) => [row.user_id, row])));
+    setQuality(Object.fromEntries((qualityResult.ok ? qualityResult.data : []).map((row) => [row.user_id, row])));
   }, [event]);
 
   useEffect(() => {
@@ -208,6 +231,7 @@ function AdminWinners() {
               place={index + 1}
               player={player}
               payout={payouts[player.id]}
+              quality={quality[player.id]}
               ended={ended}
               onChanged={load}
             />

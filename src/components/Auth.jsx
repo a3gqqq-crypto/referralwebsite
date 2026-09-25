@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useEventList } from "../data/events";
 import {
@@ -826,6 +827,10 @@ function Auth({ onAuthenticated }) {
             >
               {isLogin ? "Create an account" : "Log in"}
             </button>
+          </p>
+
+          <p className="auth-rules">
+            <Link to="/rules">How it works · Rules & FAQ</Link>
           </p>
 
         </div>
