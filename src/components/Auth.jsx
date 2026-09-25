@@ -521,36 +521,26 @@ function Auth({ onAuthenticated }) {
         !loginValue.includes("@")
       ) {
 
+        // Returns the email only when the password is right, so emails never leak.
         const {
           data: usernameEmail,
-          error:
-            usernameLookupError,
-        } = await supabase.rpc(
-          "get_email_by_username",
-          {
-            lookup_username:
-              loginValue,
-          }
-        );
-
+          error: usernameLookupError,
+        } = await supabase.rpc("email_for_login", {
+          p_username: loginValue,
+          p_password: password,
+        });
 
         if (usernameLookupError) {
-
-          console.error(
-            usernameLookupError
-          );
+          console.error(usernameLookupError);
 
           throw new Error(
-            "Could not find that username. Please try again."
+            usernameLookupError.message ||
+              "Could not log in. Please try again."
           );
-
         }
 
-
         if (!usernameEmail) {
-          setError(
-            "Username not found."
-          );
+          setError("Wrong username or password.");
 
           return;
         }
