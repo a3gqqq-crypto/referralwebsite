@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 
 import Icon from "./Icon";
 import { FramedAvatar, StyledName } from "./Cosmetics";
+import { LevelBadge } from "./Level";
 import { useMyProfile } from "../context/ProfileContext";
 import { useSocial } from "../context/SocialContext";
 import { equippedFrom } from "../data/cosmetics";
@@ -115,6 +116,7 @@ function Navbar({ user, onLogout }) {
           >
             <FramedAvatar name={username} frame={equipped.frame} size={32} />
             <StyledName name={username} effect={equipped.name} className="navbar-me-name" />
+            <LevelBadge xp={profile?.xp} />
           </Link>
 
           <button

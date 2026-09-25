@@ -12,6 +12,7 @@ import {
   ProfileBanner,
   StyledName,
 } from "../components/Cosmetics";
+import { LevelBadge } from "../components/Level";
 import { equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
@@ -37,7 +38,10 @@ function PersonCard({ person }) {
 
           <div className="person-card-name">
             <StyledName name={person.username} effect={equipped.name} />
-            <BadgeRow ids={equipped.badges} size={18} />
+            <span className="person-card-tags">
+              <LevelBadge xp={person.xp} />
+              <BadgeRow ids={equipped.badges} size={18} />
+            </span>
           </div>
         </div>
 
@@ -79,6 +83,7 @@ function PeoplePage() {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [top, setTop] = useState([]);
+  const [leveled, setLeveled] = useState([]);
   const [newest, setNewest] = useState([]);
   const [loadingLists, setLoadingLists] = useState(true);
 
@@ -98,11 +103,18 @@ function PeoplePage() {
         .not("username", "is", null)
         .order("created_at", { ascending: false })
         .limit(9),
-    ]).then(([topResult, newResult]) => {
+      supabase
+        .from("profiles")
+        .select(COLUMNS)
+        .not("username", "is", null)
+        .order("xp", { ascending: false })
+        .limit(9),
+    ]).then(([topResult, newResult, levelResult]) => {
       if (cancelled) return;
 
       setTop((topResult.data || []).filter((person) => person.id !== me));
       setNewest((newResult.data || []).filter((person) => person.id !== me));
+      setLeveled((levelResult.data || []).filter((person) => person.id !== me));
       setLoadingLists(false);
     });
 
@@ -204,6 +216,11 @@ function PeoplePage() {
           <section className="people-section">
             <h2 className="people-section-title">Top inviters</h2>
             <PersonGrid people={top} loading={loadingLists} empty="No one yet." />
+          </section>
+
+          <section className="people-section">
+            <h2 className="people-section-title">Highest levels</h2>
+            <PersonGrid people={leveled} loading={loadingLists} empty="No one yet." />
           </section>
 
           <section className="people-section">

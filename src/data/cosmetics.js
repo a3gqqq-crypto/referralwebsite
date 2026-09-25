@@ -276,4 +276,4 @@ export function equippedFrom(profile) {
 }
 
 export const PROFILE_COLUMNS =
-  "id, username, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges";
+  "id, username, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak";

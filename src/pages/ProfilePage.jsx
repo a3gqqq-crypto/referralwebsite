@@ -148,6 +148,8 @@ function ProfilePage({ viewer, standalone = false }) {
           username={profile.username}
           equipped={equipped}
           bio={profile.bio}
+          xp={profile.xp}
+          showProgress
           stats={[
             { label: "Referrals", value: profile.referral_count || 0 },
             { label: "Rank", value: rank ? `#${rank}` : "—" },

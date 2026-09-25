@@ -179,6 +179,9 @@ function Home({ user }) {
           <ProfileCard
             username={username}
             equipped={equippedFrom(profile)}
+            xp={profile?.xp}
+            streak={profile?.checkin_streak}
+            showProgress
             stats={[
               { label: "Rank", value: standing.rank ? `#${standing.rank}` : "—" },
               { label: "Referrals", value: standing.referrals ?? "—" },

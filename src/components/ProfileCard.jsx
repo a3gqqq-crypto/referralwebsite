@@ -4,6 +4,7 @@ import {
   ProfileBanner,
   StyledName,
 } from "./Cosmetics";
+import { LevelBadge, LevelProgress } from "./Level";
 
 import "../styles/profile.css";
 
@@ -11,6 +12,9 @@ function ProfileCard({
   username,
   equipped,
   bio,
+  xp,
+  streak,
+  showProgress = false,
   stats = [],
   size = "md",
   children,
@@ -35,10 +39,18 @@ function ProfileCard({
             <StyledName name={username || "you"} effect={equipped.name} />
           </h2>
 
+          <LevelBadge xp={xp} size={size === "lg" ? "lg" : "sm"} />
+
           <BadgeRow ids={equipped.badges} size={size === "lg" ? 26 : 22} />
         </div>
 
         {bio && <p className="profile-card-bio">{bio}</p>}
+
+        {showProgress && xp != null && (
+          <div className="profile-card-level">
+            <LevelProgress xp={xp} streak={streak} />
+          </div>
+        )}
 
         {stats.length > 0 && (
           <dl className="profile-card-stats">

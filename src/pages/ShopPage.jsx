@@ -192,6 +192,7 @@ function ShopPage() {
             username={username || "you"}
             equipped={tryOn}
             bio={profile?.bio}
+            xp={profile?.xp}
           />
 
           {selected && (

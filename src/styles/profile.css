@@ -83,6 +83,10 @@
   overflow-wrap: anywhere;
 }
 
+.profile-card-level {
+  margin-top: 18px;
+}
+
 .profile-card-stats {
   display: flex;
   flex-wrap: wrap;
@@ -472,6 +476,26 @@
 }
 
 
+.locker-levels {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 32px;
+
+  margin-top: 40px;
+  padding: 30px;
+}
+
+.locker-levels h2 {
+  margin-top: 12px;
+
+  font-size: 40px;
+}
+
+.locker-levels p {
+  margin: 10px 0 20px;
+}
+
+
 /* =========================================
    RESPONSIVE
 ========================================= */
@@ -483,6 +507,12 @@
 
   .locker-preview {
     position: static;
+  }
+
+  .locker-levels {
+    grid-template-columns: minmax(0, 1fr);
+
+    padding: 22px;
   }
 }
 

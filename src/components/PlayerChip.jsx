@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 
 import { BadgeRow, FramedAvatar, StyledName } from "./Cosmetics";
+import { LevelBadge } from "./Level";
 import { equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
-  "id, username, referral_count, created_at, equipped_frame, equipped_name, equipped_badges";
+  "id, username, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp";
 
 function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
   const equipped = equippedFrom(player);
@@ -17,6 +18,8 @@ function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
       <span className="player-chip-name">
         <StyledName name={name} effect={equipped.name} />
       </span>
+
+      <LevelBadge xp={player?.xp} />
 
       {showBadges && <BadgeRow ids={equipped.badges} size={18} />}
 

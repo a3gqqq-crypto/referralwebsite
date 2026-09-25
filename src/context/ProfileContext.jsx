@@ -3,11 +3,14 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
 import { supabase } from "../lib/supabaseClient";
 import { PROFILE_COLUMNS } from "../data/cosmetics";
+
+import "../styles/levels.css";
 
 const ProfileContext = createContext(null);
 
@@ -18,9 +21,23 @@ export function ProfileProvider({ user, children }) {
   const [owned, setOwned] = useState(() => new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [checkin, setCheckin] = useState(null);
+  const checkedIn = useRef(false);
 
   const refresh = useCallback(async () => {
     if (!userId) return;
+
+    if (!checkedIn.current) {
+      checkedIn.current = true;
+
+      const { data: reward, error: checkinError } = await supabase.rpc("daily_checkin");
+
+      if (checkinError) {
+        console.error("Daily check-in failed:", checkinError);
+      } else if (reward?.awarded > 0) {
+        setCheckin(reward);
+      }
+    }
 
     // Grants any free badges the user now qualifies for; safe to call repeatedly.
     const { error: claimError } = await supabase.rpc("claim_earned_cosmetics");
@@ -96,6 +113,16 @@ export function ProfileProvider({ user, children }) {
   return (
     <ProfileContext.Provider value={value}>
       {children}
+
+      {checkin && (
+        <div className="xp-toast" role="status" onAnimationEnd={() => setCheckin(null)}>
+          <span aria-hidden="true">🔥</span>
+          <span>
+            Daily check-in <strong>+{checkin.awarded} XP</strong>
+            {checkin.streak > 1 ? ` · ${checkin.streak}-day streak` : ""}
+          </span>
+        </div>
+      )}
     </ProfileContext.Provider>
   );
 }

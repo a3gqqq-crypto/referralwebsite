@@ -14,6 +14,7 @@ import {
   formatPrice,
 } from "../data/cosmetics";
 import { useCopy } from "../hooks/useCopy";
+import { TIERS, XP_RULES, levelInfo } from "../data/levels";
 
 import "../styles/profile.css";
 
@@ -168,6 +169,9 @@ function LockerPage() {
             username={username}
             equipped={equipped}
             bio={bio.trim() || profile?.bio}
+            xp={profile?.xp}
+            streak={profile?.checkin_streak}
+            showProgress
             stats={[
               { label: "Referrals", value: referrals },
               { label: "Owned", value: owned.size },
@@ -323,6 +327,42 @@ function LockerPage() {
           </div>
         </section>
       </div>
+
+      <section className="locker-levels card">
+        <div>
+          <span className="eyebrow">Levels &amp; ranks</span>
+          <h2>How to level up</h2>
+          <p className="muted">
+            XP only counts things the site can verify, and daily
+            caps stop spam from counting.
+          </p>
+
+          <ul className="tier-ladder">
+            {TIERS.map((tier) => (
+              <li
+                key={tier.id}
+                className={`tier-${tier.id} ${
+                  levelInfo(profile?.xp).tier.id === tier.id ? "current" : ""
+                }`}
+              >
+                <Icon name={tier.icon} size={13} strokeWidth={2.4} />
+                {tier.name}
+                <small>Lv {tier.minLevel}+</small>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <ul className="xp-guide">
+          {XP_RULES.map((rule) => (
+            <li key={rule.label}>
+              <Icon name={rule.icon} size={17} />
+              <span>{rule.label}</span>
+              <strong>{rule.xp}</strong>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }
