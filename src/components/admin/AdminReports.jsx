@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import SkeletonRows from "../SkeletonRows";
+import { useChatImage } from "../../lib/chatImages";
 import { adminCall, timeAgo } from "./adminApi";
 
 const KIND_LABEL = {
@@ -9,6 +10,20 @@ const KIND_LABEL = {
   lounge: "Lounge message",
   dm: "Direct message",
 };
+
+function ReportPhoto({ path }) {
+  const link = useChatImage(path);
+
+  if (!link?.url) {
+    return <p className="admin-meta">{link?.failed ? "Photo was deleted." : "Loading photo…"}</p>;
+  }
+
+  return (
+    <a href={link.url} target="_blank" rel="noreferrer" className="admin-report-photo">
+      <img src={link.url} alt="Reported" />
+    </a>
+  );
+}
 
 function AdminReports({ onChange }) {
   const [filter, setFilter] = useState("open");
@@ -92,7 +107,9 @@ function AdminReports({ onChange }) {
 
               {report.reason && <p className="admin-report-reason">“{report.reason}”</p>}
 
-              {report.message_body != null && (
+              {report.message_image && <ReportPhoto path={report.message_image} />}
+
+              {report.message_body != null && report.message_body !== "" && (
                 <blockquote className={`admin-report-message ${report.message_deleted ? "is-deleted" : ""}`}>
                   {report.message_body}
                   {report.message_deleted && <small> · removed</small>}

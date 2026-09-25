@@ -226,6 +226,24 @@
   text-decoration: line-through;
 }
 
+.admin-report-photo {
+  display: inline-block;
+
+  margin-top: 12px;
+}
+
+.admin-report-photo img {
+  display: block;
+
+  max-width: 240px;
+  max-height: 200px;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+
+  object-fit: cover;
+}
+
 .admin-report .admin-actions {
   margin-top: 14px;
 }

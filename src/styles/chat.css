@@ -477,6 +477,198 @@
 
 
 /* =========================================
+   PHOTOS
+========================================= */
+
+.chat-photo {
+  display: block;
+
+  max-width: min(320px, 100%);
+  margin-top: 6px;
+  padding: 0;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--surface-2);
+
+  overflow: hidden;
+
+  cursor: zoom-in;
+}
+
+.chat-photo img {
+  display: block;
+
+  max-width: 100%;
+  max-height: 340px;
+
+  object-fit: cover;
+}
+
+.chat-photo-loading {
+  width: 220px;
+  height: 160px;
+
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+
+  animation: chat-photo-shimmer 1.4s ease infinite;
+
+  cursor: default;
+}
+
+.chat-photo-missing {
+  padding: 18px 20px;
+
+  color: var(--text-mute);
+
+  font-size: 13px;
+
+  cursor: default;
+}
+
+@keyframes chat-photo-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.chat-photo + .chat-msg-body {
+  margin-top: 6px;
+}
+
+.chat-pending-photo {
+  position: relative;
+
+  display: inline-block;
+
+  margin-bottom: 10px;
+}
+
+.chat-pending-photo img {
+  display: block;
+
+  max-width: 140px;
+  max-height: 110px;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+
+  object-fit: cover;
+}
+
+.chat-pending-photo button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+
+  width: 26px;
+  height: 26px;
+
+  display: grid;
+  place-items: center;
+
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.chat-attach {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  margin-left: -8px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--text-mute);
+
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.chat-attach:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--gold-soft);
+}
+
+.chat-send-spinner {
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+
+  animation: chat-spin 0.7s linear infinite;
+}
+
+@keyframes chat-spin {
+  to { transform: rotate(360deg); }
+}
+
+.chat-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+
+  display: grid;
+  place-items: center;
+
+  padding: 24px;
+
+  background: rgba(12, 6, 14, 0.9);
+
+  backdrop-filter: blur(6px);
+
+  cursor: zoom-out;
+
+  animation: navbar-backdrop-in 0.15s ease;
+}
+
+.chat-lightbox:focus {
+  outline: none;
+}
+
+.chat-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+
+  border-radius: 12px;
+
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+}
+
+.chat-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+
+/* =========================================
    COMPOSER
 ========================================= */
 

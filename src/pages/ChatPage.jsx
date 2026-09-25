@@ -16,6 +16,8 @@ import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
+import { useMyProfile } from "../context/ProfileContext";
+import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
 import { equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
@@ -33,7 +35,25 @@ function formatTime(iso) {
   return `${date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}, ${time}`;
 }
 
-function MessageRow({ message, sender, grouped, isMine, onReport }) {
+function ChatPhoto({ path, onOpen, onLoad }) {
+  const link = useChatImage(path);
+
+  if (link?.failed) {
+    return <div className="chat-photo chat-photo-missing">Photo unavailable</div>;
+  }
+
+  if (!link?.url) {
+    return <div className="chat-photo chat-photo-loading" aria-label="Loading photo" />;
+  }
+
+  return (
+    <button type="button" className="chat-photo" onClick={() => onOpen(link.url)} aria-label="Open photo">
+      <img src={link.url} alt="" loading="lazy" decoding="async" onLoad={onLoad} />
+    </button>
+  );
+}
+
+function MessageRow({ message, sender, grouped, isMine, onReport, onOpenPhoto, onPhotoLoad }) {
   const equipped = equippedFrom(sender);
   const name = sender?.username || "…";
 
@@ -60,7 +80,11 @@ function MessageRow({ message, sender, grouped, isMine, onReport }) {
           </div>
         )}
 
-        <p className="chat-msg-body">{message.body}</p>
+        {message.image && (
+          <ChatPhoto path={message.image} onOpen={onOpenPhoto} onLoad={onPhotoLoad} />
+        )}
+
+        {message.body && <p className="chat-msg-body">{message.body}</p>}
       </div>
 
       {!isMine && sender && (
@@ -99,6 +123,12 @@ function ChatPage() {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [viewing, setViewing] = useState(null);
+  const photoInputRef = useRef(null);
+
+  const { profile: myProfile } = useMyProfile();
+  const canPostLoungePhoto = (myProfile?.xp || 0) >= 200;
 
   const [recent, setRecent] = useState({});
   const [listOpen, setListOpen] = useState(false);
@@ -147,7 +177,7 @@ function ChatPage() {
 
     const { data } = await supabase
       .from("direct_messages")
-      .select("sender_id, recipient_id, body, created_at")
+      .select("sender_id, recipient_id, body, image, created_at")
       .or(`sender_id.eq.${me},recipient_id.eq.${me}`)
       .order("created_at", { ascending: false })
       .limit(300);
@@ -171,6 +201,7 @@ function ChatPage() {
     setListOpen(false);
     setError("");
     setDraft("");
+    setPhoto(null);
 
     if (!isDm) {
       setTarget(null);
@@ -212,11 +243,11 @@ function ChatPage() {
       let query = isDm
         ? supabase
             .from("direct_messages")
-            .select("id, sender_id, recipient_id, body, created_at")
+            .select("id, sender_id, recipient_id, body, image, created_at")
             .or(
               `and(sender_id.eq.${me},recipient_id.eq.${target.id}),and(sender_id.eq.${target.id},recipient_id.eq.${me})`
             )
-        : supabase.from("lounge_messages").select("id, sender_id, body, created_at");
+        : supabase.from("lounge_messages").select("id, sender_id, body, image, created_at");
 
       query = query.order("created_at", { ascending: false }).limit(PAGE);
 
@@ -339,29 +370,86 @@ function ChatPage() {
     stickToBottom.current = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
   };
 
+  // Photos load after the message renders; keep the view pinned to the newest one.
+  const keepAtBottom = useCallback(() => {
+    const box = scrollRef.current;
+    if (box && stickToBottom.current) box.scrollTop = box.scrollHeight;
+  }, []);
+
   /* ---------- Sending ---------- */
+
+  const pickPhoto = (file) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Only photos can be sent.");
+      return;
+    }
+
+    if (!isDm && !canPostLoungePhoto) {
+      setError("Reach level 3 to post photos in the lounge.");
+      return;
+    }
+
+    setError("");
+    setPhoto((current) => {
+      if (current) URL.revokeObjectURL(current.preview);
+      return { file, preview: URL.createObjectURL(file) };
+    });
+    inputRef.current?.focus();
+  };
+
+  const clearPhoto = () => {
+    setPhoto((current) => {
+      if (current) URL.revokeObjectURL(current.preview);
+      return null;
+    });
+  };
+
+  const onPaste = (event) => {
+    const file = [...(event.clipboardData?.files || [])].find((item) => item.type.startsWith("image/"));
+
+    if (file) {
+      event.preventDefault();
+      pickPhoto(file);
+    }
+  };
 
   const send = async (event) => {
     event?.preventDefault();
 
     const body = draft.trim();
 
-    if (!body || sending || !canSend) return;
+    if ((!body && !photo) || sending || !canSend) return;
 
     setSending(true);
     setError("");
 
+    let imagePath = null;
+
+    if (photo) {
+      try {
+        imagePath = await uploadChatImage(me, await prepareChatImage(photo.file));
+      } catch (uploadError) {
+        setSending(false);
+        setError(uploadError.message);
+        return;
+      }
+    }
+
     const { data, error: sendError } = isDm
-      ? await supabase.rpc("send_direct_message", { p_recipient: target.id, p_body: body })
-      : await supabase.rpc("send_lounge_message", { p_body: body });
+      ? await supabase.rpc("send_direct_message", { p_recipient: target.id, p_body: body, p_image: imagePath })
+      : await supabase.rpc("send_lounge_message", { p_body: body, p_image: imagePath });
 
     setSending(false);
 
     if (sendError) {
+      if (imagePath) removeChatImage(imagePath);
       setError(sendError.message);
       return;
     }
 
+    clearPhoto();
     setDraft("");
     stickToBottom.current = true;
     setMessages((current) =>
@@ -499,7 +587,7 @@ function ChatPage() {
                       <StyledName name={profile.username} effect={equipped.name} />
                       <small>
                         {last
-                          ? `${last.sender_id === me ? "You: " : ""}${last.body}`
+                          ? `${last.sender_id === me ? "You: " : ""}${last.body || (last.image ? "📷 Photo" : "")}`
                           : "Say hi 👋"}
                       </small>
                     </span>
@@ -623,6 +711,8 @@ function ChatPage() {
                       onReport={(sender, messageId) =>
                         setReporting({ target: sender, kind: isDm ? "dm" : "lounge", messageId })
                       }
+                      onOpenPhoto={setViewing}
+                      onPhotoLoad={keepAtBottom}
                     />
                   );
                 })}
@@ -635,7 +725,42 @@ function ChatPage() {
           <form className="chat-composer" onSubmit={send}>
             {error && <div className="notice notice-error chat-error">{error}</div>}
 
+            {photo && (
+              <div className="chat-pending-photo">
+                <img src={photo.preview} alt="Photo to send" />
+                <button type="button" onClick={clearPhoto} aria-label="Remove photo" disabled={sending}>
+                  <Icon name="close" size={14} strokeWidth={2.6} />
+                </button>
+              </div>
+            )}
+
             <div className="chat-composer-box">
+              <button
+                type="button"
+                className="chat-attach"
+                onClick={() =>
+                  !isDm && !canPostLoungePhoto
+                    ? setError("Reach level 3 to post photos in the lounge.")
+                    : photoInputRef.current?.click()
+                }
+                disabled={sending}
+                aria-label="Add a photo"
+                title={!isDm && !canPostLoungePhoto ? "Reach level 3 to post photos in the lounge" : "Add a photo"}
+              >
+                <Icon name="image" size={20} />
+              </button>
+
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(event) => {
+                  pickPhoto(event.target.files?.[0]);
+                  event.target.value = "";
+                }}
+              />
+
               <textarea
                 ref={inputRef}
                 rows={1}
@@ -645,6 +770,7 @@ function ChatPage() {
                   if (error) setError("");
                 }}
                 onKeyDown={onKeyDown}
+                onPaste={onPaste}
                 maxLength={limit}
                 placeholder={isDm && target ? `Message ${target.username}` : "Message the lounge"}
                 aria-label="Message"
@@ -657,10 +783,10 @@ function ChatPage() {
               <button
                 type="submit"
                 className="chat-send"
-                disabled={!draft.trim() || sending}
+                disabled={(!draft.trim() && !photo) || sending}
                 aria-label="Send"
               >
-                <Icon name="arrowRight" size={18} strokeWidth={2.4} />
+                {sending ? <span className="chat-send-spinner" /> : <Icon name="arrowRight" size={18} strokeWidth={2.4} />}
               </button>
             </div>
           </form>
@@ -677,6 +803,23 @@ function ChatPage() {
           )
         )}
       </section>
+
+      {viewing && (
+        <div
+          className="chat-lightbox"
+          role="dialog"
+          aria-label="Photo"
+          onClick={() => setViewing(null)}
+          onKeyDown={(event) => event.key === "Escape" && setViewing(null)}
+          tabIndex={-1}
+          ref={(node) => node?.focus()}
+        >
+          <img src={viewing} alt="" />
+          <button type="button" className="chat-lightbox-close" aria-label="Close photo">
+            <Icon name="close" size={20} />
+          </button>
+        </div>
+      )}
 
       {reporting && (
         <ReportModal
