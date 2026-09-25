@@ -8,7 +8,7 @@ const CARD = { x: 90, y: 360, w: 900, h: 1125 };
 const DISPLAY = '"Bricolage Grotesque", "Geist", system-ui, sans-serif';
 const BODY = '"Geist", system-ui, sans-serif';
 
-function roundedRect(ctx, x, y, w, h, r) {
+export function roundedRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -41,7 +41,7 @@ function wrap(ctx, text, maxWidth) {
   return lines;
 }
 
-function fitText(ctx, text, maxWidth, startSize, minSize, weight, family) {
+export function fitText(ctx, text, maxWidth, startSize, minSize, weight, family) {
   let size = startSize;
 
   do {
@@ -193,12 +193,10 @@ export async function renderMomentImage(moment) {
 }
 
 // Share the image where the phone allows it (WhatsApp, Instagram…), otherwise download it.
-export async function shareOrSaveMomentImage(moment) {
-  const file = await renderMomentImage(moment);
-
+export async function shareOrSaveFile(file, text) {
   if (navigator.canShare?.({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], text: `${moment.from_name} made you something ✦` });
+      await navigator.share({ files: [file], text });
       return "shared";
     } catch (error) {
       if (error?.name === "AbortError") return "cancelled";
@@ -215,4 +213,9 @@ export async function shareOrSaveMomentImage(moment) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 
   return "saved";
+}
+
+export async function shareOrSaveMomentImage(moment) {
+  const file = await renderMomentImage(moment);
+  return shareOrSaveFile(file, `${moment.from_name} made you something ✦`);
 }

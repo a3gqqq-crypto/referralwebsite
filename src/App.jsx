@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   BrowserRouter,
   Routes,
@@ -16,23 +16,26 @@ import Auth from "./components/Auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import Home from "./pages/Home";
-import EventsPage from "./pages/EventsPage";
-import EventDetailsPage from "./pages/EventDetails";
-import EventLeaderboardPage from "./pages/EventLeaderboardPage";
-import InvitesPage from "./pages/InvitesPage";
-import DonationsPage from "./pages/DonationsPage";
-import DiscordPage from "./pages/DiscordPage";
-import MomentsPage from "./pages/MomentsPage";
 import MomentViewPage from "./pages/MomentViewPage";
 import ProfilePage from "./pages/ProfilePage";
-import LockerPage from "./pages/LockerPage";
-import ShopPage from "./pages/ShopPage";
-import PeoplePage from "./pages/PeoplePage";
-import ChatPage from "./pages/ChatPage";
 import NotFound from "./pages/NotFound";
 import PageLoading from "./components/PageLoading";
+import { lazyPage } from "./lib/lazyPage";
 
-const AdminPage = lazy(() => import("./pages/AdminPage"));
+// Home, shared Moments and public profiles are entry points, so they load
+// with the app; everything else downloads when it's first opened.
+const EventsPage = lazyPage(() => import("./pages/EventsPage"));
+const EventDetailsPage = lazyPage(() => import("./pages/EventDetails"));
+const EventLeaderboardPage = lazyPage(() => import("./pages/EventLeaderboardPage"));
+const InvitesPage = lazyPage(() => import("./pages/InvitesPage"));
+const DonationsPage = lazyPage(() => import("./pages/DonationsPage"));
+const DiscordPage = lazyPage(() => import("./pages/DiscordPage"));
+const MomentsPage = lazyPage(() => import("./pages/MomentsPage"));
+const LockerPage = lazyPage(() => import("./pages/LockerPage"));
+const ShopPage = lazyPage(() => import("./pages/ShopPage"));
+const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
+const ChatPage = lazyPage(() => import("./pages/ChatPage"));
+const AdminPage = lazyPage(() => import("./pages/AdminPage"));
 
 import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
@@ -80,6 +83,7 @@ function AuthenticatedApp({ session, onLogout }) {
 
             <Navbar user={user} onLogout={onLogout} />
 
+            <Suspense fallback={<PageLoading />}>
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/events" element={<EventsPage />} />
@@ -96,16 +100,10 @@ function AuthenticatedApp({ session, onLogout }) {
               <Route path="/chat/:username" element={<ChatPage />} />
               <Route path="/donations" element={<DonationsPage />} />
               <Route path="/discord" element={<DiscordPage />} />
-              <Route
-                path="/admin"
-                element={
-                  <Suspense fallback={<PageLoading />}>
-                    <AdminPage />
-                  </Suspense>
-                }
-              />
+              <Route path="/admin" element={<AdminPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
 
             {!fullHeight && <Footer />}
 

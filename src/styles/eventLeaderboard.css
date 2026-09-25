@@ -269,6 +269,12 @@
   display: none;
 }
 
+.board-brag {
+  align-self: flex-start;
+
+  margin-top: 10px;
+}
+
 .board-count-unit {
   margin-left: 1px;
 

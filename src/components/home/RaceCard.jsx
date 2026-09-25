@@ -5,6 +5,7 @@ import Icon from "../Icon";
 import PlayerChip from "../PlayerChip";
 import { useEvents } from "../../context/EventContext";
 import { useCopy, canNativeShare, nativeShare } from "../../hooks/useCopy";
+import { shareBragImage } from "../../lib/bragImage";
 
 const SHARE_TEXT = "Join me on Vexora — invite friends, climb the board, win real prizes.";
 
@@ -68,10 +69,11 @@ function raceLine(event, standings, userId) {
   };
 }
 
-export function RaceCard({ event, standings, loading, userId, referralLink, onJoined, now }) {
+export function RaceCard({ event, standings, loading, userId, username, avatar, referralLink, onJoined, now }) {
   const [copied, copy] = useCopy();
   const { joinEvent } = useEvents();
   const [joining, setJoining] = useState(false);
+  const [bragging, setBragging] = useState(false);
 
   const line = event && !loading ? raceLine(event, standings, userId) : null;
   const daysLeft = event ? Math.max(0, Math.floor((new Date(event.endDate) - now) / 86400000)) : null;
@@ -84,6 +86,22 @@ export function RaceCard({ event, standings, loading, userId, referralLink, onJo
   };
 
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${referralLink}`)}`;
+
+  const brag = async () => {
+    const me = standings.find((player) => player.id === userId);
+    setBragging(true);
+    await shareBragImage({
+      username,
+      avatar,
+      rank: line.rank,
+      count: me?.referral_count || 0,
+      eventTitle: event.title,
+      daysLeft,
+      prize: rewardFor(event, 1),
+      link: referralLink,
+    });
+    setBragging(false);
+  };
 
   return (
     <section className="dash-race card">
@@ -150,6 +168,13 @@ export function RaceCard({ event, standings, loading, userId, referralLink, onJo
             >
               <Icon name="share" size={15} />
               Share
+            </button>
+          )}
+
+          {line?.state === "in" && referralLink && (
+            <button type="button" className="btn btn-sm btn-sun" onClick={brag} disabled={bragging}>
+              <Icon name="trophy" size={15} />
+              {bragging ? "Making…" : "Brag"}
             </button>
           )}
         </div>

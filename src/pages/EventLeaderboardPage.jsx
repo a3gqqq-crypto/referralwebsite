@@ -12,6 +12,8 @@ import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { equippedFrom } from "../data/cosmetics";
 import NotFound from "./NotFound";
 import { useNow, getEventStatus } from "../hooks/useCountdown";
+import { referralLinkFor } from "../hooks/useCopy";
+import { shareBragImage } from "../lib/bragImage";
 
 import "../styles/eventLeaderboard.css";
 
@@ -25,6 +27,7 @@ function EventLeaderboardPage({ user }) {
   const event = events.find((item) => item.id === eventId);
 
   const [players, setPlayers] = useState([]);
+  const [bragging, setBragging] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -88,6 +91,22 @@ function EventLeaderboardPage({ user }) {
 
   const me = players.find((player) => player.id === user?.id);
 
+  const brag = async () => {
+    setBragging(true);
+    await shareBragImage({
+      username: me.username,
+      avatar: me.avatar,
+      rank: me.rank,
+      count: kind.score(me),
+      countLabel: isStreak ? "day streak" : null,
+      eventTitle: event.title,
+      daysLeft: status === "live" ? Math.floor((new Date(event.endDate) - now) / 86400000) : null,
+      prize: rewardFor(1),
+      link: referralLinkFor(user?.user_metadata?.username || me.username),
+    });
+    setBragging(false);
+  };
+
   const podium = [players[1], players[0], players[2]].filter(Boolean);
 
   return (
@@ -139,6 +158,13 @@ function EventLeaderboardPage({ user }) {
           <strong className="mono">
             {me ? `#${me.rank}` : "—"}
           </strong>
+
+          {me && status !== "upcoming" && (
+            <button type="button" className="btn btn-sm btn-sun board-brag" onClick={brag} disabled={bragging}>
+              <Icon name="share" size={14} />
+              {bragging ? "Making…" : "Share my rank"}
+            </button>
+          )}
         </div>
       </section>
 

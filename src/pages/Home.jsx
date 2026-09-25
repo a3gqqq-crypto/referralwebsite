@@ -163,6 +163,8 @@ function Home({ user }) {
           standings={standings}
           loading={loadingEvents || loadingStandings}
           userId={user?.id}
+          username={username}
+          avatar={profile?.avatar}
           referralLink={referralLink}
           onJoined={loadStandings}
           now={now}
