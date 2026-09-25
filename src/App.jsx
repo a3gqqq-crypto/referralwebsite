@@ -3,8 +3,11 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
   useLocation,
 } from "react-router-dom";
+
+import { featuredEvent } from "./data/events";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -66,6 +69,10 @@ function AuthenticatedApp({ session, onLogout }) {
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/events" element={<EventsPage />} />
+              <Route
+                path="/leaderboard"
+                element={<Navigate to={`/events/${featuredEvent()?.id}/leaderboard`} replace />}
+              />
               <Route path="/events/:eventId" element={<EventDetailsPage user={user} />} />
               <Route path="/events/:eventId/leaderboard" element={<EventLeaderboardPage user={user} />} />
               <Route path="/invites" element={<InvitesPage user={user} />} />

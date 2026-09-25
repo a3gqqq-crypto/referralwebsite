@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabaseClient";
 import { events } from "../data/events";
 import Icon from "../components/Icon";
 import SkeletonRows from "../components/SkeletonRows";
-import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
+import PlayerChip from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { equippedFrom } from "../data/cosmetics";
 import NotFound from "./NotFound";
@@ -31,53 +31,24 @@ function EventLeaderboardPage({ user }) {
     let cancelled = false;
 
     const loadLeaderboard = async () => {
-      setLoading(true);
-      setError("");
-
-      const { data: participants, error: participantError } =
-        await supabase
-          .from("event_participants")
-          .select("user_id")
-          .eq("event_id", event.id);
+      const { data, error: loadError } = await supabase.rpc("event_standings", {
+        p_event_id: event.id,
+        p_starts: new Date(event.startDate).toISOString(),
+        p_ends: new Date(event.endDate).toISOString(),
+      });
 
       if (cancelled) return;
 
-      if (participantError) {
-        console.error(participantError);
+      if (loadError) {
+        console.error(loadError);
         setError("Could not load the leaderboard.");
         setLoading(false);
         return;
       }
 
-      const ids = (participants || []).map((row) => row.user_id);
-
-      if (ids.length === 0) {
-        setPlayers([]);
-        setLoading(false);
-        return;
-      }
-
-      const { data: profiles, error: profileError } = await supabase
-        .from("profiles")
-        .select(PLAYER_COLUMNS)
-        .in("id", ids);
-
-      if (cancelled) return;
-
-      if (profileError) {
-        console.error(profileError);
-        setError("Could not load player rankings.");
-        setLoading(false);
-        return;
-      }
-
+      setError("");
       setPlayers(
-        [...(profiles || [])]
-          .sort(
-            (a, b) =>
-              (b.referral_count || 0) - (a.referral_count || 0)
-          )
-          .map((player, index) => ({ ...player, rank: index + 1 }))
+        (data || []).map((player, index) => ({ ...player, rank: index + 1 }))
       );
 
       setLoading(false);
@@ -85,8 +56,11 @@ function EventLeaderboardPage({ user }) {
 
     loadLeaderboard();
 
+    const timer = setInterval(loadLeaderboard, 30000);
+
     return () => {
       cancelled = true;
+      clearInterval(timer);
     };
   }, [event]);
 
@@ -126,8 +100,10 @@ function EventLeaderboardPage({ user }) {
 
         <p>
           {status === "ended"
-            ? "This event has ended. Top three by referral count take the prizes."
-            : "Ranked by referral count. Top three when the event ends take the prizes."}
+            ? "This event has ended. Top three by invites made during the event take the prizes."
+            : status === "upcoming"
+              ? "Starts soon. Only invites made during the event count — everyone starts at zero."
+              : "Ranked by invites made during this event. Top three when it ends take the prizes."}
         </p>
       </header>
 

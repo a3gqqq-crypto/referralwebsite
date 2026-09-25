@@ -15,7 +15,7 @@ const NAV_LINKS = [
       path.startsWith("/events") && !path.endsWith("/leaderboard"),
   },
   {
-    to: "/events/top-inviter/leaderboard",
+    to: "/leaderboard",
     label: "Leaderboard",
     match: (path) => path.endsWith("/leaderboard"),
   },

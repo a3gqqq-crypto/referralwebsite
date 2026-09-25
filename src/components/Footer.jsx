@@ -20,7 +20,7 @@ function Footer() {
           <div>
             <span className="eyebrow">Compete</span>
             <Link to="/events">Events</Link>
-            <Link to="/events/top-inviter/leaderboard">Leaderboard</Link>
+            <Link to="/leaderboard">Leaderboard</Link>
             <Link to="/invites">Your invites</Link>
           </div>
 
