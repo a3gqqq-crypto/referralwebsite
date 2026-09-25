@@ -41,18 +41,16 @@ export default async function handler(req, res) {
 
   if (supabaseUrl && supabaseKey) {
     try {
-      const query =
-        `${supabaseUrl}/rest/v1/moments` +
-        `?id=eq.${encodeURIComponent(cleanMomentId)}` +
-        `&select=creator_username,from_name,to_name,expires_at` +
-        `&limit=1`;
-
-      const response = await fetch(query, {
+      // Moments aren't readable from the table directly; get_moment reads one by its id.
+      const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_moment`, {
+        method: "POST",
         headers: {
           apikey: supabaseKey,
           Authorization: `Bearer ${supabaseKey}`,
           Accept: "application/json",
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({ p_id: cleanMomentId }),
       });
 
       if (response.ok) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
@@ -6,63 +6,51 @@ import Icon from "../components/Icon";
 import MomentCard from "../components/MomentCard";
 import { templateById } from "../data/momentTemplates";
 import { useCopy, canNativeShare, nativeShare } from "../hooks/useCopy";
+import { shareOrSaveMomentImage } from "../lib/momentImage";
 
 import "../styles/moments.css";
 
-const escapeXml = (value) =>
-  String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
+// Stable pseudo-random in [0, 1) so the burst looks scattered without Math.random in render.
+const jitter = (n) => (((Math.sin(n * 12.9898) * 43758.5453) % 1) + 1) % 1;
 
-function wrapLines(text, maxChars) {
-  const lines = [];
-  let remaining = text;
+// Emoji that fly out when the envelope opens.
+function Burst({ emojis }) {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 28 }, (_, index) => {
+        const angle = (index / 28) * Math.PI * 2 + jitter(index) * 0.4;
+        const distance = 160 + jitter(index + 50) * 220;
 
-  while (remaining.length > maxChars) {
-    let cut = remaining.lastIndexOf(" ", maxChars);
-    if (cut < maxChars / 2) cut = maxChars;
-    lines.push(remaining.slice(0, cut));
-    remaining = remaining.slice(cut).trimStart();
-  }
+        return {
+          emoji: emojis[index % emojis.length],
+          x: Math.cos(angle) * distance,
+          y: Math.sin(angle) * distance - 80,
+          rotate: Math.round(jitter(index + 100) * 540 - 270),
+          delay: jitter(index + 150) * 0.15,
+          size: 18 + jitter(index + 200) * 22,
+        };
+      }),
+    [emojis]
+  );
 
-  if (remaining) lines.push(remaining);
-
-  return lines;
-}
-
-function buildCardSvg(moment) {
-  const template = templateById(moment.template);
-  const lines = wrapLines(moment.message, 34).slice(0, 9);
-
-  const messageSvg = lines
-    .map(
-      (line, index) =>
-        `<text x="170" y="${760 + index * 52}" fill="#1a1612" font-size="38" font-family="Arial, sans-serif">${escapeXml(line)}</text>`
-    )
-    .join("");
-
-  const fromY = 760 + lines.length * 52 + 50;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
-  <defs>
-    <radialGradient id="glow" cx="0.1" cy="0" r="0.9">
-      <stop offset="0" stop-color="#ff4d8d" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="#ff4d8d" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="1200" height="1500" fill="#140d16"/>
-  <rect width="1200" height="1500" fill="url(#glow)"/>
-  <rect x="120" y="220" width="960" height="1100" rx="56" fill="#000000" fill-opacity="0.45"/>
-  <rect x="110" y="190" width="960" height="1100" rx="56" fill="${template.color}"/>
-  <text x="170" y="360" font-size="110">${escapeXml(template.icon)}</text>
-  <text x="170" y="440" fill="#1a1612" fill-opacity="0.75" font-size="26" letter-spacing="5" font-family="Courier New, monospace">${escapeXml(template.label.toUpperCase())}</text>
-  <text x="170" y="590" fill="#1a1612" font-size="100" font-family="Georgia, serif">For ${escapeXml(moment.to_name)}</text>
-  ${messageSvg}
-  <text x="170" y="${fromY}" fill="#1a1612" font-size="40" font-style="italic" font-family="Georgia, serif">— ${escapeXml(moment.from_name)}</text>
-  <text x="600" y="1410" text-anchor="middle" fill="#ff9dbc" font-size="26" font-family="Arial, sans-serif">made on Vexora · joinvexora.com</text>
-</svg>`;
+  return (
+    <div className="moment-burst" aria-hidden="true">
+      {pieces.map((piece, index) => (
+        <span
+          key={index}
+          style={{
+            "--x": `${piece.x}px`,
+            "--y": `${piece.y}px`,
+            "--r": `${piece.rotate}deg`,
+            "--d": `${piece.delay}s`,
+            fontSize: `${piece.size}px`,
+          }}
+        >
+          {piece.emoji}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function MomentViewPage() {
@@ -70,69 +58,61 @@ function MomentViewPage() {
 
   const [moment, setMoment] = useState(null);
   const [state, setState] = useState("loading");
+  const [opened, setOpened] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [copied, copy] = useCopy();
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
-      const { data, error } = await supabase
-        .from("moments")
-        .select(
-          "id, creator_username, from_name, to_name, message, template, created_at, expires_at"
-        )
-        .eq("id", momentId)
-        .maybeSingle();
-
+    supabase.rpc("get_moment", { p_id: momentId }).then(({ data, error }) => {
       if (cancelled) return;
 
-      if (error || !data) {
+      const row = data?.[0];
+
+      if (error || !row) {
         setState("missing");
         return;
       }
 
-      if (new Date(data.expires_at).getTime() <= Date.now()) {
+      if (row.expired) {
         setState("expired");
         return;
       }
 
-      setMoment(data);
+      setMoment(row);
       setState("ready");
-    };
-
-    load();
+    });
 
     return () => {
       cancelled = true;
     };
   }, [momentId]);
 
-  const ref = moment?.creator_username
-    ? `?ref=${encodeURIComponent(moment.creator_username)}`
-    : "";
+  const template = templateById(moment?.template);
 
-  const publicLink = moment
-    ? `${window.location.origin}/m/${moment.id}${ref}`
-    : "";
+  const ref = moment?.creator_username ? `?ref=${encodeURIComponent(moment.creator_username)}` : "";
+  const publicLink = moment ? `${window.location.origin}/m/${moment.id}${ref}` : "";
+  const replyLink = moment
+    ? `/moments?to=${encodeURIComponent(moment.from_name || "")}${ref ? `&${ref.slice(1)}` : ""}`
+    : "/moments";
 
-  const downloadCard = () => {
-    const blob = new Blob([buildCardSvg(moment)], {
-      type: "image/svg+xml;charset=utf-8",
+  const open = () => {
+    setOpened(true);
+    // Supabase queries only send once awaited/then'd.
+    supabase.rpc("open_moment", { p_id: moment.id }).then(({ error }) => {
+      if (error) console.error("Could not count the open:", error);
     });
+  };
 
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-
-    anchor.href = url;
-    anchor.download = `vexora-moment-${moment.id}.svg`;
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
+  const saveImage = async () => {
+    setSaving(true);
+    await shareOrSaveMomentImage(moment);
+    setSaving(false);
   };
 
   return (
-    <div className="moment-view">
+    <div className="moment-view" style={{ "--m-glow": template.bg[1] }}>
 
       <header className="moment-view-bar">
         <Link to={`/${ref}`} className="navbar-brand">
@@ -144,7 +124,6 @@ function MomentViewPage() {
           Make your own
         </Link>
       </header>
-
 
       <main className="moment-view-main">
         {state === "loading" && (
@@ -158,16 +137,9 @@ function MomentViewPage() {
           <div className="moment-view-gone card">
             <span className="moment-view-gone-icon" aria-hidden="true">⌛</span>
 
-            <h1>
-              {state === "expired"
-                ? "This Moment has expired."
-                : "This Moment doesn't exist."}
-            </h1>
+            <h1>{state === "expired" ? "This Moment has expired." : "This Moment doesn't exist."}</h1>
 
-            <p>
-              Moments only last 5 days. Make a new one and
-              give someone else a reason to smile.
-            </p>
+            <p>Moments only last 5 days. Make a new one and give someone else a reason to smile.</p>
 
             <Link to="/moments" className="btn btn-primary">
               Make a Moment
@@ -176,13 +148,36 @@ function MomentViewPage() {
           </div>
         )}
 
-        {state === "ready" && moment && (
+        {state === "ready" && moment && !opened && (
+          <div className="moment-sealed">
+            <p className="moment-view-intro">
+              <strong>{moment.from_name}</strong> made you something.
+            </p>
+
+            <button
+              type="button"
+              className="moment-envelope"
+              onClick={open}
+              style={{ "--env-a": template.bg[0], "--env-b": template.bg[1], "--env-ink": template.ink }}
+              aria-label="Open your Moment"
+            >
+              <span className="moment-envelope-flap" aria-hidden="true" />
+              <span className="moment-envelope-seal" aria-hidden="true">{template.icon}</span>
+              <span className="moment-envelope-to">For {moment.to_name}</span>
+            </button>
+
+            <p className="moment-tap">Tap to open</p>
+          </div>
+        )}
+
+        {state === "ready" && moment && opened && (
           <>
             <p className="moment-view-intro">
               <strong>{moment.from_name}</strong> made you something.
             </p>
 
             <div className="moment-view-card">
+              <Burst emojis={template.burst} />
               <MomentCard
                 templateId={moment.template}
                 to={moment.to_name}
@@ -193,22 +188,10 @@ function MomentViewPage() {
             </div>
 
             <div className="moment-view-actions">
-              {canNativeShare && (
-                <button
-                  type="button"
-                  className="btn"
-                  onClick={() =>
-                    nativeShare({
-                      title: "A Vexora Moment",
-                      text: `${moment.from_name} made you something ✦`,
-                      url: publicLink,
-                    })
-                  }
-                >
-                  <Icon name="share" />
-                  Share
-                </button>
-              )}
+              <button type="button" className="btn btn-primary" onClick={saveImage} disabled={saving}>
+                <Icon name="download" />
+                {saving ? "Making image…" : "Save or share image"}
+              </button>
 
               <button
                 type="button"
@@ -219,23 +202,28 @@ function MomentViewPage() {
                 {copied ? "Copied" : "Copy link"}
               </button>
 
-              <button type="button" className="btn" onClick={downloadCard}>
-                <Icon name="download" />
-                Save image
-              </button>
+              {canNativeShare && (
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() =>
+                    nativeShare({ title: "A Vexora Moment", text: `${moment.from_name} made you something ✦`, url: publicLink })
+                  }
+                >
+                  <Icon name="share" />
+                  Share link
+                </button>
+              )}
             </div>
 
             <section className="moment-view-cta card">
               <div>
-                <h2>Make one back.</h2>
-                <p>
-                  Free, takes a minute, and Vexora runs
-                  competitions with real prizes for inviting friends.
-                </p>
+                <h2>Send one back to {moment.from_name}.</h2>
+                <p>Free, takes a minute, and Vexora runs competitions with real prizes for inviting friends.</p>
               </div>
 
-              <Link to={`/moments${ref}`} className="btn btn-primary">
-                Create your Moment
+              <Link to={replyLink} className="btn btn-primary">
+                Reply with a Moment
                 <Icon name="arrowRight" />
               </Link>
             </section>

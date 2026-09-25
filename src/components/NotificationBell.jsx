@@ -69,7 +69,10 @@ function NotificationBell({ userId }) {
 
   const markAllRead = useCallback(() => {
     setItems((current) => current.map((item) => (item.read_at ? item : { ...item, read_at: new Date().toISOString() })));
-    supabase.rpc("mark_notifications_read");
+    // Supabase queries only send once awaited/then'd.
+    supabase.rpc("mark_notifications_read").then(({ error }) => {
+      if (error) console.error("Could not mark notifications read:", error);
+    });
   }, []);
 
   // Items that were new when the panel opened stay highlighted until it closes.
