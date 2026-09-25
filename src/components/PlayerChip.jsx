@@ -5,7 +5,7 @@ import { LevelBadge } from "./Level";
 import { equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
-  "id, username, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp";
+  "id, username, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar";
 
 function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
   const equipped = equippedFrom(player);
@@ -13,7 +13,7 @@ function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
 
   const inner = (
     <>
-      <FramedAvatar name={name} frame={equipped.frame} size={size} />
+      <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={size} />
 
       <span className="player-chip-name">
         <StyledName name={name} effect={equipped.name} />

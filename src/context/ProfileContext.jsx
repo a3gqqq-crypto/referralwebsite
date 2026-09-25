@@ -10,12 +10,24 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { PROFILE_COLUMNS } from "../data/cosmetics";
 import { utcDay } from "../lib/streakDay";
+import { prepareAvatarImage } from "../data/avatars";
 
 import "../styles/levels.css";
 
 const ProfileContext = createContext(null);
 
 const today = () => utcDay();
+
+// Keeps only the picture in use; older uploads in the user's folder are deleted.
+async function removeOldUploads(userId, current) {
+  const keep = current?.startsWith("upload:") ? current.slice(7) : null;
+  const { data } = await supabase.storage.from("avatars").list(userId);
+  const stale = (data || [])
+    .map((file) => `${userId}/${file.name}`)
+    .filter((path) => path !== keep);
+
+  if (stale.length) await supabase.storage.from("avatars").remove(stale);
+}
 
 export function ProfileProvider({ user, children }) {
   const userId = user?.id;
@@ -148,6 +160,38 @@ export function ProfileProvider({ user, children }) {
       callAndRefresh("set_equipped_badges", { p_badges: badgeIds }),
     saveBio: (bio) =>
       callAndRefresh("update_profile_bio", { p_bio: bio }),
+    setAvatar: async (avatar) => {
+      const result = await callAndRefresh("set_avatar", { p_avatar: avatar });
+      if (result.ok) removeOldUploads(userId, avatar);
+      return result;
+    },
+    uploadAvatar: async (file) => {
+      let prepared;
+
+      try {
+        prepared = await prepareAvatarImage(file);
+      } catch (prepareError) {
+        return { ok: false, error: prepareError.message };
+      }
+
+      const path = `${userId}/${Date.now()}.${prepared.ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, prepared.blob, { contentType: prepared.blob.type, cacheControl: "31536000" });
+
+      if (uploadError) {
+        console.error(uploadError);
+        return { ok: false, error: "Upload failed. Try a smaller image." };
+      }
+
+      const avatar = `upload:${path}`;
+      const result = await callAndRefresh("set_avatar", { p_avatar: avatar });
+
+      if (result.ok) removeOldUploads(userId, avatar);
+      else supabase.storage.from("avatars").remove([path]);
+
+      return result;
+    },
   };
 
   return (

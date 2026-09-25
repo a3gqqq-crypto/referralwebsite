@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
+import AvatarPicker from "../components/AvatarPicker";
 import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import {
@@ -18,7 +19,8 @@ import { TIERS, XP_RULES, levelInfo } from "../data/levels";
 
 import "../styles/profile.css";
 
-const TABS = ["frame", "name", "banner", "badge", "bio"];
+const TABS = ["picture", "frame", "name", "banner", "badge", "bio"];
+const TAB_LABEL = { picture: "Picture", bio: "Bio" };
 const BIO_LIMIT = 160;
 
 function lockLabel(item, referrals) {
@@ -41,9 +43,11 @@ function LockerPage() {
     equip,
     setBadges,
     saveBio,
+    setAvatar,
+    uploadAvatar,
   } = useMyProfile();
 
-  const [tab, setTab] = useState("frame");
+  const [tab, setTab] = useState("picture");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
   const [bio, setBio] = useState("");
@@ -118,7 +122,7 @@ function LockerPage() {
         aria-pressed={selected}
       >
         <span className="locker-tile-preview">
-          <CosmeticPreview item={item} username={username} />
+          <CosmeticPreview item={item} username={username} avatar={profile?.avatar} />
         </span>
 
         <span className="locker-tile-name">{item.name}</span>
@@ -143,7 +147,7 @@ function LockerPage() {
     );
   };
 
-  const slotItems = tab !== "bio" ? cosmeticsOfType(tab) : [];
+  const slotItems = SLOTS[tab] ? cosmeticsOfType(tab) : [];
   const ownedCount = slotItems.filter((item) => owned.has(item.id)).length;
 
   return (
@@ -217,7 +221,7 @@ function LockerPage() {
                   setNotice(null);
                 }}
               >
-                {key === "bio" ? "Bio" : SLOTS[key].label}
+                {TAB_LABEL[key] || SLOTS[key].label}
               </button>
             ))}
           </div>
@@ -225,6 +229,15 @@ function LockerPage() {
           <div className="locker-panel" role="tabpanel">
             {loading ? (
               <p className="muted">Loading your locker…</p>
+            ) : tab === "picture" ? (
+              <AvatarPicker
+                username={username}
+                frame={equipped.frame}
+                current={profile?.avatar || null}
+                busy={busy}
+                onPick={(avatar) => run(() => setAvatar(avatar), "Picture updated.")}
+                onUpload={(file) => run(() => uploadAvatar(file), "Photo uploaded.")}
+              />
             ) : tab === "bio" ? (
               <form
                 className="locker-bio"

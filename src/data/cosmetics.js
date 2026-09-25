@@ -272,8 +272,9 @@ export function equippedFrom(profile) {
     badges: (profile?.equipped_badges || [])
       .filter((id) => cosmeticById(id)?.type === "badge")
       .slice(0, MAX_BADGES),
+    avatar: profile?.avatar || null,
   };
 }
 
 export const PROFILE_COLUMNS =
-  "id, username, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak";
+  "id, username, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak, avatar";

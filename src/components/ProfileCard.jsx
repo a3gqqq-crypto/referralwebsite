@@ -30,6 +30,7 @@ function ProfileCard({
           <FramedAvatar
             name={username}
             frame={equipped.frame}
+            avatar={equipped.avatar}
             size={avatarSize}
           />
         </div>

@@ -154,7 +154,7 @@ function ShopPage() {
                   aria-pressed={selected?.id === item.id}
                 >
                   <span className="shop-item-preview">
-                    <CosmeticPreview item={item} username={username || "you"} />
+                    <CosmeticPreview item={item} username={username || "you"} avatar={profile?.avatar} />
                   </span>
 
                   <span className="shop-item-info">

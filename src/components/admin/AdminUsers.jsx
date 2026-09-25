@@ -45,6 +45,27 @@ function UserRow({ person, isMe, onUpdated }) {
       </div>
 
       <div className="admin-actions">
+        {person.avatar && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            disabled={busy}
+            onClick={async () => {
+              if (!window.confirm(`Remove ${person.username}'s profile picture?`)) return;
+
+              await run("admin_clear_avatar", { p_user: person.id }, "Picture removed.");
+
+              if (person.avatar.startsWith("upload:")) {
+                const { data } = await supabase.storage.from("avatars").list(person.id);
+                const paths = (data || []).map((file) => `${person.id}/${file.name}`);
+                if (paths.length) await supabase.storage.from("avatars").remove(paths);
+              }
+            }}
+          >
+            Remove picture
+          </button>
+        )}
+
         {!isMe && (
           <button
             type="button"

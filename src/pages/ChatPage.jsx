@@ -41,7 +41,7 @@ function MessageRow({ message, sender, grouped, isMine, onReport }) {
       <div className="chat-msg-avatar">
         {!grouped && (
           <Link to={`/u/${encodeURIComponent(name)}`} tabIndex={-1} aria-hidden="true">
-            <FramedAvatar name={name} frame={equipped.frame} size={38} />
+            <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={38} />
           </Link>
         )}
       </div>
@@ -486,7 +486,12 @@ function ChatPage() {
                     className={`chat-friend ${active ? "active" : ""} ${count ? "has-unread" : ""}`}
                     onClick={() => setListOpen(false)}
                   >
-                    <FramedAvatar name={profile.username} frame={equipped.frame} size={36} />
+                    <FramedAvatar
+                      name={profile.username}
+                      frame={equipped.frame}
+                      avatar={equipped.avatar}
+                      size={36}
+                    />
 
                     <span className="chat-friend-text">
                       <StyledName name={profile.username} effect={equipped.name} />

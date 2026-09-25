@@ -184,6 +184,7 @@ function EventLeaderboardPage({ user }) {
                   <FramedAvatar
                     name={player.username}
                     frame={equippedFrom(player).frame}
+                    avatar={player.avatar}
                     size={player.rank === 1 ? 76 : 62}
                   />
 

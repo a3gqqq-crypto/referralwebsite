@@ -114,7 +114,7 @@ function Navbar({ user, onLogout }) {
             className="navbar-me"
             onClick={playClick}
           >
-            <FramedAvatar name={username} frame={equipped.frame} size={32} />
+            <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={32} />
             <StyledName name={username} effect={equipped.name} className="navbar-me-name" />
             <LevelBadge xp={profile?.xp} />
           </Link>
@@ -180,7 +180,7 @@ function Navbar({ user, onLogout }) {
 
         <div className="navbar-mobile-footer">
           <Link to="/profile" className="navbar-me" onClick={playClick}>
-            <FramedAvatar name={username} frame={equipped.frame} size={36} />
+            <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={36} />
             <StyledName name={username} effect={equipped.name} className="navbar-me-name" />
           </Link>
 

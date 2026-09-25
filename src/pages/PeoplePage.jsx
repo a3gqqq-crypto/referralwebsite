@@ -34,7 +34,12 @@ function PersonCard({ person }) {
         <ProfileBanner banner={equipped.banner} className="person-card-banner" />
 
         <div className="person-card-id">
-          <FramedAvatar name={person.username} frame={equipped.frame} size={58} />
+          <FramedAvatar
+            name={person.username}
+            frame={equipped.frame}
+            avatar={equipped.avatar}
+            size={58}
+          />
 
           <div className="person-card-name">
             <StyledName name={person.username} effect={equipped.name} />

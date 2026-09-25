@@ -38,7 +38,12 @@ function MobileTabBar() {
         >
           <span className="tabbar-icon">
             {tab.avatar ? (
-              <FramedAvatar name={username || "?"} frame={equippedFrom(profile).frame} size={26} />
+              <FramedAvatar
+                name={username || "?"}
+                frame={equippedFrom(profile).frame}
+                avatar={profile?.avatar}
+                size={26}
+              />
             ) : (
               <Icon name={tab.icon} size={22} />
             )}

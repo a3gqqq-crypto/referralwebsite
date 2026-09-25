@@ -637,7 +637,7 @@ function Auth({ onAuthenticated }) {
           <ProfileBanner banner="banner-golddust" className="auth-showcase-banner" />
 
           <div className="auth-showcase-body">
-            <FramedAvatar name="nova" frame="frame-crowned" size={58} />
+            <FramedAvatar name="nova" frame="frame-crowned" avatar="builtin:fox" size={58} />
 
             <div className="auth-showcase-id">
               <StyledName name="nova" effect="name-gold" className="auth-showcase-name" />

@@ -1,17 +1,36 @@
+import { useState } from "react";
+
 import Icon from "./Icon";
 import { cosmeticById } from "../data/cosmetics";
+import { avatarSrc } from "../data/avatars";
 
 import "../styles/cosmetics.css";
 
-export function FramedAvatar({ name, frame, size = 40, className = "" }) {
+export function FramedAvatar({ name, frame, avatar, size = 40, className = "" }) {
   const initial = (name || "?").charAt(0).toUpperCase();
+  const src = avatarSrc(avatar);
+  const [failed, setFailed] = useState(null);
 
   return (
     <span
       className={`fav ${frame ? `fav-framed ${frame}` : ""} ${className}`}
       style={{ "--fav-size": `${size}px` }}
     >
-      <span className="fav-face">{initial}</span>
+      <span className="fav-face">
+        {src && failed !== src ? (
+          <img
+            className="fav-img"
+            src={src}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable="false"
+            onError={() => setFailed(src)}
+          />
+        ) : (
+          initial
+        )}
+      </span>
 
       {frame === "frame-crowned" && (
         <span className="fav-crown" aria-hidden="true">
@@ -71,9 +90,9 @@ export function ProfileBanner({ banner, className = "", children }) {
   );
 }
 
-export function CosmeticPreview({ item, username = "you" }) {
+export function CosmeticPreview({ item, username = "you", avatar = null }) {
   if (item.type === "frame") {
-    return <FramedAvatar name={username} frame={item.id} size={76} />;
+    return <FramedAvatar name={username} frame={item.id} avatar={avatar} size={76} />;
   }
 
   if (item.type === "name") {
