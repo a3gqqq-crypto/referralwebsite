@@ -97,17 +97,40 @@
     <link
       rel="icon"
       type="image/svg+xml"
-      href="/favicon.svg?v=2"
+      href="/favicon.svg?v=3"
     />
 
     <link
       rel="shortcut icon"
-      href="/favicon.svg?v=2"
+      href="/favicon.svg?v=3"
     />
 
     <title>
       Vexora — Invite friends. Win real prizes.
     </title>
+
+    <!-- A tab opened before a deploy can request an asset that no longer exists; reload once to pick up the new build. -->
+    <script>
+      window.addEventListener(
+        "error",
+        function (event) {
+          var el = event.target;
+          if (!el || !/^(SCRIPT|LINK)$/.test(el.tagName)) return;
+          if (!/\/assets\//.test(el.src || el.href || "")) return;
+
+          try {
+            var last = Number(sessionStorage.getItem("vx-asset-reload") || 0);
+            if (Date.now() - last < 60000) return;
+            sessionStorage.setItem("vx-asset-reload", String(Date.now()));
+          } catch (e) {
+            return;
+          }
+
+          location.reload();
+        },
+        true
+      );
+    </script>
   </head>
 
   <body>
