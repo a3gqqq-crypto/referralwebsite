@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { supabase } from "../../lib/supabaseClient";
 import Icon from "../Icon";
@@ -6,7 +6,7 @@ import PlayerChip, { PLAYER_COLUMNS } from "../PlayerChip";
 import SkeletonRows from "../SkeletonRows";
 import { COSMETICS, SLOTS } from "../../data/cosmetics";
 import { useMyProfile } from "../../context/ProfileContext";
-import { loadStaff, useStaff } from "../../data/staff";
+import { loadStaff } from "../../data/staff";
 import { adminCall, timeAgo } from "./adminApi";
 
 const COLUMNS = `${PLAYER_COLUMNS}, chat_banned`;
@@ -76,7 +76,7 @@ function RoleButtons({ person, role, busy, run }) {
   );
 }
 
-function UserRow({ person, isMe, role, canManageRoles, onUpdated }) {
+function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
   const [item, setItem] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -106,6 +106,7 @@ function UserRow({ person, isMe, role, canManageRoles, onUpdated }) {
         </span>
 
         {person.chat_banned && <span className="chip admin-banned">Chat banned</span>}
+        {role && tagHidden && <span className="chip">{role} · tag hidden</span>}
       </div>
 
       <div className="admin-actions">
@@ -199,8 +200,22 @@ function AdminUsers() {
   const [version, setVersion] = useState(0);
   const [staffOnly, setStaffOnly] = useState(false);
 
-  const staff = useStaff();
+  const [staff, setStaff] = useState(() => new Map());
+  const [hiddenTags, setHiddenTags] = useState(() => new Set());
   const myRole = staff.get(profile?.id);
+
+  // Full list incl. hidden tags (the public list leaves hidden staff out).
+  const loadAdminStaff = useCallback(async () => {
+    const result = await adminCall("admin_staff_list");
+    if (!result.ok) return;
+    setStaff(new Map(result.data.map((row) => [row.user_id, row.role])));
+    setHiddenTags(new Set(result.data.filter((row) => row.hide_tag).map((row) => row.user_id)));
+  }, []);
+
+  useEffect(() => {
+    loadAdminStaff();
+  }, [loadAdminStaff]);
+
   const staffIds = [...staff.keys()];
   const staffKey = staffIds.join(",");
 
@@ -288,8 +303,12 @@ function AdminUsers() {
               person={person}
               isMe={person.id === profile?.id}
               role={staff.get(person.id) || null}
+              tagHidden={hiddenTags.has(person.id)}
               canManageRoles={myRole === "owner"}
-              onUpdated={() => setVersion((value) => value + 1)}
+              onUpdated={() => {
+                setVersion((value) => value + 1);
+                loadAdminStaff();
+              }}
             />
           ))}
         </ul>

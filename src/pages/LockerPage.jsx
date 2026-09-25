@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
 import AvatarPicker from "../components/AvatarPicker";
+import StaffTagToggle from "../components/StaffTagToggle";
 import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import {
@@ -205,6 +206,8 @@ function LockerPage() {
           <p className="locker-preview-note">
             Your profile link works as an invite link too.
           </p>
+
+          <StaffTagToggle />
         </aside>
 
 
