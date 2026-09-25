@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useEventList } from "../data/events";
-import {
-  BadgeRow,
-  FramedAvatar,
-  ProfileBanner,
-  StyledName,
-} from "./Cosmetics";
+import AuthLiveBoard from "./AuthLiveBoard";
 import "../styles/auth.css";
 
 
@@ -634,23 +629,7 @@ function Auth({ onAuthenticated }) {
           </ol>
         </div>
 
-        <div className="auth-showcase" aria-hidden="true">
-          <ProfileBanner banner="banner-golddust" className="auth-showcase-banner" />
-
-          <div className="auth-showcase-body">
-            <FramedAvatar name="nova" frame="frame-crowned" avatar="builtin:fox" size={58} />
-
-            <div className="auth-showcase-id">
-              <StyledName name="nova" effect="name-gold" className="auth-showcase-name" />
-              <BadgeRow ids={["badge-legend", "badge-early", "badge-gem"]} size={20} />
-            </div>
-
-            <div className="auth-showcase-rank">
-              <span className="mono">#1</span>
-              <small>42 invites</small>
-            </div>
-          </div>
-        </div>
+        <AuthLiveBoard race={liveEvent?.type === "referral" ? liveEvent : null} />
 
         <div className="auth-poster-foot">
           {liveEvent ? (
