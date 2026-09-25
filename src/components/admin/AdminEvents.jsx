@@ -271,6 +271,7 @@ function EventForm({ initial, existingIds, onSaved, onCancel }) {
           <label htmlFor="event-type">Ranking</label>
           <select id="event-type" value={form.type} onChange={(event) => set("type", event.target.value)}>
             <option value="referral">Invites made during the event</option>
+            <option value="streak">Longest daily login streak</option>
             <option value="custom">Custom (no invite leaderboard)</option>
           </select>
         </div>

@@ -102,6 +102,11 @@
    EVENT STATUS
 ========================================= */
 
+.home-status {
+  display: grid;
+  gap: 16px;
+}
+
 .home-event {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);

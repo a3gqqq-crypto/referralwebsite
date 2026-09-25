@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabaseClient";
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
 import SkeletonRows from "../components/SkeletonRows";
+import StreakCard from "../components/StreakCard";
 import { useMyProfile } from "../context/ProfileContext";
 import { equippedFrom } from "../data/cosmetics";
 import {
@@ -25,6 +26,46 @@ import "../styles/home.css";
 
 const SHARE_TEXT =
   "Join me on Vexora — invite friends, climb the board, win real prizes.";
+
+function HomeEventCard({ event, live = false, now }) {
+  return (
+    <div className={`home-event card ${live ? "home-event-live" : "home-event-upcoming"}`}>
+      <div className="home-event-main">
+        {live ? (
+          <span className="chip chip-live">
+            <span className="live-dot" />
+            Live now
+          </span>
+        ) : (
+          <span className="chip chip-upcoming">Next up</span>
+        )}
+
+        <h2>{event.title}</h2>
+
+        <p>{event.description}</p>
+      </div>
+
+      <div className="home-event-side">
+        <div>
+          <span className="eyebrow">Prize pool</span>
+          <strong className="home-event-prize">{event.prize}</strong>
+        </div>
+
+        <div>
+          <span className="eyebrow">{live ? "Ends in" : "Starts in"}</span>
+          <strong className="home-event-timer mono">
+            {formatCountdown(live ? event.endDate : event.startDate, now)}
+          </strong>
+        </div>
+
+        <Link to={`/events/${event.id}`} className="btn btn-dark">
+          View event
+          <Icon name="arrowRight" />
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 function Home({ user }) {
   const { profile } = useMyProfile();
@@ -99,10 +140,17 @@ function Home({ user }) {
   const { events, loading: loadingEvents } = useEventList();
   const activeEvents = events.filter((event) => event.active);
 
-  const liveEvent =
-    activeEvents.find(
-      (event) => getEventStatus(event, now) === "live"
-    ) || null;
+  // Several events can run at once (e.g. an invite race and the monthly streak).
+  const liveEvents = activeEvents
+    .filter((event) => getEventStatus(event, now) === "live")
+    .sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+
+  const streakEvent =
+    activeEvents
+      .filter(
+        (event) => event.type === "streak" && getEventStatus(event, now) !== "ended"
+      )
+      .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
 
   const upcomingEvent =
     activeEvents
@@ -223,83 +271,24 @@ function Home({ user }) {
         ref={statusRef}
         className={`home-status ${revealClass(statusVisible)}`}
       >
+        <StreakCard
+          userId={user?.id}
+          streak={profile?.checkin_streak}
+          lastCheckin={profile?.last_checkin}
+          streakEvent={streakEvent}
+          now={now}
+        />
+
         {loadingEvents ? (
           <div className="home-event card" aria-busy="true">
             <SkeletonRows count={2} />
           </div>
-        ) : liveEvent ? (
-          <div className="home-event home-event-live card">
-            <div className="home-event-main">
-              <span className="chip chip-live">
-                <span className="live-dot" />
-                Live now
-              </span>
-
-              <h2>{liveEvent.title}</h2>
-
-              <p>{liveEvent.description}</p>
-            </div>
-
-            <div className="home-event-side">
-              <div>
-                <span className="eyebrow">Prize pool</span>
-                <strong className="home-event-prize">
-                  {liveEvent.prize}
-                </strong>
-              </div>
-
-              <div>
-                <span className="eyebrow">Ends in</span>
-                <strong className="home-event-timer mono">
-                  {formatCountdown(liveEvent.endDate, now)}
-                </strong>
-              </div>
-
-              <Link
-                to={`/events/${liveEvent.id}`}
-                className="btn btn-dark"
-              >
-                View event
-                <Icon name="arrowRight" />
-              </Link>
-            </div>
-          </div>
+        ) : liveEvents.length > 0 ? (
+          liveEvents.map((event) => (
+            <HomeEventCard key={event.id} event={event} live now={now} />
+          ))
         ) : upcomingEvent ? (
-          <div className="home-event home-event-upcoming card">
-            <div className="home-event-main">
-              <span className="chip chip-upcoming">
-                Next up
-              </span>
-
-              <h2>{upcomingEvent.title}</h2>
-
-              <p>{upcomingEvent.description}</p>
-            </div>
-
-            <div className="home-event-side">
-              <div>
-                <span className="eyebrow">Prize pool</span>
-                <strong className="home-event-prize">
-                  {upcomingEvent.prize}
-                </strong>
-              </div>
-
-              <div>
-                <span className="eyebrow">Starts in</span>
-                <strong className="home-event-timer mono">
-                  {formatCountdown(upcomingEvent.startDate, now)}
-                </strong>
-              </div>
-
-              <Link
-                to={`/events/${upcomingEvent.id}`}
-                className="btn btn-dark"
-              >
-                View event
-                <Icon name="arrowRight" />
-              </Link>
-            </div>
-          </div>
+          <HomeEventCard event={upcomingEvent} now={now} />
         ) : (
           <div className="home-event home-event-idle">
             <div className="home-event-main">

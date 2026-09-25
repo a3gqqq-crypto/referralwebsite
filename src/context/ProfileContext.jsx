@@ -9,10 +9,13 @@ import {
 
 import { supabase } from "../lib/supabaseClient";
 import { PROFILE_COLUMNS } from "../data/cosmetics";
+import { utcDay } from "../lib/streakDay";
 
 import "../styles/levels.css";
 
 const ProfileContext = createContext(null);
+
+const today = () => utcDay();
 
 export function ProfileProvider({ user, children }) {
   const userId = user?.id;
@@ -24,7 +27,7 @@ export function ProfileProvider({ user, children }) {
   const [checkin, setCheckin] = useState(null);
   // null until the check comes back, so /admin can wait instead of flashing "not found".
   const [isAdmin, setIsAdmin] = useState(null);
-  const checkedIn = useRef(false);
+  const checkedIn = useRef(null);
 
   // Only decides whether to show the Admin link; every admin RPC re-checks on the server.
   useEffect(() => {
@@ -44,8 +47,11 @@ export function ProfileProvider({ user, children }) {
   const refresh = useCallback(async () => {
     if (!userId) return;
 
-    if (!checkedIn.current) {
-      checkedIn.current = true;
+    // One check-in per day (00:00 UTC reset); a tab left open overnight checks in again.
+    const day = today();
+
+    if (checkedIn.current !== day) {
+      checkedIn.current = day;
 
       const { data: reward, error: checkinError } = await supabase.rpc("daily_checkin");
 
@@ -66,7 +72,7 @@ export function ProfileProvider({ user, children }) {
     const [profileResult, ownedResult] = await Promise.all([
       supabase
         .from("profiles")
-        .select(PROFILE_COLUMNS)
+        .select(`${PROFILE_COLUMNS}, last_checkin`)
         .eq("id", userId)
         .single(),
       supabase
@@ -94,6 +100,22 @@ export function ProfileProvider({ user, children }) {
 
   useEffect(() => {
     refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const onReturn = () => {
+      if (document.visibilityState === "visible" && checkedIn.current !== today()) {
+        refresh();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onReturn);
+    window.addEventListener("focus", onReturn);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onReturn);
+      window.removeEventListener("focus", onReturn);
+    };
   }, [refresh]);
 
   const callAndRefresh = async (fn, args) => {

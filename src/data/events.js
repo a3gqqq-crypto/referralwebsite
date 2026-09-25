@@ -79,6 +79,28 @@ export function useEventList() {
   return current;
 }
 
+// How each event type is ranked and labelled. "custom" events rank like referral ones.
+const EVENT_KINDS = {
+  referral: {
+    rpc: "event_standings",
+    score: (player) => player.referral_count || 0,
+    column: "Referrals",
+    columnShort: "Invites",
+    unit: (n) => `${n} ${n === 1 ? "referral" : "referrals"}`,
+    chip: "Referral race",
+  },
+  streak: {
+    rpc: "streak_standings",
+    score: (player) => player.best_streak || 0,
+    column: "Best streak",
+    columnShort: "Streak",
+    unit: (n) => `${n}-day streak`,
+    chip: "Login streak",
+  },
+};
+
+export const eventKind = (event) => EVENT_KINDS[event?.type] || EVENT_KINDS.referral;
+
 // The event the nav "Leaderboard" link should open: live, else next up, else most recent.
 export function featuredEvent(events, now = new Date()) {
   const active = events.filter((event) => event.active);

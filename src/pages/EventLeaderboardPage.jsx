@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
-import { useEventList } from "../data/events";
+import { eventKind, useEventList } from "../data/events";
 import Icon from "../components/Icon";
 import PageLoading from "../components/PageLoading";
 import SkeletonRows from "../components/SkeletonRows";
@@ -33,7 +33,7 @@ function EventLeaderboardPage({ user }) {
     let cancelled = false;
 
     const loadLeaderboard = async () => {
-      const { data, error: loadError } = await supabase.rpc("event_standings", {
+      const { data, error: loadError } = await supabase.rpc(eventKind(event).rpc, {
         p_event_id: event.id,
         p_starts: new Date(event.startDate).toISOString(),
         p_ends: new Date(event.endDate).toISOString(),
@@ -78,6 +78,8 @@ function EventLeaderboardPage({ user }) {
   }
 
   const status = getEventStatus(event, now);
+  const kind = eventKind(event);
+  const isStreak = event.type === "streak";
 
   const rewardFor = (position) =>
     event.rules?.winners?.find((winner) => winner.position === position)
@@ -103,11 +105,17 @@ function EventLeaderboardPage({ user }) {
         <h1>{event.title}</h1>
 
         <p>
-          {status === "ended"
-            ? "This event has ended. Top three by invites made during the event take the prizes."
-            : status === "upcoming"
-              ? "Starts soon. Only invites made during the event count — everyone starts at zero."
-              : "Ranked by invites made during this event. Top three when it ends take the prizes."}
+          {isStreak
+            ? status === "ended"
+              ? "This month is over. The three longest login streaks take the prizes."
+              : status === "upcoming"
+                ? "Starts on the 1st. Open Vexora every day — you're entered automatically."
+                : "Ranked by your longest run of daily logins this month. Ties go to whoever logged in on more days."
+            : status === "ended"
+              ? "This event has ended. Top three by invites made during the event take the prizes."
+              : status === "upcoming"
+                ? "Starts soon. Only invites made during the event count — everyone starts at zero."
+                : "Ranked by invites made during this event. Top three when it ends take the prizes."}
         </p>
       </header>
 
@@ -144,7 +152,11 @@ function EventLeaderboardPage({ user }) {
         <div className="card empty-state board-message">
           <div className="empty-state-icon" aria-hidden="true">🏁</div>
           <h3>No players yet</h3>
-          <p>Be the first to join and claim the top spot.</p>
+          <p>
+            {isStreak
+              ? "Everyone who opens Vexora this month shows up here."
+              : "Be the first to join and claim the top spot."}
+          </p>
           <div className="empty-state-actions">
             <Link to={`/events/${event.id}`} className="btn btn-primary">
               Go to event
@@ -186,7 +198,7 @@ function EventLeaderboardPage({ user }) {
                 <BadgeRow ids={equippedFrom(player).badges} size={18} />
 
                 <span className="board-podium-count mono">
-                  {player.referral_count || 0} referrals
+                  {kind.unit(kind.score(player))}
                 </span>
 
                 {rewardFor(player.rank) && (
@@ -204,8 +216,8 @@ function EventLeaderboardPage({ user }) {
               <span>Rank</span>
               <span>Player</span>
               <span>
-                <span className="board-head-long">Referrals</span>
-                <span className="board-head-short">Invites</span>
+                <span className="board-head-long">{kind.column}</span>
+                <span className="board-head-short">{kind.columnShort}</span>
               </span>
               <span>Prize</span>
             </div>
@@ -231,7 +243,8 @@ function EventLeaderboardPage({ user }) {
                   </span>
 
                   <span className="board-count mono">
-                    {player.referral_count || 0}
+                    {kind.score(player)}
+                    {isStreak && <span className="board-count-unit">d</span>}
                   </span>
 
                   <span className="board-reward">

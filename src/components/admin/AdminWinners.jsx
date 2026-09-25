@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import PlayerChip from "../PlayerChip";
 import SkeletonRows from "../SkeletonRows";
-import { EVENT_COLUMNS, toEvent } from "../../data/events";
+import { EVENT_COLUMNS, eventKind, toEvent } from "../../data/events";
 import { getEventStatus } from "../../hooks/useCountdown";
 import { adminCall, formatDateTime } from "./adminApi";
 
@@ -59,8 +59,8 @@ function WinnerRow({ event, place, player, payout, ended, onChanged }) {
       <div className="admin-winner-main">
         <span className="admin-winner-place mono">#{place}</span>
         <PlayerChip player={player} size={40} />
-        <span className="admin-meta">
-          <span className="mono">{player.referral_count || 0}</span> invites in window
+        <span className="admin-meta mono">
+          {eventKind(event).unit(eventKind(event).score(player))}
         </span>
         {reward && <strong className="admin-winner-reward">{reward}</strong>}
         <span className={`chip ${paid ? "chip-live" : "chip-ended"}`}>
@@ -139,7 +139,7 @@ function AdminWinners() {
     if (!event) return;
 
     const [standingResult, payoutResult] = await Promise.all([
-      supabase.rpc("event_standings", {
+      supabase.rpc(eventKind(event).rpc, {
         p_event_id: event.id,
         p_starts: new Date(event.startDate).toISOString(),
         p_ends: new Date(event.endDate).toISOString(),

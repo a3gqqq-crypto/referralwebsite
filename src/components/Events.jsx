@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import Icon from "./Icon";
 import SkeletonRows from "./SkeletonRows";
-import { useEventList } from "../data/events";
+import { eventKind, useEventList } from "../data/events";
 import { useEvents } from "../context/EventContext";
 import {
   useNow,
@@ -140,8 +140,8 @@ function Events() {
                       {STATUS_LABEL[status]}
                     </span>
 
-                    {event.type === "referral" && (
-                      <span className="chip">Referral race</span>
+                    {event.type !== "custom" && (
+                      <span className="chip">{eventKind(event).chip}</span>
                     )}
 
                     {joined && !loadingEvents && (

@@ -267,6 +267,14 @@
   display: none;
 }
 
+.board-count-unit {
+  margin-left: 1px;
+
+  color: var(--text-mute);
+
+  font-size: 0.8em;
+}
+
 .board-row.is-top .board-reward {
   color: var(--gold-soft);
 }

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { supabase } from "../lib/supabaseClient";
 import Icon from "./Icon";
 import { useEvents } from "../context/EventContext";
+import { localResetTime } from "../lib/streakDay";
 import {
   useNow,
   getEventStatus,
@@ -35,6 +37,27 @@ const MEDAL = {
   3: "🥉",
 };
 
+const STEPS = {
+  referral: {
+    title: "Four steps. No tricks.",
+    items: [
+      ["Join", "Hit “Join event” so you show up on this event's board."],
+      ["Share", "Send your invite link anywhere people will see it."],
+      ["Climb", "Each signup through your link adds to your count."],
+      ["Win", "Top three when the clock hits zero take the prizes."],
+    ],
+  },
+  streak: {
+    title: "Show up. Every day.",
+    items: [
+      ["You're in", "Everyone who opens Vexora this month is entered automatically."],
+      ["Check in", `Open the site once a day to add to your chain. Days reset at ${localResetTime()} your time (00:00 UTC).`],
+      ["Don't break it", "Miss a day and your chain starts again from one."],
+      ["Win", "The three longest chains when the month ends win secret prizes."],
+    ],
+  },
+};
+
 const formatDate = (date) =>
   new Date(date).toLocaleDateString(undefined, {
     day: "numeric",
@@ -55,6 +78,33 @@ function EventDetails({ event, user }) {
   const joined = isJoined(event.id);
   const status = getEventStatus(event, now);
   const isReferralEvent = event.type === "referral";
+  const isStreakEvent = event.type === "streak";
+  const steps = isStreakEvent ? STEPS.streak : STEPS.referral;
+
+  const [myStanding, setMyStanding] = useState(null);
+
+  useEffect(() => {
+    if (!isStreakEvent || !user?.id) return;
+
+    let cancelled = false;
+
+    supabase
+      .rpc("streak_standings", {
+        p_event_id: event.id,
+        p_starts: new Date(event.startDate).toISOString(),
+        p_ends: new Date(event.endDate).toISOString(),
+      })
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+
+        const index = data.findIndex((player) => player.id === user.id);
+        setMyStanding(index === -1 ? null : { ...data[index], rank: index + 1 });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isStreakEvent, event.id, event.startDate, event.endDate, user?.id]);
 
   const referralLink = referralLinkFor(
     user?.user_metadata?.username
@@ -89,7 +139,9 @@ function EventDetails({ event, user }) {
       setMessage(
         result.alreadyJoined
           ? "You're already in this one."
-          : "You're in. Now go share your link. 🏆"
+          : isStreakEvent
+            ? "You're in. See you tomorrow. 🔥"
+            : "You're in. Now go share your link. 🏆"
       );
     } catch (joinError) {
       console.error("Join event error:", joinError);
@@ -215,13 +267,17 @@ function EventDetails({ event, user }) {
         </div>
 
         <div className="event-fact">
-          <span className="eyebrow">You</span>
+          <span className="eyebrow">{isStreakEvent ? "Your streak" : "You"}</span>
           <strong>
-            {joined
-              ? "Competing"
-              : status === "ended"
-                ? "Didn't join"
-                : "Not joined yet"}
+            {isStreakEvent && status === "upcoming"
+              ? "Starts at 0"
+              : isStreakEvent && myStanding
+                ? `🔥 ${myStanding.best_streak} ${myStanding.best_streak === 1 ? "day" : "days"} · #${myStanding.rank}`
+                : joined
+                ? "Competing"
+                : status === "ended"
+                  ? "Didn't join"
+                  : "Not joined yet"}
           </strong>
         </div>
       </section>
@@ -323,33 +379,17 @@ function EventDetails({ event, user }) {
       <section className="event-section">
         <div className="event-section-head">
           <span className="eyebrow">How it works</span>
-          <h2>Four steps. No tricks.</h2>
+          <h2>{steps.title}</h2>
         </div>
 
         <ol className="event-steps">
-          <li>
-            <span>01</span>
-            <strong>Join</strong>
-            <p>Hit “Join event” so you show up on this event's board.</p>
-          </li>
-
-          <li>
-            <span>02</span>
-            <strong>Share</strong>
-            <p>Send your invite link anywhere people will see it.</p>
-          </li>
-
-          <li>
-            <span>03</span>
-            <strong>Climb</strong>
-            <p>Each signup through your link adds to your count.</p>
-          </li>
-
-          <li>
-            <span>04</span>
-            <strong>Win</strong>
-            <p>Top three when the clock hits zero take the prizes.</p>
-          </li>
+          {steps.items.map(([title, text], index) => (
+            <li key={title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{title}</strong>
+              <p>{text}</p>
+            </li>
+          ))}
         </ol>
       </section>
 
