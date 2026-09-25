@@ -7,6 +7,7 @@ import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
 import SkeletonRows from "../components/SkeletonRows";
 import StreakCard from "../components/StreakCard";
+import QuestsCard from "../components/QuestsCard";
 import { useMyProfile } from "../context/ProfileContext";
 import { equippedFrom } from "../data/cosmetics";
 import {
@@ -279,6 +280,8 @@ function Home({ user }) {
           streakEvent={streakEvent}
           now={now}
         />
+
+        <QuestsCard now={now} />
 
         {loadingEvents ? (
           <div className="home-event card" aria-busy="true">

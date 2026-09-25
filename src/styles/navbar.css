@@ -305,6 +305,261 @@
 
 
 /* =========================================
+   NOTIFICATIONS
+========================================= */
+
+.notif {
+  position: relative;
+}
+
+.notif-bell {
+  position: relative;
+
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid transparent;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--text-soft);
+
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.notif-bell:hover,
+.notif-bell.is-open {
+  border-color: var(--line);
+
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.notif-count {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+
+  min-width: 17px;
+  height: 17px;
+
+  padding: 0 4px;
+
+  display: grid;
+  place-items: center;
+
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+
+  background: var(--accent-grad);
+  color: #fff;
+
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -60px;
+  z-index: 120;
+
+  width: 370px;
+  max-height: min(70vh, 520px);
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+
+  background: var(--surface);
+
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.75);
+
+  overflow: hidden;
+
+  animation: notif-in 0.16s ease;
+}
+
+@keyframes notif-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.notif-head {
+  padding: 14px 16px;
+
+  border-bottom: 1px solid var(--line);
+
+  font-size: 15px;
+}
+
+.notif-empty {
+  padding: 28px 20px;
+
+  color: var(--text-mute);
+
+  font-size: 14px;
+  text-align: center;
+}
+
+.notif-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  list-style: none;
+}
+
+.notif-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.notif-list a,
+.notif-list li > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 12px 16px;
+
+  text-decoration: none;
+
+  transition: background 0.12s ease;
+}
+
+.notif-list a:hover {
+  background: rgba(255, 200, 225, 0.04);
+}
+
+.notif-list li.is-unread {
+  background: rgba(255, 92, 141, 0.06);
+}
+
+.notif-icon {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+}
+
+.notif-icon.kind-passed {
+  background: var(--rose-wash);
+  color: var(--rose);
+}
+
+.notif-icon.kind-level,
+.notif-icon.kind-payout {
+  background: rgba(255, 209, 102, 0.14);
+  color: var(--sun);
+}
+
+.notif-icon.kind-friend_request,
+.notif-icon.kind-friend_accept {
+  background: var(--sky-wash);
+  color: var(--sky);
+}
+
+.notif-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.notif-text strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.notif-text small {
+  color: var(--text-mute);
+
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.notif-time {
+  flex-shrink: 0;
+
+  color: var(--text-mute);
+
+  font-size: 12px;
+}
+
+.notif-toast {
+  position: fixed;
+  top: 78px;
+  right: 20px;
+  z-index: 250;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  width: min(360px, calc(100vw - 32px));
+  padding: 14px 16px;
+
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius);
+
+  background: rgba(33, 23, 37, 0.97);
+
+  backdrop-filter: blur(10px);
+
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.75), var(--shadow-gold);
+
+  text-decoration: none;
+
+  animation: notif-toast 5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes notif-toast {
+  0% { opacity: 0; transform: translateY(-10px); }
+  8% { opacity: 1; transform: none; }
+  88% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-6px); visibility: hidden; }
+}
+
+@media (max-width: 700px) {
+  .notif-panel {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+    max-height: calc(100dvh - 72px - var(--tabbar-h, 0px) - 24px);
+  }
+
+  .notif-toast {
+    top: 74px;
+    right: 16px;
+  }
+}
+
+
+/* =========================================
    PHONE TAB BAR
 ========================================= */
 

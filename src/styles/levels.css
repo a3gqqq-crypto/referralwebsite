@@ -359,6 +359,212 @@
   font-weight: 500;
 }
 
+/* =========================================
+   DAILY QUESTS
+========================================= */
+
+.quests {
+  padding: 26px 28px;
+}
+
+.quests-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quests-head h3 {
+  margin-top: 8px;
+
+  font-size: 28px;
+}
+
+.quests-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  color: var(--text-mute);
+
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.quests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-top: 18px;
+
+  list-style: none;
+}
+
+.quest {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+
+  background: var(--bg-raised);
+
+  transition: border-color 0.2s ease;
+}
+
+.quest.is-ready {
+  border-color: var(--line-gold);
+
+  background:
+    radial-gradient(300px 100px at 0% 50%, rgba(255, 92, 141, 0.1), transparent 70%),
+    var(--bg-raised);
+}
+
+.quest-icon {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+}
+
+.quest.is-claimed .quest-icon {
+  background: var(--mint-wash);
+  color: var(--mint);
+}
+
+.quest-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.quest-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.quest-title strong {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.quest.is-claimed .quest-title strong {
+  color: var(--text-mute);
+
+  text-decoration: line-through;
+  text-decoration-color: var(--line-strong);
+}
+
+.quest-reward {
+  flex-shrink: 0;
+
+  color: var(--gold-soft);
+
+  font-size: 12.5px;
+}
+
+.quest-bar {
+  height: 6px;
+
+  margin-top: 8px;
+
+  border-radius: 999px;
+
+  background: var(--surface-3);
+
+  overflow: hidden;
+}
+
+.quest-bar span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--accent-grad);
+
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quest.is-claimed .quest-bar span {
+  background: var(--mint);
+}
+
+.quest .btn {
+  flex-shrink: 0;
+}
+
+.quest-done {
+  flex-shrink: 0;
+
+  padding: 0 6px;
+
+  color: var(--mint);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.quests-bonus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 14px;
+
+  color: var(--text-mute);
+
+  font-size: 13.5px;
+}
+
+.quests-bonus.is-done {
+  color: var(--mint);
+}
+
+.quests-notice {
+  margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+  .quests {
+    padding: 18px;
+  }
+
+  .quests-head h3 {
+    font-size: 24px;
+  }
+
+  .quest {
+    gap: 12px;
+
+    padding: 11px 12px;
+  }
+
+  .quest-title {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
 @media (max-width: 900px) {
   .streak-card {
     grid-template-columns: minmax(0, 1fr);
