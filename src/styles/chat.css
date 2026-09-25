@@ -4,7 +4,7 @@
 
   width: 100%;
   max-width: calc(var(--page-width) + var(--gutter) * 2);
-  height: calc(100dvh - 67px);
+  min-height: 0;
 
   margin: 0 auto;
   padding: 20px var(--gutter);
@@ -583,8 +583,6 @@
     position: relative;
 
     grid-template-columns: minmax(0, 1fr);
-
-    height: calc(100dvh - 65px);
 
     padding: 0;
   }

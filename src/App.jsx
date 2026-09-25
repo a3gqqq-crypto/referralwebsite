@@ -74,7 +74,7 @@ function AuthenticatedApp({ session, onLogout }) {
     <EventProvider user={user}>
       <ProfileProvider user={user}>
         <SocialProvider user={user}>
-          <div className="app">
+          <div className={`app ${fullHeight ? "app-fill" : ""}`}>
             <ScrollToTop />
 
             <Navbar user={user} onLogout={onLogout} />
