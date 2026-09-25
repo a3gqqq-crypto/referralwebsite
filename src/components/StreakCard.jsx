@@ -17,7 +17,7 @@ function lastSevenDays(now) {
   });
 }
 
-function StreakCard({ userId, streak = 0, lastCheckin, streakEvent, now }) {
+function StreakCard({ userId, streak = 0, lastCheckin, streakEvent, now, compact = false }) {
   const [checkedDays, setCheckedDays] = useState(() => new Set());
   const [standing, setStanding] = useState(null);
 
@@ -73,6 +73,54 @@ function StreakCard({ userId, streak = 0, lastCheckin, streakEvent, now }) {
   const current = checkedToday || lastCheckin === utcDay(new Date(now.getTime() - 86400000)) ? streak : 0;
   const nextBonus = 10 + Math.min(current * 5, 30);
   const days = lastSevenDays(now);
+
+  if (compact) {
+    return (
+      <div className="streak-card card is-compact">
+        <div className="dash-card-head">
+          <span className="eyebrow">Login streak</span>
+          {streakEvent && (
+            <Link to={`/events/${streakEvent.id}`} className="dash-more">
+              {eventStatus === "live" && standing ? `#${standing.rank} this month` : "Monthly event"}
+              <Icon name="arrowRight" size={14} />
+            </Link>
+          )}
+        </div>
+
+        <div className="streak-card-main">
+          <div className={`streak-flame ${current > 0 ? "is-lit" : ""}`} aria-hidden="true">
+            <Icon name="flame" size={24} strokeWidth={2} />
+          </div>
+
+          <div className="streak-card-count">
+            <strong className="mono">{current}</strong>
+            <span>{current === 1 ? "day" : "days"}</span>
+          </div>
+
+          <ol className="streak-week" aria-label="Last seven days">
+            {days.map((day) => (
+              <li
+                key={day.key}
+                className={`${checkedDays.has(day.key) ? "is-done" : ""} ${day.key === today ? "is-today" : ""}`}
+                title={day.key}
+              >
+                <span className="streak-dot">
+                  {checkedDays.has(day.key) && <Icon name="check" size={11} strokeWidth={3} />}
+                </span>
+                <small>{day.label}</small>
+              </li>
+            ))}
+          </ol>
+
+          <p className="streak-card-note">
+            {checkedToday
+              ? `Next day in ${formatUntilNextDay(now)} · +${nextBonus} XP`
+              : "Open Vexora today to keep it going."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="streak-card card">

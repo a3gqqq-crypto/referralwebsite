@@ -14,6 +14,7 @@ export const XP_RULES = [
   { icon: "link", label: "Someone joins with your link", xp: "+100" },
   { icon: "users", label: "You join through someone's link", xp: "+50" },
   { icon: "flame", label: "Daily check-in (streaks add up to +30)", xp: "+10–40" },
+  { icon: "star", label: "Daily quests (+40 bonus for all three)", xp: "+15–60" },
   { icon: "trophy", label: "Join an event", xp: "+25" },
   { icon: "heart", label: "Make a Moment (up to 3 a day)", xp: "+15" },
   { icon: "users", label: "Make a friend (up to 5 a day)", xp: "+15" },

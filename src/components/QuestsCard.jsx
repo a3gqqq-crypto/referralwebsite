@@ -17,7 +17,7 @@ const QUEST_UI = {
 
 const SWEEP_BONUS = 40;
 
-function QuestsCard({ now }) {
+function QuestsCard({ now, compact = false }) {
   const { refresh } = useMyProfile();
   const [quests, setQuests] = useState(null);
   const [busy, setBusy] = useState(null);
@@ -78,13 +78,15 @@ function QuestsCard({ now }) {
   const swept = quests[0]?.sweep_claimed;
 
   return (
-    <div className="quests card">
+    <div className={`quests card ${compact ? "is-compact" : ""}`}>
       <div className="quests-head">
         <div>
-          <span className="eyebrow">Daily quests</span>
-          <h3>
-            {done}/{quests.length} done today
-          </h3>
+          <span className="eyebrow">{compact ? `Daily quests · ${done}/${quests.length}` : "Daily quests"}</span>
+          {!compact && (
+            <h3>
+              {done}/{quests.length} done today
+            </h3>
+          )}
         </div>
 
         <span className="quests-reset mono" title="Quests reset at 00:00 UTC">
