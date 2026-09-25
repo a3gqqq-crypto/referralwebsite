@@ -57,7 +57,7 @@
   position: absolute;
   inset: 0;
 
-  background: linear-gradient(90deg, transparent 60%, rgba(26, 25, 30, 0.9));
+  background: linear-gradient(90deg, transparent 60%, rgba(33, 23, 37, 0.9));
 }
 
 .event-card-art img {
@@ -144,6 +144,8 @@
 
 .event-card-meta .event-card-prize {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 34px;
   line-height: 1;
 
@@ -257,8 +259,9 @@
   margin-top: 10px;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 28px;
-  font-weight: 400;
 }
 
 .demo-moment-front {
@@ -291,8 +294,9 @@
   margin-top: 4px;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 36px;
-  font-weight: 400;
   line-height: 1;
 }
 
@@ -324,7 +328,7 @@
   }
 
   .event-card-art::after {
-    background: linear-gradient(180deg, transparent 60%, rgba(26, 25, 30, 0.9));
+    background: linear-gradient(180deg, transparent 60%, rgba(33, 23, 37, 0.9));
   }
 
   .event-card-body {

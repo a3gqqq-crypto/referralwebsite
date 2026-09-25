@@ -40,7 +40,7 @@
 }
 
 .report-modal::backdrop {
-  background: rgba(8, 7, 10, 0.7);
+  background: rgba(12, 6, 14, 0.7);
 
   backdrop-filter: blur(4px);
 }

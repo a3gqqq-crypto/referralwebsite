@@ -23,8 +23,9 @@ body {
   min-height: 100vh;
 
   background:
-    radial-gradient(1100px 520px at 50% -180px, rgba(242, 181, 68, 0.09), transparent 65%),
-    radial-gradient(700px 500px at 100% 30%, rgba(185, 161, 255, 0.04), transparent 70%),
+    radial-gradient(1100px 520px at 30% -200px, rgba(255, 77, 141, 0.16), transparent 65%),
+    radial-gradient(900px 480px at 90% -120px, rgba(255, 159, 61, 0.1), transparent 65%),
+    radial-gradient(700px 500px at 100% 60%, rgba(199, 166, 255, 0.05), transparent 70%),
     var(--bg);
   background-attachment: fixed;
   color: var(--text);
@@ -97,8 +98,9 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.015em;
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
@@ -147,8 +149,8 @@ h3 {
 .page-header h1 {
   margin-top: 18px;
 
-  font-size: clamp(50px, 7vw, 92px);
-  line-height: 0.95;
+  font-size: clamp(42px, 6vw, 80px);
+  line-height: 0.98;
 }
 
 .page-header p {
@@ -177,21 +179,24 @@ h3 {
 
   border-radius: 10px;
 
-  background: linear-gradient(145deg, var(--gold-soft), var(--gold) 55%, var(--gold-deep));
+  background: var(--accent-grad);
   color: var(--on-gold);
 
   font-family: var(--font-display);
-  font-size: 22px;
-  font-style: italic;
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
+  font-size: 21px;
   line-height: 1;
 
-  box-shadow: 0 6px 20px -6px rgba(242, 181, 68, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px -6px rgba(255, 92, 141, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .brand-word {
   font-family: var(--font-display);
-  font-size: 26px;
-  letter-spacing: -0.01em;
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
+  font-size: 24px;
+  letter-spacing: -0.03em;
 }
 
 
@@ -223,9 +228,13 @@ h3 {
 }
 
 .mark {
-  font-style: italic;
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 
-  color: var(--gold);
+  /* Gradient text clips descenders on some fonts without a little room. */
+  padding-bottom: 0.06em;
 }
 
 .mono {
@@ -275,7 +284,7 @@ h3 {
 .btn:hover:not(:disabled) {
   background: var(--surface-3);
 
-  border-color: rgba(255, 238, 214, 0.26);
+  border-color: rgba(255, 200, 225, 0.26);
 }
 
 .btn:active:not(:disabled) {
@@ -289,20 +298,22 @@ h3 {
 .btn-primary {
   border-color: transparent;
 
-  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  background: var(--accent-grad);
   color: var(--on-gold);
 
-  font-weight: 600;
+  font-weight: 700;
 
-  box-shadow: var(--shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 1px rgba(120, 20, 50, 0.25);
+
+  box-shadow: var(--shadow-gold), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #fbe2a8, var(--gold-soft));
+  background: var(--accent-grad-hover);
 
   border-color: transparent;
 
-  box-shadow: 0 14px 44px -12px rgba(242, 181, 68, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: 0 14px 44px -12px rgba(255, 92, 141, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .btn-dark {
@@ -317,7 +328,7 @@ h3 {
 }
 
 .btn-sun:hover:not(:disabled) {
-  background: rgba(242, 181, 68, 0.18);
+  background: rgba(255, 92, 141, 0.18);
 
   border-color: var(--gold);
 }
@@ -372,7 +383,7 @@ h3 {
   border-color: var(--line-gold);
 
   background:
-    radial-gradient(600px 240px at 0% 0%, rgba(242, 181, 68, 0.12), transparent 70%),
+    radial-gradient(600px 240px at 0% 0%, rgba(255, 92, 141, 0.12), transparent 70%),
     var(--surface);
 }
 
@@ -572,9 +583,9 @@ h3 {
   background:
     linear-gradient(
       90deg,
-      rgba(255, 238, 214, 0.04) 25%,
-      rgba(255, 238, 214, 0.09) 37%,
-      rgba(255, 238, 214, 0.04) 63%
+      rgba(255, 200, 225, 0.04) 25%,
+      rgba(255, 200, 225, 0.09) 37%,
+      rgba(255, 200, 225, 0.04) 63%
     );
   background-size: 400% 100%;
 
@@ -664,6 +675,8 @@ h3 {
   color: var(--gold-soft);
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 19px;
 }
 
@@ -747,7 +760,7 @@ h3 {
 
   border-color: var(--gold);
 
-  box-shadow: 0 0 0 4px rgba(242, 181, 68, 0.12);
+  box-shadow: 0 0 0 4px rgba(255, 92, 141, 0.12);
 }
 
 .field input:disabled {

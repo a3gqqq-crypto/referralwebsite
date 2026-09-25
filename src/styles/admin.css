@@ -462,8 +462,9 @@
   color: var(--gold);
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 24px;
-  font-weight: 400;
 }
 
 .admin-note {

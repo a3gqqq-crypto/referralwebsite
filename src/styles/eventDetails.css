@@ -114,13 +114,14 @@
 }
 
 .event-fact-prize {
-  background: radial-gradient(300px 150px at 0% 0%, rgba(242, 181, 68, 0.16), transparent 70%);
+  background: radial-gradient(300px 150px at 0% 0%, rgba(255, 92, 141, 0.16), transparent 70%);
 }
 
 .event-fact-prize strong {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 44px;
-  font-weight: 400;
   line-height: 1;
 
   color: var(--gold);
@@ -204,8 +205,9 @@
   margin-top: 10px;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: clamp(38px, 4.4vw, 54px);
-  font-weight: 400;
   line-height: 1;
 
   color: var(--podium-color);
@@ -313,8 +315,9 @@
   margin-top: 12px;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 32px;
-  font-weight: 400;
   line-height: 1;
 }
 

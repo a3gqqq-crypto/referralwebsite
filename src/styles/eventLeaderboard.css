@@ -41,13 +41,14 @@
 }
 
 .board-stat-prize {
-  background: radial-gradient(300px 140px at 0% 0%, rgba(242, 181, 68, 0.16), transparent 70%);
+  background: radial-gradient(300px 140px at 0% 0%, rgba(255, 92, 141, 0.16), transparent 70%);
 }
 
 .board-stat-prize strong {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 40px;
-  font-weight: 400;
   line-height: 1;
 
   color: var(--gold);
@@ -96,7 +97,7 @@
 
   min-height: 330px;
 
-  box-shadow: 0 30px 80px -30px rgba(242, 181, 68, 0.45);
+  box-shadow: 0 30px 80px -30px rgba(255, 92, 141, 0.45);
 }
 
 .board-podium-step.place-2 {
@@ -138,8 +139,9 @@
   max-width: 100%;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 28px;
-  font-weight: 400;
   line-height: 1.05;
 }
 
@@ -225,16 +227,16 @@
 }
 
 .board-list ol .board-row:hover {
-  background: rgba(255, 238, 214, 0.025);
+  background: rgba(255, 200, 225, 0.025);
 }
 
 .board-row.is-top {
-  background: rgba(242, 181, 68, 0.035);
+  background: rgba(255, 92, 141, 0.035);
 }
 
 .board-row.is-me,
 .board-list ol .board-row.is-me:hover {
-  background: rgba(242, 181, 68, 0.09);
+  background: rgba(255, 92, 141, 0.09);
 
   box-shadow: inset 2px 0 0 var(--gold);
 }

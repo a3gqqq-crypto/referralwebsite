@@ -137,7 +137,7 @@
   border: 1px solid var(--line-gold);
   border-radius: 999px;
 
-  background: rgba(26, 25, 30, 0.95);
+  background: rgba(33, 23, 37, 0.95);
 
   backdrop-filter: blur(10px);
 
@@ -232,6 +232,8 @@
   color: var(--text-soft);
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
 }
 
@@ -332,8 +334,9 @@
 
 .streak-card-event > strong {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
-  font-weight: 400;
   line-height: 1.1;
 }
 

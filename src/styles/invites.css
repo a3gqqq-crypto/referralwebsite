@@ -59,7 +59,7 @@
   border-left: 1px solid var(--line);
 
   background:
-    radial-gradient(360px 220px at 100% 0%, rgba(242, 181, 68, 0.18), transparent 70%),
+    radial-gradient(360px 220px at 100% 0%, rgba(255, 92, 141, 0.18), transparent 70%),
     var(--bg-raised);
 }
 
@@ -83,6 +83,8 @@
 
 .invite-stat-main dd {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 104px;
   line-height: 0.85;
 

@@ -22,7 +22,7 @@
 .people-search:focus-within {
   border-color: var(--gold);
 
-  box-shadow: 0 0 0 4px rgba(242, 181, 68, 0.12);
+  box-shadow: 0 0 0 4px rgba(255, 92, 141, 0.12);
 }
 
 .people-search input {
@@ -126,6 +126,8 @@
   margin-top: 32px;
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
   line-height: 1.05;
 }

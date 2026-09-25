@@ -36,6 +36,8 @@
   color: var(--gold-soft);
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: calc(var(--fav-size) * 0.48);
   line-height: 1;
 
@@ -108,7 +110,7 @@
   left: 50%;
   z-index: 2;
 
-  color: var(--gold);
+  color: var(--sun);
 
   transform: translateX(-50%) rotate(-8deg);
 
@@ -237,10 +239,10 @@
 
   border-color: transparent;
 
-  background: linear-gradient(145deg, #fff1c9, var(--gold) 55%, var(--gold-deep));
-  color: var(--on-gold);
+  background: linear-gradient(145deg, #fff1c9, #ffb347 55%, #d9761a);
+  color: #2a1402;
 
-  box-shadow: 0 0 14px -3px rgba(242, 181, 68, 0.7);
+  box-shadow: 0 0 14px -3px rgba(255, 179, 71, 0.7);
 }
 
 
@@ -253,14 +255,14 @@
 
   overflow: hidden;
 
-  background-color: #16151a;
+  background-color: #1f1422;
 }
 
 .banner-midnight {
   background:
-    radial-gradient(500px 200px at 15% 0%, rgba(242, 181, 68, 0.14), transparent 70%),
-    radial-gradient(400px 220px at 90% 100%, rgba(185, 161, 255, 0.1), transparent 70%),
-    linear-gradient(180deg, #1c1b21, #131216);
+    radial-gradient(500px 200px at 15% 0%, rgba(255, 77, 141, 0.22), transparent 70%),
+    radial-gradient(400px 220px at 90% 100%, rgba(255, 159, 61, 0.16), transparent 70%),
+    linear-gradient(180deg, #2a1a2e, #1a111d);
 }
 
 .banner-dusk {
@@ -357,6 +359,8 @@ a.player-chip:hover .player-chip-name {
 
 .cosmetic-preview-name {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 34px;
 }
 

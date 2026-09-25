@@ -71,12 +71,12 @@
 
 .chat-room:hover,
 .chat-friend:hover {
-  background: rgba(255, 238, 214, 0.04);
+  background: rgba(255, 200, 225, 0.04);
 }
 
 .chat-room.active,
 .chat-friend.active {
-  background: rgba(242, 181, 68, 0.1);
+  background: rgba(255, 92, 141, 0.1);
 }
 
 .chat-room-icon {
@@ -241,7 +241,7 @@
   border-radius: var(--radius-lg);
 
   background:
-    radial-gradient(700px 300px at 50% 0%, rgba(242, 181, 68, 0.05), transparent 70%),
+    radial-gradient(700px 300px at 50% 0%, rgba(255, 92, 141, 0.05), transparent 70%),
     var(--bg-raised);
 
   overflow: hidden;
@@ -258,7 +258,7 @@
 
   border-bottom: 1px solid var(--line);
 
-  background: rgba(26, 25, 30, 0.6);
+  background: rgba(33, 23, 37, 0.6);
 }
 
 .chat-head .player-chip {
@@ -267,6 +267,8 @@
 
 .chat-head .player-chip-name {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 24px;
 }
 
@@ -295,8 +297,9 @@
 
 .chat-head-title {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
-  font-weight: 400;
   line-height: 1;
 }
 
@@ -360,8 +363,9 @@
   color: var(--text);
 
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
-  font-weight: 400;
 }
 
 .chat-list {
@@ -386,7 +390,7 @@
 }
 
 .chat-msg:hover {
-  background: rgba(255, 238, 214, 0.025);
+  background: rgba(255, 200, 225, 0.025);
 }
 
 .chat-msg-avatar a {
@@ -501,7 +505,7 @@
 .chat-composer-box:focus-within {
   border-color: var(--gold);
 
-  box-shadow: 0 0 0 4px rgba(242, 181, 68, 0.1);
+  box-shadow: 0 0 0 4px rgba(255, 92, 141, 0.1);
 }
 
 .chat-composer-box textarea {
@@ -545,7 +549,7 @@
   border: none;
   border-radius: 50%;
 
-  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+  background: var(--accent-grad);
   color: var(--on-gold);
 
   transition:

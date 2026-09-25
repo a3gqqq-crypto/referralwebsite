@@ -48,11 +48,11 @@ function buildCardSvg(moment) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
   <defs>
     <radialGradient id="glow" cx="0.1" cy="0" r="0.9">
-      <stop offset="0" stop-color="#f2b544" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#f2b544" stop-opacity="0"/>
+      <stop offset="0" stop-color="#ff4d8d" stop-opacity="0.3"/>
+      <stop offset="1" stop-color="#ff4d8d" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1200" height="1500" fill="#0f0e11"/>
+  <rect width="1200" height="1500" fill="#140d16"/>
   <rect width="1200" height="1500" fill="url(#glow)"/>
   <rect x="120" y="220" width="960" height="1100" rx="56" fill="#000000" fill-opacity="0.45"/>
   <rect x="110" y="190" width="960" height="1100" rx="56" fill="${template.color}"/>
@@ -61,7 +61,7 @@ function buildCardSvg(moment) {
   <text x="170" y="590" fill="#1a1612" font-size="100" font-family="Georgia, serif">For ${escapeXml(moment.to_name)}</text>
   ${messageSvg}
   <text x="170" y="${fromY}" fill="#1a1612" font-size="40" font-style="italic" font-family="Georgia, serif">— ${escapeXml(moment.from_name)}</text>
-  <text x="600" y="1410" text-anchor="middle" fill="#f8d58a" font-size="26" font-family="Arial, sans-serif">made on Vexora · joinvexora.com</text>
+  <text x="600" y="1410" text-anchor="middle" fill="#ff9dbc" font-size="26" font-family="Arial, sans-serif">made on Vexora · joinvexora.com</text>
 </svg>`;
 }
 

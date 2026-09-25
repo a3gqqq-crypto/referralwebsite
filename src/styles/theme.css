@@ -1,53 +1,61 @@
 :root {
   color-scheme: dark;
 
-  /* Surfaces — warm, layered darks (never flat black) */
-  --bg: #0f0e11;
-  --bg-raised: #141317;
-  --surface: #1a191e;
-  --surface-2: #222127;
-  --surface-3: #2b2a31;
+  /* Sunset: dark plum surfaces, hot pink → orange accent, sunny yellow for wins */
+
+  /* Surfaces */
+  --bg: #140d16;
+  --bg-raised: #1a111d;
+  --surface: #211725;
+  --surface-2: #2a1e2f;
+  --surface-3: #35263a;
 
   /* Text */
-  --text: #f4efe7;
-  --text-soft: #bdb6aa;
-  --text-mute: #807a70;
+  --text: #fff1f5;
+  --text-soft: #d3bcc9;
+  --text-mute: #9c8494;
 
   /* Lines */
-  --line: rgba(255, 238, 214, 0.08);
-  --line-strong: rgba(255, 238, 214, 0.16);
-  --line-gold: rgba(242, 181, 68, 0.35);
+  --line: rgba(255, 200, 225, 0.09);
+  --line-strong: rgba(255, 200, 225, 0.17);
+  --line-gold: rgba(255, 92, 141, 0.4);
 
-  /* Gold */
-  --gold: #f2b544;
-  --gold-soft: #f8d58a;
-  --gold-deep: #c98a1b;
-  --gold-wash: rgba(242, 181, 68, 0.1);
-  --on-gold: #1b1405;
+  /* Accent. Named "gold" for history; it's the Sunset pink now. */
+  --gold: #ff5c8d;
+  --gold-soft: #ff9dbc;
+  --gold-deep: #e0336f;
+  --gold-wash: rgba(255, 92, 141, 0.12);
+  --on-gold: #ffffff;
+
+  --accent-grad: linear-gradient(100deg, #ff4d8d 0%, #ff7a5c 55%, #ff9f3d 100%);
+  --accent-grad-hover: linear-gradient(100deg, #ff66a0 0%, #ff8c6b 55%, #ffb057 100%);
+  --sun: #ffd166;
 
   /* Supporting */
-  --mint: #6fd7a3;
-  --mint-wash: rgba(111, 215, 163, 0.12);
-  --rose: #ff8a7a;
-  --rose-wash: rgba(255, 138, 122, 0.12);
-  --sky: #8ab8ff;
-  --sky-wash: rgba(138, 184, 255, 0.12);
-  --violet: #b9a1ff;
-  --violet-wash: rgba(185, 161, 255, 0.12);
+  --mint: #5fe3a8;
+  --mint-wash: rgba(95, 227, 168, 0.12);
+  --rose: #ff7a7a;
+  --rose-wash: rgba(255, 122, 122, 0.12);
+  --sky: #7cc4ff;
+  --sky-wash: rgba(124, 196, 255, 0.12);
+  --violet: #c7a6ff;
+  --violet-wash: rgba(199, 166, 255, 0.12);
 
   /* Podium */
-  --place-1: #f2b544;
-  --place-2: #cfd2da;
-  --place-3: #d48d5a;
+  --place-1: #ffd166;
+  --place-2: #dcd6e4;
+  --place-3: #ff9a5c;
 
   /* Rarity */
-  --rarity-common: #bdb6aa;
-  --rarity-rare: #8ab8ff;
-  --rarity-epic: #b9a1ff;
-  --rarity-legendary: #f2b544;
+  --rarity-common: #d3bcc9;
+  --rarity-rare: #7cc4ff;
+  --rarity-epic: #c7a6ff;
+  --rarity-legendary: #ffb347;
 
   /* Type */
-  --font-display: "Instrument Serif", Georgia, serif;
+  --font-display: "Bricolage Grotesque", "Geist", system-ui, sans-serif;
+  --display-weight: 800;
+  --display-stretch: 82%;
   --font-body: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, Consolas, monospace;
 
@@ -55,9 +63,9 @@
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 22px;
-  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
-  --shadow-gold: 0 10px 40px -12px rgba(242, 181, 68, 0.45);
-  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.65);
+  --shadow-gold: 0 12px 40px -12px rgba(255, 92, 141, 0.55);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
   /* Layout */
   --page-width: 1120px;

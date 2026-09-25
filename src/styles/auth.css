@@ -26,7 +26,7 @@
   border-right: 1px solid var(--line);
 
   background:
-    radial-gradient(700px 420px at 0% 0%, rgba(242, 181, 68, 0.14), transparent 65%),
+    radial-gradient(700px 420px at 0% 0%, rgba(255, 92, 141, 0.14), transparent 65%),
     radial-gradient(600px 400px at 100% 100%, rgba(185, 161, 255, 0.07), transparent 70%),
     var(--bg-raised);
 
@@ -106,7 +106,7 @@
 
   background: var(--surface);
 
-  box-shadow: var(--shadow), 0 0 0 1px rgba(242, 181, 68, 0.06);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255, 92, 141, 0.06);
 
   overflow: hidden;
 
@@ -139,6 +139,8 @@
 
 .auth-showcase-name {
   font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-stretch: var(--display-stretch);
   font-size: 26px;
   line-height: 1;
 }
