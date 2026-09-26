@@ -444,40 +444,181 @@
   overflow-wrap: anywhere;
 }
 
-.chat-msg-report {
+/* Reply / delete / report. Desktop: icons on hover. Phones: a row under the tapped message. */
+.chat-msg-actions {
   position: absolute;
   top: 6px;
   right: 8px;
 
-  width: 26px;
-  height: 26px;
-
-  display: grid;
-  place-items: center;
-
-  border: 1px solid var(--line);
-  border-radius: 8px;
-
-  background: var(--surface);
-  color: var(--text-mute);
+  display: flex;
+  gap: 4px;
 
   opacity: 0;
 
   transition: opacity 0.15s ease;
 }
 
-.chat-msg:hover .chat-msg-report,
-.chat-msg-report:focus-visible {
+.chat-msg:hover .chat-msg-actions,
+.chat-msg-actions:focus-within {
   opacity: 1;
 }
 
-.chat-msg-report:hover {
+.chat-msg-action {
+  height: 26px;
+  min-width: 26px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 0 6px;
+
+  border: 1px solid var(--line);
+  border-radius: 8px;
+
+  background: var(--surface);
+  color: var(--text-mute);
+}
+
+.chat-msg-action:hover {
+  color: var(--gold-soft);
+}
+
+.chat-msg-action.is-danger:hover {
   color: var(--rose);
 }
 
-/* Owner-only delete; sits left of the report flag when both show. */
-.chat-msg-delete.beside-report {
-  right: 40px;
+.chat-msg-action-label {
+  display: none;
+}
+
+/* The message a reply points at. */
+.chat-quote {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  max-width: min(420px, 100%);
+  margin: 4px 0 2px;
+  padding: 5px 10px;
+
+  border: none;
+  border-left: 3px solid var(--gold);
+  border-radius: 4px 10px 10px 4px;
+
+  background: var(--gold-wash);
+  color: var(--text-soft);
+
+  font-size: 13px;
+  text-align: left;
+}
+
+button.chat-quote {
+  cursor: pointer;
+}
+
+.chat-quote strong {
+  color: var(--gold-soft);
+
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.chat-quote span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+
+  max-width: 100%;
+
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.chat-quote.is-gone {
+  border-left-color: var(--line-strong);
+
+  background: var(--surface-2);
+  color: var(--text-mute);
+
+  font-style: italic;
+}
+
+@keyframes chat-flash {
+  0%, 30% { background: rgba(255, 92, 141, 0.18); }
+  100% { background: transparent; }
+}
+
+.chat-msg.flash {
+  animation: chat-flash 1.6s ease-out;
+}
+
+/* "Replying to …" bar above the message box. */
+.chat-replying {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 8px;
+  padding: 8px 8px 8px 12px;
+
+  border-left: 3px solid var(--gold);
+  border-radius: 4px 12px 12px 4px;
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+}
+
+.chat-replying-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 0;
+
+  border: none;
+  background: none;
+
+  text-align: left;
+}
+
+.chat-replying-text strong {
+  color: var(--gold-soft);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chat-replying-text span {
+  max-width: 100%;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-replying-close {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid var(--line);
+  border-radius: 50%;
+
+  background: var(--surface);
+  color: var(--text-mute);
 }
 
 
@@ -884,30 +1025,43 @@
     padding-right: 10px;
   }
 
-  .chat-msg-head {
-    padding-right: 30px;
+  /* No hover on phones: tap a message to show its actions as a row underneath. */
+  .chat-msg-actions {
+    position: static;
+    grid-column: 2;
+
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin: 6px 0 4px;
+
+    opacity: 1;
   }
 
-  .chat-msg-report {
-    top: 2px;
-    right: 2px;
+  .chat-msg.selected {
+    background: rgba(255, 200, 225, 0.05);
+  }
 
-    width: 34px;
+  .chat-msg.selected .chat-msg-actions {
+    display: flex;
+  }
+
+  .chat-msg-action {
     height: 34px;
 
-    border-color: transparent;
+    padding: 0 12px;
 
-    background: transparent;
+    border-radius: 999px;
 
-    opacity: 0.4;
+    color: var(--text-soft);
+
+    font-size: 13.5px;
+    font-weight: 600;
   }
 
-  .chat-msg-delete.beside-report {
-    right: 38px;
-  }
-
-  .chat-msg:has(.chat-msg-delete.beside-report) .chat-msg-head {
-    padding-right: 70px;
+  .chat-msg-action-label {
+    display: inline;
   }
 
   /* 16px stops iOS from zooming in when the box is tapped. */

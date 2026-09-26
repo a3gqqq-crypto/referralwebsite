@@ -53,15 +53,55 @@ function ChatPhoto({ path, onOpen, onLoad }) {
   );
 }
 
-function MessageRow({ message, sender, grouped, isMine, onReport, onDelete, onOpenPhoto, onPhotoLoad }) {
+// What a reply shows of the message it answers.
+function QuoteBlock({ quote, onJump }) {
+  if (quote === undefined) return null;
+
+  if (!quote) {
+    return <div className="chat-quote is-gone">Message deleted</div>;
+  }
+
+  return (
+    <button type="button" className="chat-quote" onClick={() => onJump(quote.message.id)}>
+      <strong>{displayNameOf(quote.sender, "…")}</strong>
+      <span>{quote.message.body || (quote.message.image ? "📷 Photo" : "")}</span>
+    </button>
+  );
+}
+
+function MessageRow({
+  message,
+  sender,
+  grouped,
+  isMine,
+  quote,
+  selected,
+  onSelect,
+  onReply,
+  onJump,
+  onReport,
+  onDelete,
+  onOpenPhoto,
+  onPhotoLoad,
+}) {
   const equipped = equippedFrom(sender);
   const name = displayNameOf(sender, "…");
   const href = `/u/${encodeURIComponent(sender?.username || "")}`;
+  const canReport = !isMine && sender;
+  // A reply always shows who sent it, even in a run of messages from one person.
+  const compact = grouped && !message.reply_to;
 
   return (
-    <li className={`chat-msg ${grouped ? "grouped" : ""} ${isMine ? "mine" : ""}`}>
+    <li
+      id={`msg-${message.id}`}
+      className={`chat-msg ${compact ? "grouped" : ""} ${isMine ? "mine" : ""} ${selected ? "selected" : ""}`}
+      onClick={(event) => {
+        // Phones: tapping a message shows its actions. Links and buttons keep their own taps.
+        if (!event.target.closest("a, button")) onSelect(message.id);
+      }}
+    >
       <div className="chat-msg-avatar">
-        {!grouped && (
+        {!compact && (
           <Link to={href} tabIndex={-1} aria-hidden="true">
             <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={38} />
           </Link>
@@ -69,7 +109,7 @@ function MessageRow({ message, sender, grouped, isMine, onReport, onDelete, onOp
       </div>
 
       <div className="chat-msg-main">
-        {!grouped && (
+        {!compact && (
           <div className="chat-msg-head">
             <Link to={href} className="chat-msg-name">
               <StyledName name={name} effect={equipped.name} />
@@ -81,6 +121,8 @@ function MessageRow({ message, sender, grouped, isMine, onReport, onDelete, onOp
           </div>
         )}
 
+        {message.reply_to && <QuoteBlock quote={quote} onJump={onJump} />}
+
         {message.image && (
           <ChatPhoto path={message.image} onOpen={onOpenPhoto} onLoad={onPhotoLoad} />
         )}
@@ -88,29 +130,44 @@ function MessageRow({ message, sender, grouped, isMine, onReport, onDelete, onOp
         {message.body && <p className="chat-msg-body">{message.body}</p>}
       </div>
 
-      {!isMine && sender && (
+      <div className="chat-msg-actions">
         <button
           type="button"
-          className="chat-msg-report"
-          onClick={() => onReport(sender, message.id)}
-          aria-label={`Report message from ${name}`}
-          title="Report"
+          className="chat-msg-action"
+          onClick={() => onReply(message)}
+          aria-label={`Reply to ${name}`}
+          title="Reply"
         >
-          <Icon name="flag" size={14} />
+          <Icon name="reply" size={14} />
+          <span className="chat-msg-action-label">Reply</span>
         </button>
-      )}
 
-      {onDelete && (
-        <button
-          type="button"
-          className={`chat-msg-report chat-msg-delete ${!isMine && sender ? "beside-report" : ""}`}
-          onClick={() => onDelete(message.id)}
-          aria-label={`Delete message from ${name}`}
-          title="Delete for everyone"
-        >
-          <Icon name="trash" size={14} />
-        </button>
-      )}
+        {onDelete && (
+          <button
+            type="button"
+            className="chat-msg-action is-danger"
+            onClick={() => onDelete(message.id)}
+            aria-label={`Delete message from ${name}`}
+            title="Delete for everyone"
+          >
+            <Icon name="trash" size={14} />
+            <span className="chat-msg-action-label">Delete</span>
+          </button>
+        )}
+
+        {canReport && (
+          <button
+            type="button"
+            className="chat-msg-action is-danger"
+            onClick={() => onReport(sender, message.id)}
+            aria-label={`Report message from ${name}`}
+            title="Report"
+          >
+            <Icon name="flag" size={14} />
+            <span className="chat-msg-action-label">Report</span>
+          </button>
+        )}
+      </div>
     </li>
   );
 }
@@ -138,6 +195,11 @@ function ChatPage() {
   const [error, setError] = useState("");
   const [photo, setPhoto] = useState(null);
   const [viewing, setViewing] = useState(null);
+  const [replyTo, setReplyTo] = useState(null);
+  const [selectedId, setSelectedId] = useState(null);
+  // Replied-to messages that aren't loaded on screen, keyed "l:id" / "d:id"; null = deleted.
+  const [quoted, setQuoted] = useState({});
+  const quotedRef = useRef({});
   const photoInputRef = useRef(null);
 
   const { profile: myProfile, isOwner } = useMyProfile();
@@ -215,6 +277,7 @@ function ChatPage() {
     setError("");
     setDraft("");
     setPhoto(null);
+    setReplyTo(null);
 
     if (!isDm) {
       setTarget(null);
@@ -256,11 +319,11 @@ function ChatPage() {
       let query = isDm
         ? supabase
             .from("direct_messages")
-            .select("id, sender_id, recipient_id, body, image, created_at")
+            .select("id, sender_id, recipient_id, body, image, created_at, reply_to")
             .or(
               `and(sender_id.eq.${me},recipient_id.eq.${target.id}),and(sender_id.eq.${target.id},recipient_id.eq.${me})`
             )
-        : supabase.from("lounge_messages").select("id, sender_id, body, image, created_at");
+        : supabase.from("lounge_messages").select("id, sender_id, body, image, created_at, reply_to");
 
       query = query.order("created_at", { ascending: false }).limit(PAGE);
 
@@ -333,6 +396,58 @@ function ChatPage() {
     }
 
     setMessages((current) => current.filter((item) => item.id !== id));
+  };
+
+  /* ---------- Replies ---------- */
+
+  useEffect(() => {
+    const loaded = new Set(messages.map((message) => message.id));
+    const prefix = isDm ? "d" : "l";
+    const missing = [
+      ...new Set(
+        messages
+          .map((message) => message.reply_to)
+          .filter((id) => id && !loaded.has(id) && !(`${prefix}:${id}` in quotedRef.current))
+      ),
+    ];
+
+    if (!missing.length) return;
+
+    // Mark as in flight so the next render doesn't ask again.
+    missing.forEach((id) => {
+      quotedRef.current[`${prefix}:${id}`] = undefined;
+    });
+
+    supabase
+      .from(isDm ? "direct_messages" : "lounge_messages")
+      .select("id, sender_id, body, image, created_at")
+      .in("id", missing)
+      .then(async ({ data }) => {
+        await ensureProfiles((data || []).map((row) => row.sender_id));
+
+        const next = { ...quotedRef.current };
+        missing.forEach((id) => {
+          next[`${prefix}:${id}`] = (data || []).find((row) => row.id === id) || null;
+        });
+        quotedRef.current = next;
+        setQuoted(next);
+      });
+  }, [messages, isDm, ensureProfiles]);
+
+  const jumpTo = (id) => {
+    const row = document.getElementById(`msg-${id}`);
+    if (!row) return;
+
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    row.classList.remove("flash");
+    void row.offsetWidth; // restarts the highlight
+    row.classList.add("flash");
+  };
+
+  const startReply = (message) => {
+    setReplyTo(message);
+    setSelectedId(null);
+    inputRef.current?.focus();
   };
 
   /* ---------- Live updates ---------- */
@@ -474,8 +589,17 @@ function ChatPage() {
     }
 
     const { data, error: sendError } = isDm
-      ? await supabase.rpc("send_direct_message", { p_recipient: target.id, p_body: body, p_image: imagePath })
-      : await supabase.rpc("send_lounge_message", { p_body: body, p_image: imagePath });
+      ? await supabase.rpc("send_direct_message", {
+          p_recipient: target.id,
+          p_body: body,
+          p_image: imagePath,
+          p_reply_to: replyTo?.id ?? null,
+        })
+      : await supabase.rpc("send_lounge_message", {
+          p_body: body,
+          p_image: imagePath,
+          p_reply_to: replyTo?.id ?? null,
+        });
 
     setSending(false);
 
@@ -487,6 +611,7 @@ function ChatPage() {
 
     clearPhoto();
     setDraft("");
+    setReplyTo(null);
     stickToBottom.current = true;
     setMessages((current) =>
       current.some((item) => item.id === data.id) ? current : [...current, data]
@@ -498,6 +623,11 @@ function ChatPage() {
   };
 
   const onKeyDown = (event) => {
+    if (event.key === "Escape" && replyTo) {
+      setReplyTo(null);
+      return;
+    }
+
     if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
       event.preventDefault();
       send();
@@ -517,6 +647,20 @@ function ChatPage() {
   /* ---------- Render ---------- */
 
   const visible = messages.filter((message) => !blocked.has(message.sender_id));
+
+  const byId = new Map(messages.map((message) => [message.id, message]));
+
+  // undefined = still loading, null = deleted.
+  const quoteFor = (message) => {
+    if (!message.reply_to) return undefined;
+
+    const original = byId.get(message.reply_to) ?? quoted[`${isDm ? "d" : "l"}:${message.reply_to}`];
+
+    if (original === undefined) return undefined;
+    if (original === null) return null;
+
+    return { message: original, sender: profiles[original.sender_id] };
+  };
 
   const sortedFriends = [...friends].sort((a, b) => {
     const at = recent[a.otherId]?.created_at || a.accepted_at || "";
@@ -744,6 +888,11 @@ function ChatPage() {
                       sender={profiles[message.sender_id]}
                       grouped={grouped}
                       isMine={message.sender_id === me}
+                      quote={quoteFor(message)}
+                      selected={selectedId === message.id}
+                      onSelect={(id) => setSelectedId((current) => (current === id ? null : id))}
+                      onReply={startReply}
+                      onJump={jumpTo}
                       onReport={(sender, messageId) =>
                         setReporting({ target: sender, kind: isDm ? "dm" : "lounge", messageId })
                       }
@@ -761,6 +910,24 @@ function ChatPage() {
         {canSend ? (
           <form className="chat-composer" onSubmit={send}>
             {error && <div className="notice notice-error chat-error">{error}</div>}
+
+            {replyTo && (
+              <div className="chat-replying">
+                <Icon name="reply" size={16} />
+                <button type="button" className="chat-replying-text" onClick={() => jumpTo(replyTo.id)}>
+                  <strong>Replying to {displayNameOf(profiles[replyTo.sender_id], "…")}</strong>
+                  <span>{replyTo.body || (replyTo.image ? "📷 Photo" : "")}</span>
+                </button>
+                <button
+                  type="button"
+                  className="chat-replying-close"
+                  onClick={() => setReplyTo(null)}
+                  aria-label="Cancel reply"
+                >
+                  <Icon name="close" size={14} strokeWidth={2.6} />
+                </button>
+              </div>
+            )}
 
             {photo && (
               <div className="chat-pending-photo">
