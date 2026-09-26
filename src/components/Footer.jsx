@@ -36,6 +36,9 @@ function Footer() {
             <Link to="/chat">Lounge</Link>
             <Link to="/people">Find people</Link>
             <Link to="/discord">Discord</Link>
+            <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">
+              Instagram
+            </a>
             <Link to="/rules">Rules & FAQ</Link>
             <Link to="/donations">Support us</Link>
           </div>
