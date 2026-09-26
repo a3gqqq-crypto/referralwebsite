@@ -575,3 +575,36 @@
     grid-column: 1 / -1;
   }
 }
+
+
+/* Announce tab */
+.admin-event-form > .btn {
+  align-self: flex-start;
+}
+
+.admin-pinned {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 18px 20px;
+
+  border-color: var(--line-gold);
+
+  background: var(--gold-wash);
+}
+
+.admin-pinned strong {
+  display: block;
+
+  margin-top: 6px;
+
+  font-size: 17px;
+}
+
+.admin-pinned p {
+  margin-top: 4px;
+
+  color: var(--text-soft);
+}

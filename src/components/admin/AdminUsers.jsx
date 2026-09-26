@@ -9,7 +9,7 @@ import { useMyProfile } from "../../context/ProfileContext";
 import { loadStaff } from "../../data/staff";
 import { adminCall, timeAgo } from "./adminApi";
 
-const COLUMNS = `${PLAYER_COLUMNS}, chat_banned`;
+const COLUMNS = `${PLAYER_COLUMNS}, chat_banned, chat_muted_until`;
 
 // Matches usernames and display names. Keeps only letters, numbers, spaces and
 // underscores so nothing can act as a LIKE wildcard or break the PostgREST filter.
@@ -81,6 +81,7 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
   const [item, setItem] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [loadedAt] = useState(() => Date.now());
 
   const run = async (fn, args, successText, afterSuccess) => {
     setBusy(true);
@@ -96,6 +97,16 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
     if (result.ok) onUpdated?.();
   };
 
+  const mutedMs = person.chat_muted_until ? new Date(person.chat_muted_until) - loadedAt : 0;
+  const mutedFor =
+    mutedMs <= 0
+      ? null
+      : mutedMs < 3600000
+        ? `${Math.ceil(mutedMs / 60000)}m`
+        : mutedMs < 86400000
+          ? `${Math.ceil(mutedMs / 3600000)}h`
+          : `${Math.ceil(mutedMs / 86400000)}d`;
+
   return (
     <li className="admin-user card">
       <div className="admin-user-main">
@@ -108,6 +119,7 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
         </span>
 
         {person.chat_banned && <span className="chip admin-banned">Chat banned</span>}
+        {mutedFor && <span className="chip admin-banned">Muted · {mutedFor} left</span>}
         {role && tagHidden && <span className="chip">{role} · tag hidden</span>}
       </div>
 
@@ -148,6 +160,17 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
             }}
           >
             Remove name
+          </button>
+        )}
+
+        {canManageRoles && mutedFor && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            disabled={busy}
+            onClick={() => run("owner_mute_user", { p_user: person.id, p_minutes: 0 }, "Unmuted.")}
+          >
+            Unmute
           </button>
         )}
 

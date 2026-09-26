@@ -5,6 +5,7 @@ import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
 import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
+import { supabase } from "../lib/supabaseClient";
 import {
   COSMETICS,
   MAX_BADGES,
@@ -24,7 +25,7 @@ function ShopPage() {
   const [params, setParams] = useSearchParams();
   const filter = FILTERS.includes(params.get("type")) ? params.get("type") : "all";
 
-  const { profile, owned, username, equip, setBadges } = useMyProfile();
+  const { profile, owned, username, equip, setBadges, isOwner, refresh } = useMyProfile();
 
   const items =
     filter === "all" ? COSMETICS : COSMETICS.filter((item) => item.type === filter);
@@ -102,6 +103,45 @@ function ShopPage() {
     }
   };
 
+  // Owners get anything for free (same server action as "Give an item" in the admin panel).
+  const grantToMe = (ids) =>
+    Promise.all(
+      ids.map((id) => supabase.rpc("admin_grant_cosmetic", { p_user: profile.id, p_cosmetic: id }))
+    );
+
+  const getFree = async () => {
+    setBusy(true);
+    setNotice(null);
+
+    const [{ error: grantError }] = await grantToMe([selected.id]);
+    await refresh();
+
+    setBusy(false);
+    setNotice(
+      grantError
+        ? { type: "error", text: grantError.message || "Couldn't unlock that." }
+        : { type: "success", text: `${selected.name} unlocked. Equip it whenever.` }
+    );
+  };
+
+  const missing = COSMETICS.filter((item) => !owned.has(item.id));
+
+  const unlockAll = async () => {
+    setBusy(true);
+    setNotice(null);
+
+    const results = await grantToMe(missing.map((item) => item.id));
+    await refresh();
+
+    setBusy(false);
+    const failed = results.filter((result) => result.error).length;
+    setNotice(
+      failed
+        ? { type: "error", text: `${failed} items didn't unlock. Try again.` }
+        : { type: "success", text: "Everything unlocked 👑" }
+    );
+  };
+
   const earnProgress =
     selected?.earn?.referrals
       ? Math.min(1, referrals / selected.earn.referrals)
@@ -121,6 +161,23 @@ function ShopPage() {
           profile. Purely cosmetic — they never affect rankings.
         </p>
       </header>
+
+      {isOwner && (
+        <div className="shop-owner-bar">
+          <span>
+            <Icon name="crown" size={16} />
+            Owner: everything in the shop is free for you.
+          </span>
+
+          {missing.length > 0 ? (
+            <button type="button" className="btn btn-sm btn-sun" onClick={unlockAll} disabled={busy}>
+              {busy ? "Unlocking…" : `Unlock all ${missing.length}`}
+            </button>
+          ) : (
+            <span className="shop-owner-done">You own everything ✓</span>
+          )}
+        </div>
+      )}
 
       <div className="shop-layout">
         <section className="shop-catalog">
@@ -171,6 +228,8 @@ function ShopPage() {
                         <Icon name="check" size={13} strokeWidth={3} />
                         Owned
                       </span>
+                    ) : isOwner ? (
+                      <span className="shop-earn">Free</span>
                     ) : item.price != null ? (
                       formatPrice(item.price)
                     ) : (
@@ -207,7 +266,7 @@ function ShopPage() {
                   </span>
                 </div>
 
-                {selected.price != null && !isOwned && (
+                {selected.price != null && !isOwned && !isOwner && (
                   <strong className="shop-detail-price">
                     {formatPrice(selected.price)}
                   </strong>
@@ -225,6 +284,16 @@ function ShopPage() {
                 >
                   <Icon name="check" size={16} />
                   {isEquipped ? "Equipped" : busy ? "Equipping…" : "Equip"}
+                </button>
+              ) : isOwner ? (
+                <button
+                  type="button"
+                  className="btn btn-sun btn-block"
+                  onClick={getFree}
+                  disabled={busy}
+                >
+                  <Icon name="crown" size={16} />
+                  {busy ? "Unlocking…" : "Get it free · Owner"}
                 </button>
               ) : selected.price != null ? (
                 <button

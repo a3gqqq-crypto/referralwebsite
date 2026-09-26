@@ -7,6 +7,7 @@ import AdminUsers from "../components/admin/AdminUsers";
 import AdminEvents from "../components/admin/AdminEvents";
 import AdminWinners from "../components/admin/AdminWinners";
 import AdminLog from "../components/admin/AdminLog";
+import AdminAnnounce from "../components/admin/AdminAnnounce";
 import { useMyProfile } from "../context/ProfileContext";
 import NotFound from "./NotFound";
 
@@ -19,13 +20,15 @@ const TABS = [
   { id: "events", label: "Events" },
   { id: "winners", label: "Winners" },
   { id: "log", label: "Log" },
+  { id: "announce", label: "📣 Announce", ownerOnly: true },
 ];
 
 function AdminPage() {
-  const { isAdmin } = useMyProfile();
+  const { isAdmin, isOwner } = useMyProfile();
   const [params, setParams] = useSearchParams();
 
-  const tab = TABS.some((item) => item.id === params.get("tab")) ? params.get("tab") : "overview";
+  const tabs = TABS.filter((item) => !item.ownerOnly || isOwner);
+  const tab = tabs.some((item) => item.id === params.get("tab")) ? params.get("tab") : "overview";
   const openTab = (id) => setParams(id === "overview" ? {} : { tab: id });
 
   if (isAdmin === null) return <PageLoading />;
@@ -42,7 +45,7 @@ function AdminPage() {
       </header>
 
       <div className="admin-tabs" role="tablist" aria-label="Admin sections">
-        {TABS.map((item) => (
+        {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -63,6 +66,7 @@ function AdminPage() {
         {tab === "events" && <AdminEvents />}
         {tab === "winners" && <AdminWinners />}
         {tab === "log" && <AdminLog />}
+        {tab === "announce" && <AdminAnnounce />}
       </div>
     </main>
   );

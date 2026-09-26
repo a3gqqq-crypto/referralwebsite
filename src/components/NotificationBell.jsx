@@ -12,6 +12,7 @@ const KIND_ICON = {
   friend_accept: "chat",
   gift: "sparkles",
   payout: "gem",
+  announcement: "megaphone",
 };
 
 const COLUMNS = "id, kind, title, body, link, created_at, read_at";

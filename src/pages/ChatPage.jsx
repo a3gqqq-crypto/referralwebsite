@@ -11,6 +11,7 @@ import { supabase } from "../lib/supabaseClient";
 import Icon from "../components/Icon";
 import FriendButton from "../components/FriendButton";
 import ReportModal from "../components/ReportModal";
+import MuteModal from "../components/MuteModal";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
@@ -81,6 +82,7 @@ function MessageRow({
   onJump,
   onReport,
   onDelete,
+  onMute,
   onOpenPhoto,
   onPhotoLoad,
 }) {
@@ -155,6 +157,19 @@ function MessageRow({
           </button>
         )}
 
+        {onMute && canReport && (
+          <button
+            type="button"
+            className="chat-msg-action is-danger"
+            onClick={() => onMute(sender)}
+            aria-label={`Mute ${name}`}
+            title="Mute from chat"
+          >
+            <Icon name="block" size={14} />
+            <span className="chat-msg-action-label">Mute</span>
+          </button>
+        )}
+
         {canReport && (
           <button
             type="button"
@@ -208,6 +223,15 @@ function ChatPage() {
   const [recent, setRecent] = useState({});
   const [listOpen, setListOpen] = useState(false);
   const [reporting, setReporting] = useState(null);
+  const [muting, setMuting] = useState(null);
+  const [pinned, setPinned] = useState(null);
+  const [dismissedPin, setDismissedPin] = useState(() => {
+    try {
+      return localStorage.getItem("suffrova_dismissed_pin");
+    } catch {
+      return null;
+    }
+  });
 
   const scrollRef = useRef(null);
   const stickToBottom = useRef(true);
@@ -396,6 +420,37 @@ function ChatPage() {
     }
 
     setMessages((current) => current.filter((item) => item.id !== id));
+  };
+
+  /* ---------- Pinned announcement (Lounge) ---------- */
+
+  useEffect(() => {
+    if (isDm) return;
+
+    let cancelled = false;
+
+    supabase
+      .from("announcements")
+      .select("id, title, body, link")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setPinned(data || null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDm]);
+
+  const dismissPin = () => {
+    setDismissedPin(String(pinned.id));
+    try {
+      localStorage.setItem("suffrova_dismissed_pin", String(pinned.id));
+    } catch {
+      // Private mode: it just comes back next visit.
+    }
   };
 
   /* ---------- Replies ---------- */
@@ -844,6 +899,24 @@ function ChatPage() {
           )}
         </header>
 
+        {!isDm && pinned && String(pinned.id) !== dismissedPin && (
+          <div className="chat-pinned" role="note">
+            <Icon name="megaphone" size={17} />
+            <div className="chat-pinned-text">
+              <strong>{pinned.title}</strong>
+              {pinned.body && <span>{pinned.body}</span>}
+              {pinned.link && (
+                <Link to={pinned.link} className="chat-pinned-link">
+                  Open <Icon name="arrowRight" size={13} />
+                </Link>
+              )}
+            </div>
+            <button type="button" className="chat-pinned-close" onClick={dismissPin} aria-label="Hide announcement">
+              <Icon name="close" size={14} strokeWidth={2.6} />
+            </button>
+          </div>
+        )}
+
         <div className="chat-scroll" ref={scrollRef} onScroll={onScroll}>
           {loading ? (
             <div className="chat-loading">
@@ -897,6 +970,7 @@ function ChatPage() {
                         setReporting({ target: sender, kind: isDm ? "dm" : "lounge", messageId })
                       }
                       onDelete={isOwner && !isDm ? deleteLoungeMessage : undefined}
+                      onMute={isOwner && !isDm ? setMuting : undefined}
                       onOpenPhoto={setViewing}
                       onPhotoLoad={keepAtBottom}
                     />
@@ -1024,6 +1098,8 @@ function ChatPage() {
           </button>
         </div>
       )}
+
+      {muting && <MuteModal target={muting} onClose={() => setMuting(null)} />}
 
       {reporting && (
         <ReportModal
