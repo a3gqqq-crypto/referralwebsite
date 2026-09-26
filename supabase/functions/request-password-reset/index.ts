@@ -7,8 +7,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SITES = [
-  "https://www.joinvexora.com",
-  "https://joinvexora.com",
+  "https://www.suffrova.com",
+  "https://suffrova.com",
   "http://localhost:5173",
 ];
 

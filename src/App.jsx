@@ -185,8 +185,8 @@ function App() {
 
   const loadingScreen = (
     <div className="app-loading">
-      <span className="brand-mark" aria-hidden="true">V</span>
-      <p>Loading Vexora…</p>
+      <span className="brand-mark" aria-hidden="true">S</span>
+      <p>Loading Suffrova…</p>
     </div>
   );
 

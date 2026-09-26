@@ -191,7 +191,7 @@ function EventForm({ initial, existingIds, onSaved, onCancel }) {
             value={form.title}
             maxLength={80}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Vexora Top Inviter · Round 3"
+            placeholder="Suffrova Top Inviter · Round 3"
           />
         </div>
 
@@ -209,7 +209,7 @@ function EventForm({ initial, existingIds, onSaved, onCancel }) {
             placeholder="top-inviter-3"
           />
           <small className="admin-hint">
-            {form.isNew ? `joinvexora.com/events/${form.id || "…"}` : "Can't change after creating."}
+            {form.isNew ? `suffrova.com/events/${form.id || "…"}` : "Can't change after creating."}
           </small>
         </div>
 

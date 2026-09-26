@@ -57,7 +57,7 @@ function ReportModal({ target, kind = "profile", messageId = null, onClose }) {
         <div className="report-modal-body">
           <h2>Thanks for telling us.</h2>
           <p>
-            The Vexora team will look at it. If you don't want to hear
+            The Suffrova team will look at it. If you don't want to hear
             from {displayNameOf(target)} again, you can also block them.
           </p>
           <button type="button" className="btn btn-primary" onClick={onClose}>

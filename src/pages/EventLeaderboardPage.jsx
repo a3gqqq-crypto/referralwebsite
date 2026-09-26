@@ -132,7 +132,7 @@ function EventLeaderboardPage({ user }) {
             ? status === "ended"
               ? "This month is over. The three longest login streaks take the prizes."
               : status === "upcoming"
-                ? "Starts on the 1st. Open Vexora every day — you're entered automatically."
+                ? "Starts on the 1st. Open Suffrova every day — you're entered automatically."
                 : "Ranked by your longest run of daily logins this month. Ties go to whoever logged in on more days."
             : status === "ended"
               ? "This event has ended. Top three by invites made during the event take the prizes."
@@ -184,7 +184,7 @@ function EventLeaderboardPage({ user }) {
           <h3>No players yet</h3>
           <p>
             {isStreak
-              ? "Everyone who opens Vexora this month shows up here."
+              ? "Everyone who opens Suffrova this month shows up here."
               : "Be the first to join and claim the top spot."}
           </p>
           <div className="empty-state-actions">

@@ -36,7 +36,7 @@ function AdminPage() {
       <header className="page-header">
         <span className="eyebrow">Admin</span>
         <h1>
-          Run <span className="mark">Vexora.</span>
+          Run <span className="mark">Suffrova.</span>
         </h1>
         <p>Reports, members, events and payouts. Everything you do here is logged.</p>
       </header>

@@ -237,7 +237,7 @@ function MomentsPage({ user }) {
                   type="button"
                   className="btn"
                   onClick={() =>
-                    nativeShare({ title: "A Vexora Moment", text: `${created.from_name} made you something ✦`, url: created.link })
+                    nativeShare({ title: "A Suffrova Moment", text: `${created.from_name} made you something ✦`, url: created.link })
                   }
                 >
                   <Icon name="share" />

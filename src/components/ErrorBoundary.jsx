@@ -9,7 +9,7 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error("Vexora crashed:", error, info);
+    console.error("Suffrova crashed:", error, info);
   }
 
   handleReload = () => {
@@ -31,7 +31,7 @@ class ErrorBoundary extends Component {
             </h1>
 
             <p>
-              Vexora hit an unexpected error. Reloading
+              Suffrova hit an unexpected error. Reloading
               usually fixes it.
             </p>
 
@@ -40,7 +40,7 @@ class ErrorBoundary extends Component {
               className="btn btn-primary"
               onClick={this.handleReload}
             >
-              Reload Vexora
+              Reload Suffrova
             </button>
 
           </div>

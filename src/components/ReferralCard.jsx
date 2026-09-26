@@ -13,7 +13,7 @@ import {
 import "../styles/invites.css";
 
 const SHARE_MESSAGE =
-  "Join me on Vexora — invite friends, climb the leaderboard, win real prizes 🏆";
+  "Join me on Suffrova — invite friends, climb the leaderboard, win real prizes 🏆";
 
 function ReferralCard({ user }) {
   const [stats, setStats] = useState(null);
@@ -130,7 +130,7 @@ function ReferralCard({ user }) {
               className="btn"
               onClick={() =>
                 nativeShare({
-                  title: "Vexora",
+                  title: "Suffrova",
                   text: SHARE_MESSAGE,
                   url: referralLink,
                 })

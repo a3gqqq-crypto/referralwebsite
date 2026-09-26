@@ -678,8 +678,8 @@ function Auth({ onAuthenticated }) {
       <aside className="auth-poster">
 
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">V</span>
-          <span className="brand-word">Vexora</span>
+          <span className="brand-mark" aria-hidden="true">S</span>
+          <span className="brand-word">Suffrova</span>
         </div>
 
         <div className="auth-poster-body">
@@ -736,7 +736,7 @@ function Auth({ onAuthenticated }) {
         <div className="auth-card">
 
           <span className="eyebrow">
-            {isForgot ? "No worries" : isLogin ? "Welcome back" : "Join Vexora"}
+            {isForgot ? "No worries" : isLogin ? "Welcome back" : "Join Suffrova"}
           </span>
 
           <h2>

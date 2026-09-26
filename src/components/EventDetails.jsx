@@ -50,7 +50,7 @@ const STEPS = {
   streak: {
     title: "Show up. Every day.",
     items: [
-      ["You're in", "Everyone who opens Vexora this month is entered automatically."],
+      ["You're in", "Everyone who opens Suffrova this month is entered automatically."],
       ["Check in", `Open the site once a day to add to your chain. Days reset at ${localResetTime()} your time (00:00 UTC).`],
       ["Don't break it", "Miss a day and your chain starts again from one."],
       ["Win", "The three longest chains when the month ends win secret prizes."],
@@ -354,8 +354,8 @@ function EventDetails({ event, user }) {
                     className="btn"
                     onClick={() =>
                       nativeShare({
-                        title: "Vexora",
-                        text: `Join ${event.title} on Vexora 🏆`,
+                        title: "Suffrova",
+                        text: `Join ${event.title} on Suffrova 🏆`,
                         url: referralLink,
                       })
                     }

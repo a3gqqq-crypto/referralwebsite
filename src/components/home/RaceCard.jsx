@@ -9,7 +9,7 @@ import { bragShareText, renderBragImage } from "../../lib/bragImage";
 import { useStoryShare } from "../StoryShare";
 import { displayNameOf } from "../../data/cosmetics";
 
-const SHARE_TEXT = "Join me on Vexora — invite friends, climb the board, win real prizes.";
+const SHARE_TEXT = "Join me on Suffrova — invite friends, climb the board, win real prizes.";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
@@ -167,7 +167,7 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
             <button
               type="button"
               className="btn btn-sm"
-              onClick={() => nativeShare({ title: "Vexora", text: SHARE_TEXT, url: referralLink })}
+              onClick={() => nativeShare({ title: "Suffrova", text: SHARE_TEXT, url: referralLink })}
               disabled={!referralLink}
             >
               <Icon name="share" size={15} />

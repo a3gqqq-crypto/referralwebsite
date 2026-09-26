@@ -23,7 +23,7 @@ function describe(item) {
     case "join":
       return <><Name name={item.target} /> joined via <Name name={item.actor} /></>;
     case "new":
-      return <><Name name={item.actor} /> joined Vexora</>;
+      return <><Name name={item.actor} /> joined Suffrova</>;
     case "level":
       return <><Name name={item.actor} /> reached Level {item.detail}</>;
     case "passed":

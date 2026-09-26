@@ -42,7 +42,7 @@ function DiscordPage() {
           <span className="eyebrow">Community</span>
 
           <h1>
-            Where Vexora <span className="mark">actually lives.</span>
+            Where Suffrova <span className="mark">actually lives.</span>
           </h1>
 
           <p>
@@ -58,7 +58,7 @@ function DiscordPage() {
 
         <div className="discord-mock card" aria-hidden="true">
           <div className="discord-mock-side">
-            <span className="brand-mark">V</span>
+            <span className="brand-mark">S</span>
 
             <span className="discord-mock-label">Channels</span>
             <span className="discord-mock-channel active"># announcements</span>
@@ -72,9 +72,9 @@ function DiscordPage() {
             <div className="discord-mock-head"># announcements</div>
 
             <div className="discord-mock-msg">
-              <span className="discord-mock-avatar" style={{ background: "var(--gold)" }}>V</span>
+              <span className="discord-mock-avatar" style={{ background: "var(--gold)" }}>S</span>
               <div>
-                <strong>Vexora <em>BOT</em></strong>
+                <strong>Suffrova <em>BOT</em></strong>
                 <p>🚀 New event is live. Go grab your invite link.</p>
               </div>
             </div>

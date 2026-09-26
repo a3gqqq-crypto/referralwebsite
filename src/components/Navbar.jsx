@@ -101,8 +101,8 @@ function Navbar({ user, onLogout }) {
       <div className="navbar-inner">
 
         <Link to="/" className="navbar-brand" onClick={playClick}>
-          <span className="brand-mark" aria-hidden="true">V</span>
-          <span className="brand-word">Vexora</span>
+          <span className="brand-mark" aria-hidden="true">S</span>
+          <span className="brand-word">Suffrova</span>
         </Link>
 
         <nav className="navbar-links" aria-label="Main">

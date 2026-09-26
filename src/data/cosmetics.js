@@ -203,7 +203,7 @@ export const COSMETICS = [
     id: "badge-supporter",
     type: "badge",
     name: "Supporter",
-    description: "Helped keep Vexora running.",
+    description: "Helped keep Suffrova running.",
     rarity: "rare",
     icon: "heart",
     price: 99,

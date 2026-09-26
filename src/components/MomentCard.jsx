@@ -65,7 +65,7 @@ function MomentCard({ templateId, to, message, from, large = false }) {
         <p className="moment-card-from">— {from || "you"}</p>
       </div>
 
-      <span className="moment-card-stamp">made on Vexora</span>
+      <span className="moment-card-stamp">made on Suffrova</span>
     </article>
   );
 }

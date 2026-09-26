@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   const requestHost =
-    req.headers?.host || "www.joinvexora.com";
+    req.headers?.host || "www.suffrova.com";
 
   const forwardedProto =
     req.headers?.["x-forwarded-proto"] || "https";
@@ -88,11 +88,11 @@ export default async function handler(req, res) {
       .replaceAll("'", "&#039;");
 
   const title =
-    `${fromName} made you a Vexora Moment ✦`;
+    `${fromName} made you a Suffrova Moment ✦`;
 
   const description =
     `A little message from ${creatorName}, made to be shared. ` +
-    `Open your Vexora Moment and see what they created.`;
+    `Open your Suffrova Moment and see what they created.`;
 
   const canonicalUrl =
     `${siteUrl}/m/${encodeURIComponent(cleanMomentId)}`;
@@ -104,12 +104,12 @@ export default async function handler(req, res) {
       await fetch(`${siteUrl}/index.html`);
 
     if (!indexResponse.ok) {
-      return res.status(500).send("Could not load Vexora.");
+      return res.status(500).send("Could not load Suffrova.");
     }
 
     html = await indexResponse.text();
   } catch {
-    return res.status(500).send("Could not load Vexora.");
+    return res.status(500).send("Could not load Suffrova.");
   }
 
   const metadata = `
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Vexora" />
+    <meta property="og:site_name" content="Suffrova" />
 
     <meta
       property="og:title"
@@ -160,7 +160,7 @@ export default async function handler(req, res) {
 
     <meta
       property="og:image:alt"
-      content="Vexora Moments"
+      content="Suffrova Moments"
     />
 
     <meta
@@ -185,7 +185,7 @@ export default async function handler(req, res) {
 
     <meta
       name="twitter:image:alt"
-      content="Vexora Moments"
+      content="Suffrova Moments"
     />
   `;
 

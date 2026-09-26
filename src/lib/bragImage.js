@@ -67,10 +67,10 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   ctx.fillStyle = "#fff";
   ctx.font = `800 50px ${DISPLAY}`;
   ctx.textAlign = "center";
-  ctx.fillText("V", 128, 166);
+  ctx.fillText("S", 128, 166);
   ctx.textAlign = "left";
   ctx.font = `800 52px ${DISPLAY}`;
-  ctx.fillText("Vexora", 188, 166);
+  ctx.fillText("Suffrova", 188, 166);
 
   // Avatar
   const cx = W / 2;
@@ -166,8 +166,8 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   ctx.fillText("Invite friends. Climb the board. Win real prizes.", cx, 1800);
 
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));
-  return new File([blob], `vexora-rank-${rank}.jpg`, { type: "image/jpeg" });
+  return new File([blob], `suffrova-rank-${rank}.jpg`, { type: "image/jpeg" });
 }
 
 export const bragShareText = (details) =>
-  `I'm #${details.rank} in ${details.eventTitle} on Vexora. Beat me: ${details.link}`;
+  `I'm #${details.rank} in ${details.eventTitle} on Suffrova. Beat me: ${details.link}`;

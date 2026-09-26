@@ -115,7 +115,7 @@ function StreakCard({ userId, streak = 0, lastCheckin, streakEvent, now, compact
           <p className="streak-card-note">
             {checkedToday
               ? `Next day in ${formatUntilNextDay(now)} · +${nextBonus} XP`
-              : "Open Vexora today to keep it going."}
+              : "Open Suffrova today to keep it going."}
           </p>
         </div>
       </div>
@@ -137,7 +137,7 @@ function StreakCard({ userId, streak = 0, lastCheckin, streakEvent, now, compact
         <p className="streak-card-note">
           {checkedToday
             ? `Checked in today. Next day starts in ${formatUntilNextDay(now)} — come back for +${nextBonus} XP.`
-            : "Open Vexora today to keep your chain going."}
+            : "Open Suffrova today to keep your chain going."}
           <small title="Days reset at 00:00 UTC for everyone">
             New day every {localResetTime()} your time
           </small>

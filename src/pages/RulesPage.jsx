@@ -10,11 +10,11 @@ const SECTIONS = [
     id: "invites",
     title: "Invites & events",
     items: [
-      ["How does an invite count?", "When someone makes a new Vexora account through your link (joinvexora.com/?ref=yourname), it's added to your count. Each person can only be invited once."],
+      ["How does an invite count?", "When someone makes a new Suffrova account through your link (suffrova.com/?ref=yourname), it's added to your count. Each person can only be invited once."],
       ["Do old invites count in a new event?", "No. Invite events only count invites made between the event's start and end, so everyone starts at zero."],
       ["Do I need to join the event?", "For invite races, yes: tap “Join event” to appear on its board. Login Streak events enter you automatically when you open the site."],
       ["What if two people tie?", "In invite races, whoever joined the event first stays ahead. In streak events, whoever logged in on more days that month wins the tie, then whoever got there first."],
-      ["How are winners paid?", "When an event ends, the top places on its final board win the listed prizes. The Vexora team checks the invites and then contacts winners to send the prize."],
+      ["How are winners paid?", "When an event ends, the top places on its final board win the listed prizes. The Suffrova team checks the invites and then contacts winners to send the prize."],
     ],
   },
   {
@@ -30,7 +30,7 @@ const SECTIONS = [
     id: "streaks",
     title: "Streaks, XP & levels",
     items: [
-      ["How do streaks work?", `Open Vexora once a day to add a day to your streak. Miss a day and it starts again from one. Days reset at 00:00 UTC for everyone (${localResetTime()} your time).`],
+      ["How do streaks work?", `Open Suffrova once a day to add a day to your streak. Miss a day and it starts again from one. Days reset at 00:00 UTC for everyone (${localResetTime()} your time).`],
       ["Daily quests", "Three quests a day: invite a friend plus two that change daily. Claim each for XP, and finishing all three adds a bonus."],
     ],
   },
@@ -52,17 +52,17 @@ function RulesPage({ standalone = false }) {
       {standalone && (
         <div className="rules-bar">
           <Link to="/" className="navbar-brand">
-            <span className="brand-mark" aria-hidden="true">V</span>
-            <span className="brand-word">Vexora</span>
+            <span className="brand-mark" aria-hidden="true">S</span>
+            <span className="brand-word">Suffrova</span>
           </Link>
-          <Link to="/" className="btn btn-sm btn-primary">Join Vexora</Link>
+          <Link to="/" className="btn btn-sm btn-primary">Join Suffrova</Link>
         </div>
       )}
 
       <header className="page-header">
         <span className="eyebrow">Rules & FAQ</span>
         <h1>
-          How Vexora <span className="mark">works.</span>
+          How Suffrova <span className="mark">works.</span>
         </h1>
         <p>Short answers to what people ask most. Still stuck? Ask in the Discord.</p>
       </header>

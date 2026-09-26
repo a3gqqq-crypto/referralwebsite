@@ -131,7 +131,7 @@ function ProfilePage({ viewer, standalone = false }) {
   const content =
     state === "loading" ? (
       <div className="profile-loading">
-        <span className="brand-mark" aria-hidden="true">V</span>
+        <span className="brand-mark" aria-hidden="true">S</span>
       </div>
     ) : state === "missing" ? (
       <div className="card empty-state profile-missing">
@@ -173,7 +173,7 @@ function ProfilePage({ viewer, standalone = false }) {
                   onClick={() =>
                     canNativeShare
                       ? nativeShare({
-                          title: `${displayNameOf(profile)} on Vexora`,
+                          title: `${displayNameOf(profile)} on Suffrova`,
                           url: profileLink,
                         })
                       : copy(profileLink)
@@ -185,7 +185,7 @@ function ProfilePage({ viewer, standalone = false }) {
               </>
             ) : standalone ? (
               <Link to={joinLink} className="btn btn-primary">
-                Join Vexora with {displayNameOf(profile)}'s invite
+                Join Suffrova with {displayNameOf(profile)}'s invite
                 <Icon name="arrowRight" size={16} />
               </Link>
             ) : (
@@ -223,8 +223,8 @@ function ProfilePage({ viewer, standalone = false }) {
       <div className="profile-standalone">
         <header className="profile-standalone-bar">
           <Link to={joinLink} className="navbar-brand">
-            <span className="brand-mark" aria-hidden="true">V</span>
-            <span className="brand-word">Vexora</span>
+            <span className="brand-mark" aria-hidden="true">S</span>
+            <span className="brand-word">Suffrova</span>
           </Link>
 
           <Link to={joinLink} className="btn btn-sm">

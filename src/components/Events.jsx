@@ -224,7 +224,7 @@ function Events() {
         <div className="events-moments-copy">
           <span className="eyebrow">Always on</span>
 
-          <h2>Vexora Moments</h2>
+          <h2>Suffrova Moments</h2>
 
           <p>
             Make a little card for someone — a birthday, a

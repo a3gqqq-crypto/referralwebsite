@@ -8,7 +8,7 @@ function Footer() {
       <div className="site-footer-inner">
 
         <div className="footer-brand">
-          <p className="footer-wordmark">Vexora</p>
+          <p className="footer-wordmark">Suffrova</p>
 
           <p className="footer-tagline">
             Referral competitions with real prizes.
@@ -44,7 +44,7 @@ function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© {year} Vexora</span>
+        <span>© {year} Suffrova</span>
         <span>Made by two friends, not a corporation.</span>
       </div>
     </footer>

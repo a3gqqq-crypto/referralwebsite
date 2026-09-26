@@ -44,8 +44,8 @@ function ResetPassword({ onDone, onCancel }) {
     <div className="auth-reset">
       <div className="auth-card">
         <div className="auth-brand">
-          <span className="brand-mark" aria-hidden="true">V</span>
-          <span className="brand-word">Vexora</span>
+          <span className="brand-mark" aria-hidden="true">S</span>
+          <span className="brand-word">Suffrova</span>
         </div>
 
         <span className="eyebrow">Password reset</span>

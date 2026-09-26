@@ -691,7 +691,7 @@ function ChatPage() {
             <span className="chat-room-icon" aria-hidden="true">#</span>
             <span className="chat-room-text">
               <strong>Lounge</strong>
-              <small>Everyone on Vexora</small>
+              <small>Everyone on Suffrova</small>
             </span>
             <span className="chip chip-live chat-room-live">
               <span className="live-dot" />
@@ -838,7 +838,7 @@ function ChatPage() {
               <span className="chat-room-icon" aria-hidden="true">#</span>
               <div>
                 <strong className="chat-head-title">Lounge</strong>
-                <small>Be kind · no links · reports go to the Vexora team</small>
+                <small>Be kind · no links · reports go to the Suffrova team</small>
               </div>
             </div>
           )}

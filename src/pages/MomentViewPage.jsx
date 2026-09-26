@@ -119,8 +119,8 @@ function MomentViewPage() {
 
       <header className="moment-view-bar">
         <Link to={`/${ref}`} className="navbar-brand">
-          <span className="brand-mark" aria-hidden="true">V</span>
-          <span className="brand-word">Vexora</span>
+          <span className="brand-mark" aria-hidden="true">S</span>
+          <span className="brand-word">Suffrova</span>
         </Link>
 
         <Link to={`/moments${ref}`} className="btn btn-sm">
@@ -131,7 +131,7 @@ function MomentViewPage() {
       <main className="moment-view-main">
         {state === "loading" && (
           <div className="moment-view-loading">
-            <span className="brand-mark" aria-hidden="true">V</span>
+            <span className="brand-mark" aria-hidden="true">S</span>
             <p>Opening your Moment…</p>
           </div>
         )}
@@ -210,7 +210,7 @@ function MomentViewPage() {
                   type="button"
                   className="btn"
                   onClick={() =>
-                    nativeShare({ title: "A Vexora Moment", text: `${moment.from_name} made you something ✦`, url: publicLink })
+                    nativeShare({ title: "A Suffrova Moment", text: `${moment.from_name} made you something ✦`, url: publicLink })
                   }
                 >
                   <Icon name="share" />
@@ -222,7 +222,7 @@ function MomentViewPage() {
             <section className="moment-view-cta card">
               <div>
                 <h2>Send one back to {moment.from_name}.</h2>
-                <p>Free, takes a minute, and Vexora runs competitions with real prizes for inviting friends.</p>
+                <p>Free, takes a minute, and Suffrova runs competitions with real prizes for inviting friends.</p>
               </div>
 
               <Link to={replyLink} className="btn btn-primary">
