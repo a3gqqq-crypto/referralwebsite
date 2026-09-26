@@ -53,7 +53,7 @@ function ChatPhoto({ path, onOpen, onLoad }) {
   );
 }
 
-function MessageRow({ message, sender, grouped, isMine, onReport, onOpenPhoto, onPhotoLoad }) {
+function MessageRow({ message, sender, grouped, isMine, onReport, onDelete, onOpenPhoto, onPhotoLoad }) {
   const equipped = equippedFrom(sender);
   const name = displayNameOf(sender, "…");
   const href = `/u/${encodeURIComponent(sender?.username || "")}`;
@@ -99,6 +99,18 @@ function MessageRow({ message, sender, grouped, isMine, onReport, onOpenPhoto, o
           <Icon name="flag" size={14} />
         </button>
       )}
+
+      {onDelete && (
+        <button
+          type="button"
+          className={`chat-msg-report chat-msg-delete ${!isMine && sender ? "beside-report" : ""}`}
+          onClick={() => onDelete(message.id)}
+          aria-label={`Delete message from ${name}`}
+          title="Delete for everyone"
+        >
+          <Icon name="trash" size={14} />
+        </button>
+      )}
     </li>
   );
 }
@@ -128,7 +140,7 @@ function ChatPage() {
   const [viewing, setViewing] = useState(null);
   const photoInputRef = useRef(null);
 
-  const { profile: myProfile } = useMyProfile();
+  const { profile: myProfile, isOwner } = useMyProfile();
   const canPostLoungePhoto = (myProfile?.xp || 0) >= 200;
 
   const [recent, setRecent] = useState({});
@@ -308,6 +320,21 @@ function ChatPage() {
     }
   };
 
+  // Owners only; the server checks again. Everyone's screen drops it via lounge_deletions.
+  const deleteLoungeMessage = async (id) => {
+    if (!window.confirm("Delete this message for everyone?")) return;
+
+    const { error: deleteError } = await supabase.rpc("admin_delete_lounge_message", { p_id: id });
+
+    if (deleteError) {
+      console.error(deleteError);
+      setError("Couldn't delete that message.");
+      return;
+    }
+
+    setMessages((current) => current.filter((item) => item.id !== id));
+  };
+
   /* ---------- Live updates ---------- */
 
   useEffect(() => {
@@ -315,6 +342,14 @@ function ChatPage() {
 
     const channel = supabase
       .channel("lounge-feed")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "lounge_deletions" },
+        (payload) => {
+          const gone = payload.new.message_id;
+          setMessages((current) => current.filter((item) => item.id !== gone));
+        }
+      )
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "lounge_messages" },
@@ -712,6 +747,7 @@ function ChatPage() {
                       onReport={(sender, messageId) =>
                         setReporting({ target: sender, kind: isDm ? "dm" : "lounge", messageId })
                       }
+                      onDelete={isOwner && !isDm ? deleteLoungeMessage : undefined}
                       onOpenPhoto={setViewing}
                       onPhotoLoad={keepAtBottom}
                     />

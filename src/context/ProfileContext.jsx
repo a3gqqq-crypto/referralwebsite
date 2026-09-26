@@ -39,6 +39,7 @@ export function ProfileProvider({ user, children }) {
   const [checkin, setCheckin] = useState(null);
   // null until the check comes back, so /admin can wait instead of flashing "not found".
   const [isAdmin, setIsAdmin] = useState(null);
+  const [staffRole, setStaffRole] = useState(null);
   const checkedIn = useRef(null);
 
   // Only decides whether to show the Admin link; every admin RPC re-checks on the server.
@@ -49,6 +50,11 @@ export function ProfileProvider({ user, children }) {
 
     supabase.rpc("is_admin").then(({ data }) => {
       if (!cancelled) setIsAdmin(data === true);
+    });
+
+    // Own role, including when the tag is hidden (the public staff list leaves those out).
+    supabase.rpc("my_staff_status").then(({ data }) => {
+      if (!cancelled) setStaffRole(data?.[0]?.role || null);
     });
 
     return () => {
@@ -150,6 +156,7 @@ export function ProfileProvider({ user, children }) {
     error,
     refresh,
     isAdmin,
+    isOwner: staffRole === "owner",
     username: profile?.username || user?.user_metadata?.username || "",
     displayName: profile?.display_name || profile?.username || user?.user_metadata?.username || "",
     setDisplayName: (name) =>

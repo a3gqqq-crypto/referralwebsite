@@ -475,6 +475,11 @@
   color: var(--rose);
 }
 
+/* Owner-only delete; sits left of the report flag when both show. */
+.chat-msg-delete.beside-report {
+  right: 40px;
+}
+
 
 /* =========================================
    PHOTOS
@@ -895,6 +900,14 @@
     background: transparent;
 
     opacity: 0.4;
+  }
+
+  .chat-msg-delete.beside-report {
+    right: 38px;
+  }
+
+  .chat-msg:has(.chat-msg-delete.beside-report) .chat-msg-head {
+    padding-right: 70px;
   }
 
   /* 16px stops iOS from zooming in when the box is tapped. */
