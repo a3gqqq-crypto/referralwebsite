@@ -9,7 +9,7 @@ import { equippedFrom } from "../data/cosmetics";
 // Phone-only bottom navigation (hidden above 700px by CSS).
 function MobileTabBar() {
   const { pathname } = useLocation();
-  const { profile, username } = useMyProfile();
+  const { profile, username, displayName } = useMyProfile();
   const { badgeCount } = useSocial();
 
   const ownProfile = username && pathname === `/u/${encodeURIComponent(username)}`;
@@ -39,7 +39,7 @@ function MobileTabBar() {
           <span className="tabbar-icon">
             {tab.avatar ? (
               <FramedAvatar
-                name={username || "?"}
+                name={displayName || "?"}
                 frame={equippedFrom(profile).frame}
                 avatar={profile?.avatar}
                 size={26}

@@ -9,7 +9,7 @@ import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip from "../components/PlayerChip";
 import StaffTag from "../components/StaffTag";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import NotFound from "./NotFound";
 import { useNow, getEventStatus } from "../hooks/useCountdown";
 import { referralLinkFor } from "../hooks/useCopy";
@@ -94,7 +94,7 @@ function EventLeaderboardPage({ user }) {
   const brag = async () => {
     setBragging(true);
     await shareBragImage({
-      username: me.username,
+      username: displayNameOf(me),
       avatar: me.avatar,
       rank: me.rank,
       count: kind.score(me),
@@ -209,7 +209,7 @@ function EventLeaderboardPage({ user }) {
                   className="board-podium-who"
                 >
                   <FramedAvatar
-                    name={player.username}
+                    name={displayNameOf(player)}
                     frame={equippedFrom(player).frame}
                     avatar={player.avatar}
                     size={player.rank === 1 ? 76 : 62}
@@ -217,7 +217,7 @@ function EventLeaderboardPage({ user }) {
 
                   <strong className="board-podium-name">
                     <StyledName
-                      name={player.username || "Player"}
+                      name={displayNameOf(player)}
                       effect={equippedFrom(player).name}
                     />
                   </strong>

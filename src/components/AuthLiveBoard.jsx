@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { FramedAvatar, StyledName } from "./Cosmetics";
 import { PLAYER_COLUMNS } from "./PlayerChip";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 
 const MEDAL = ["🥇", "🥈", "🥉"];
 
@@ -82,8 +82,8 @@ function AuthLiveBoard({ race }) {
           return (
             <li key={player.id}>
               <span className="auth-live-medal" aria-hidden="true">{MEDAL[index]}</span>
-              <FramedAvatar name={player.username} frame={equipped.frame} avatar={equipped.avatar} size={36} />
-              <StyledName name={player.username} effect={equipped.name} className="auth-live-name" />
+              <FramedAvatar name={displayNameOf(player)} frame={equipped.frame} avatar={equipped.avatar} size={36} />
+              <StyledName name={displayNameOf(player)} effect={equipped.name} className="auth-live-name" />
               <span className="auth-live-score mono">
                 {player.referral_count || 0}
                 <small> invites</small>

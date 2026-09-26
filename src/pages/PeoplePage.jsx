@@ -14,36 +14,38 @@ import {
 } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
 import "../styles/people.css";
 
 const COLUMNS = `${PLAYER_COLUMNS}, equipped_banner, bio`;
 
-// Usernames are [a-zA-Z0-9_]; strip anything else so it can't act as a LIKE/PostgREST wildcard.
+// Matches usernames and display names. Keeps only letters, numbers, spaces and
+// underscores so nothing can act as a LIKE wildcard or break the PostgREST filter.
 const toPattern = (query) =>
-  query.replace(/[^a-zA-Z0-9_]/g, "").replace(/_/g, "\\_");
+  query.replace(/[^\p{L}\p{N} _]/gu, "").replace(/\s+/g, " ").trim();
 
 function PersonCard({ person }) {
   const equipped = equippedFrom(person);
   const href = `/u/${encodeURIComponent(person.username)}`;
+  const name = displayNameOf(person);
 
   return (
     <article className="person-card">
-      <Link to={href} className="person-card-link" aria-label={`View ${person.username}'s profile`}>
+      <Link to={href} className="person-card-link" aria-label={`View ${name}'s profile`}>
         <ProfileBanner banner={equipped.banner} className="person-card-banner" />
 
         <div className="person-card-id">
           <FramedAvatar
-            name={person.username}
+            name={name}
             frame={equipped.frame}
             avatar={equipped.avatar}
             size={58}
           />
 
           <div className="person-card-name">
-            <StyledName name={person.username} effect={equipped.name} />
+            <StyledName name={name} effect={equipped.name} />
             <span className="person-card-tags">
               <StaffTag userId={person.id} />
               <LevelBadge xp={person.xp} />
@@ -146,7 +148,8 @@ function PeoplePage() {
       const { data, error } = await supabase
         .from("profiles")
         .select(COLUMNS)
-        .ilike("username", `%${pattern}%`)
+        .or(`username.ilike."%${pattern}%",display_name.ilike."%${pattern}%"`)
+        .not("username", "is", null)
         .order("referral_count", { ascending: false })
         .limit(24);
 
@@ -188,8 +191,8 @@ function PeoplePage() {
           onChange={(event) =>
             setParams(event.target.value ? { q: event.target.value } : {}, { replace: true })
           }
-          placeholder="Search by username"
-          aria-label="Search by username"
+          placeholder="Search by name"
+          aria-label="Search by name"
           autoComplete="off"
           spellCheck="false"
         />

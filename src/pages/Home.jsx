@@ -13,7 +13,7 @@ import { FramedAvatar } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
 import { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { useMyProfile } from "../context/ProfileContext";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { levelInfo } from "../data/levels";
 import { useNow, getEventStatus, formatCountdown } from "../hooks/useCountdown";
 import { referralLinkFor } from "../hooks/useCopy";
@@ -54,7 +54,7 @@ function Home({ user }) {
   const { profile } = useMyProfile();
   const now = useNow();
 
-  const username = profile?.username || user?.user_metadata?.username || "Member";
+  const username = displayNameOf(profile, user?.user_metadata?.username || "Member");
   const referralLink = referralLinkFor(user?.user_metadata?.username);
   const equipped = equippedFrom(profile);
   const level = levelInfo(profile?.xp);

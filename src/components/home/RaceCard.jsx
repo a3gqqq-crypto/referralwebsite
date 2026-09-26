@@ -6,6 +6,7 @@ import PlayerChip from "../PlayerChip";
 import { useEvents } from "../../context/EventContext";
 import { useCopy, canNativeShare, nativeShare } from "../../hooks/useCopy";
 import { shareBragImage } from "../../lib/bragImage";
+import { displayNameOf } from "../../data/cosmetics";
 
 const SHARE_TEXT = "Join me on Vexora — invite friends, climb the board, win real prizes.";
 
@@ -59,7 +60,7 @@ function raceLine(event, standings, userId) {
   return {
     state: "in",
     rank,
-    head: <>You're #{rank}. <span className="mark">{plural(needed, "invite")}</span> to pass {above.username}.</>,
+    head: <>You're #{rank}. <span className="mark">{plural(needed, "invite")}</span> to pass {displayNameOf(above)}.</>,
     sub: aboveReward
       ? `Pass them and you take the ${aboveReward} spot.`
       : toTop3 && rewardFor(event, 3)

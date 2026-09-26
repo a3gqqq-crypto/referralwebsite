@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { supabase } from "../lib/supabaseClient";
 import Icon from "./Icon";
+import { displayNameOf } from "../data/cosmetics";
 import {
   useCopy,
   canNativeShare,
@@ -27,7 +28,7 @@ function ReferralCard({ user }) {
     const load = async () => {
       const { data, error: loadError } = await supabase
         .from("profiles")
-        .select("id, username, referral_count");
+        .select("id, username, display_name, referral_count");
 
       if (cancelled) return;
 
@@ -172,7 +173,7 @@ function ReferralCard({ user }) {
             : stats.rank === 1
               ? "You're #1. Everyone's chasing you now."
               : gap
-                ? `${gap} more ${gap === 1 ? "invite" : "invites"} to pass ${stats.nextUp.username}.`
+                ? `${gap} more ${gap === 1 ? "invite" : "invites"} to pass ${displayNameOf(stats.nextUp)}.`
                 : "Share your link to get on the board."}
         </p>
       </dl>

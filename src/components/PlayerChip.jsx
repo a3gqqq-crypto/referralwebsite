@@ -3,14 +3,14 @@ import { Link } from "react-router-dom";
 import { BadgeRow, FramedAvatar, StyledName } from "./Cosmetics";
 import { LevelBadge } from "./Level";
 import StaffTag from "./StaffTag";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
-  "id, username, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar";
+  "id, username, display_name, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar";
 
 function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
   const equipped = equippedFrom(player);
-  const name = player?.username || "Player";
+  const name = displayNameOf(player);
 
   const inner = (
     <>

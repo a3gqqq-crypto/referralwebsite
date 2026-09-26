@@ -11,6 +11,7 @@ import { useSocial } from "../context/SocialContext";
 import {
   PROFILE_COLUMNS,
   cosmeticById,
+  displayNameOf,
   equippedFrom,
 } from "../data/cosmetics";
 import {
@@ -43,7 +44,7 @@ function ProfileSocialActions({ profile }) {
             type="button"
             className="btn btn-ghost btn-sm"
             onClick={() => {
-              if (window.confirm(`Block ${profile.username}? They won't be able to message or add you.`)) {
+              if (window.confirm(`Block ${displayNameOf(profile)}? They won't be able to message or add you.`)) {
                 social.block(profile.id);
               }
             }}
@@ -136,7 +137,7 @@ function ProfilePage({ viewer, standalone = false }) {
       <div className="card empty-state profile-missing">
         <div className="empty-state-icon" aria-hidden="true">🔍</div>
         <h3>No one goes by “{username}”.</h3>
-        <p>Check the spelling, or they may have changed their name.</p>
+        <p>Check the spelling of the username.</p>
         <div className="empty-state-actions">
           <Link to="/" className="btn">Go home</Link>
         </div>
@@ -147,6 +148,7 @@ function ProfilePage({ viewer, standalone = false }) {
           size="lg"
           userId={profile.id}
           username={profile.username}
+          displayName={profile.display_name}
           equipped={equipped}
           bio={profile.bio}
           xp={profile.xp}
@@ -171,7 +173,7 @@ function ProfilePage({ viewer, standalone = false }) {
                   onClick={() =>
                     canNativeShare
                       ? nativeShare({
-                          title: `${profile.username} on Vexora`,
+                          title: `${displayNameOf(profile)} on Vexora`,
                           url: profileLink,
                         })
                       : copy(profileLink)
@@ -183,7 +185,7 @@ function ProfilePage({ viewer, standalone = false }) {
               </>
             ) : standalone ? (
               <Link to={joinLink} className="btn btn-primary">
-                Join Vexora with {profile.username}'s invite
+                Join Vexora with {displayNameOf(profile)}'s invite
                 <Icon name="arrowRight" size={16} />
               </Link>
             ) : (

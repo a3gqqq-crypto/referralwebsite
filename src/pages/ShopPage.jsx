@@ -191,6 +191,7 @@ function ShopPage() {
             size="sm"
             userId={profile?.id}
             username={username || "you"}
+            displayName={profile?.display_name}
             equipped={tryOn}
             bio={profile?.bio}
             xp={profile?.xp}

@@ -21,8 +21,9 @@ import { TIERS, XP_RULES, levelInfo } from "../data/levels";
 import "../styles/profile.css";
 
 const TABS = ["picture", "frame", "name", "banner", "badge", "bio"];
-const TAB_LABEL = { picture: "Picture", bio: "Bio" };
+const TAB_LABEL = { picture: "Picture", bio: "Name & bio" };
 const BIO_LIMIT = 160;
+const NAME_LIMIT = 30;
 
 function lockLabel(item, referrals) {
   if (item.earn?.referrals) {
@@ -44,6 +45,7 @@ function LockerPage() {
     equip,
     setBadges,
     saveBio,
+    setDisplayName,
     setAvatar,
     uploadAvatar,
   } = useMyProfile();
@@ -52,11 +54,19 @@ function LockerPage() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
   const [bio, setBio] = useState("");
+  const [name, setName] = useState("");
   const [copied, copy] = useCopy();
 
   useEffect(() => {
     setBio(profile?.bio || "");
   }, [profile?.bio]);
+
+  useEffect(() => {
+    setName(profile?.display_name || "");
+  }, [profile?.display_name]);
+
+  const savedName = profile?.display_name || "";
+  const nameChanged = name.trim().replace(/\s+/g, " ") !== savedName;
 
   const equipped = equippedFrom(profile);
   const referrals = profile?.referral_count || 0;
@@ -173,6 +183,7 @@ function LockerPage() {
           <ProfileCard
             userId={profile?.id}
             username={username}
+            displayName={profile?.display_name}
             equipped={equipped}
             bio={bio.trim() || profile?.bio}
             xp={profile?.xp}
@@ -243,6 +254,51 @@ function LockerPage() {
                 onUpload={(file) => run(() => uploadAvatar(file), "Photo uploaded.")}
               />
             ) : tab === "bio" ? (
+              <>
+              <form
+                className="locker-bio"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  run(
+                    () => setDisplayName(name),
+                    name.trim() ? "Name saved." : "Name removed. Your username shows instead."
+                  );
+                }}
+              >
+                <div className="field">
+                  <label htmlFor="display-name">
+                    Display name
+                    <span className="mono locker-counter">
+                      {name.length}/{NAME_LIMIT}
+                    </span>
+                  </label>
+
+                  <input
+                    id="display-name"
+                    type="text"
+                    maxLength={NAME_LIMIT}
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    placeholder={username || "Your name"}
+                    autoComplete="nickname"
+                  />
+
+                  <p className="locker-hint">
+                    Shows everywhere instead of your username. Spaces and emoji are fine.
+                    Your username <span className="mono">@{username}</span> stays the same,
+                    so your invite link never changes.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={busy || !nameChanged}
+                >
+                  {busy ? "Saving…" : "Save name"}
+                </button>
+              </form>
+
               <form
                 className="locker-bio"
                 onSubmit={(event) => {
@@ -276,6 +332,7 @@ function LockerPage() {
                   {busy ? "Saving…" : "Save bio"}
                 </button>
               </form>
+              </>
             ) : (
               <>
                 <div className="locker-panel-head">

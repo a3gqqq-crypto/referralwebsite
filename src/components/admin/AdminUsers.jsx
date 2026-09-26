@@ -11,9 +11,10 @@ import { adminCall, timeAgo } from "./adminApi";
 
 const COLUMNS = `${PLAYER_COLUMNS}, chat_banned`;
 
-// Usernames are [a-zA-Z0-9_]; strip anything else so it can't act as a LIKE wildcard.
+// Matches usernames and display names. Keeps only letters, numbers, spaces and
+// underscores so nothing can act as a LIKE wildcard or break the PostgREST filter.
 const toPattern = (query) =>
-  query.replace(/[^a-zA-Z0-9_]/g, "").replace(/_/g, "\\_");
+  query.replace(/[^\p{L}\p{N} _]/gu, "").replace(/\s+/g, " ").trim();
 
 function RoleButtons({ person, role, busy, run }) {
   const setRole = (next, text, confirmText) => {
@@ -101,6 +102,7 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
         <PlayerChip player={person} size={40} />
 
         <span className="admin-meta">
+          {person.display_name && <><span className="mono">@{person.username}</span> · </>}
           <span className="mono">{person.referral_count || 0}</span> referrals ·{" "}
           <span className="mono">{person.xp || 0}</span> XP · joined {timeAgo(person.created_at)}
         </span>
@@ -132,6 +134,20 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
             }}
           >
             Remove picture
+          </button>
+        )}
+
+        {person.display_name && (
+          <button
+            type="button"
+            className="btn btn-sm"
+            disabled={busy}
+            onClick={() => {
+              if (!window.confirm(`Remove ${person.username}'s display name "${person.display_name}"?`)) return;
+              run("admin_clear_display_name", { p_user: person.id }, "Name removed.");
+            }}
+          >
+            Remove name
           </button>
         )}
 
@@ -229,7 +245,7 @@ function AdminUsers() {
       if (staffOnly) request = request.in("id", staffIds.length ? staffIds : ["00000000-0000-0000-0000-000000000000"]);
 
       request = pattern
-        ? request.ilike("username", `%${pattern}%`).order("referral_count", { ascending: false })
+        ? request.or(`username.ilike."%${pattern}%",display_name.ilike."%${pattern}%"`).order("referral_count", { ascending: false })
         : request.order("created_at", { ascending: false });
 
       const { data, error: loadError } = await request.limit(30);
@@ -259,8 +275,8 @@ function AdminUsers() {
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search members by username"
-          aria-label="Search members by username"
+          placeholder="Search members by name"
+          aria-label="Search members by name"
           autoComplete="off"
           spellCheck="false"
         />

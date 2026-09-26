@@ -151,6 +151,9 @@ export function ProfileProvider({ user, children }) {
     refresh,
     isAdmin,
     username: profile?.username || user?.user_metadata?.username || "",
+    displayName: profile?.display_name || profile?.username || user?.user_metadata?.username || "",
+    setDisplayName: (name) =>
+      callAndRefresh("set_display_name", { p_name: name }),
     equip: (slot, cosmeticId) =>
       callAndRefresh("equip_cosmetic", {
         p_slot: slot,

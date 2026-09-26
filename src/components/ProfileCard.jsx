@@ -12,6 +12,7 @@ import "../styles/profile.css";
 function ProfileCard({
   userId,
   username,
+  displayName,
   equipped,
   bio,
   xp,
@@ -30,7 +31,7 @@ function ProfileCard({
       <div className="profile-card-body">
         <div className="profile-card-avatar">
           <FramedAvatar
-            name={username}
+            name={displayName || username}
             frame={equipped.frame}
             avatar={equipped.avatar}
             size={avatarSize}
@@ -39,8 +40,12 @@ function ProfileCard({
 
         <div className="profile-card-id">
           <h2 className="profile-card-name">
-            <StyledName name={username || "you"} effect={equipped.name} />
+            <StyledName name={displayName || username || "you"} effect={equipped.name} />
           </h2>
+
+          {displayName && username && displayName !== username && (
+            <span className="profile-card-handle">@{username}</span>
+          )}
 
           <StaffTag userId={userId} size={size === "lg" ? "lg" : "sm"} />
 

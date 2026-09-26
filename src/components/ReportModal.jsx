@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useSocial } from "../context/SocialContext";
+import { displayNameOf } from "../data/cosmetics";
 
 import "../styles/social.css";
 
@@ -57,7 +58,7 @@ function ReportModal({ target, kind = "profile", messageId = null, onClose }) {
           <h2>Thanks for telling us.</h2>
           <p>
             The Vexora team will look at it. If you don't want to hear
-            from {target.username} again, you can also block them.
+            from {displayNameOf(target)} again, you can also block them.
           </p>
           <button type="button" className="btn btn-primary" onClick={onClose}>
             Done
@@ -65,7 +66,7 @@ function ReportModal({ target, kind = "profile", messageId = null, onClose }) {
         </div>
       ) : (
         <form className="report-modal-body" onSubmit={submit}>
-          <h2>Report {target.username}</h2>
+          <h2>Report {displayNameOf(target)}</h2>
 
           <fieldset className="report-reasons">
             {REASONS.map((item) => (

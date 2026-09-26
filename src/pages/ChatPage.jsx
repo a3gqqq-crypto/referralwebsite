@@ -18,7 +18,7 @@ import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
 import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
-import { equippedFrom } from "../data/cosmetics";
+import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
 import "../styles/chat.css";
@@ -55,13 +55,14 @@ function ChatPhoto({ path, onOpen, onLoad }) {
 
 function MessageRow({ message, sender, grouped, isMine, onReport, onOpenPhoto, onPhotoLoad }) {
   const equipped = equippedFrom(sender);
-  const name = sender?.username || "…";
+  const name = displayNameOf(sender, "…");
+  const href = `/u/${encodeURIComponent(sender?.username || "")}`;
 
   return (
     <li className={`chat-msg ${grouped ? "grouped" : ""} ${isMine ? "mine" : ""}`}>
       <div className="chat-msg-avatar">
         {!grouped && (
-          <Link to={`/u/${encodeURIComponent(name)}`} tabIndex={-1} aria-hidden="true">
+          <Link to={href} tabIndex={-1} aria-hidden="true">
             <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={38} />
           </Link>
         )}
@@ -70,7 +71,7 @@ function MessageRow({ message, sender, grouped, isMine, onReport, onOpenPhoto, o
       <div className="chat-msg-main">
         {!grouped && (
           <div className="chat-msg-head">
-            <Link to={`/u/${encodeURIComponent(name)}`} className="chat-msg-name">
+            <Link to={href} className="chat-msg-name">
               <StyledName name={name} effect={equipped.name} />
             </Link>
             <StaffTag userId={message.sender_id} />
@@ -531,7 +532,7 @@ function ChatPage() {
                       type="button"
                       className="chat-icon-btn accept"
                       onClick={() => social.respond(request.otherId, true)}
-                      aria-label={`Accept ${request.profile?.username}`}
+                      aria-label={`Accept ${displayNameOf(request.profile)}`}
                       title="Accept"
                     >
                       <Icon name="check" size={15} strokeWidth={2.6} />
@@ -540,7 +541,7 @@ function ChatPage() {
                       type="button"
                       className="chat-icon-btn"
                       onClick={() => social.respond(request.otherId, false)}
-                      aria-label={`Decline ${request.profile?.username}`}
+                      aria-label={`Decline ${displayNameOf(request.profile)}`}
                       title="Decline"
                     >
                       <Icon name="close" size={15} strokeWidth={2.6} />
@@ -577,14 +578,14 @@ function ChatPage() {
                     onClick={() => setListOpen(false)}
                   >
                     <FramedAvatar
-                      name={profile.username}
+                      name={displayNameOf(profile)}
                       frame={equipped.frame}
                       avatar={equipped.avatar}
                       size={36}
                     />
 
                     <span className="chat-friend-text">
-                      <StyledName name={profile.username} effect={equipped.name} />
+                      <StyledName name={displayNameOf(profile)} effect={equipped.name} />
                       <small>
                         {last
                           ? `${last.sender_id === me ? "You: " : ""}${last.body || (last.image ? "📷 Photo" : "")}`
@@ -625,7 +626,7 @@ function ChatPage() {
                     type="button"
                     className="btn btn-sm btn-ghost"
                     onClick={() => setReporting({ target, kind: "dm", messageId: null })}
-                    aria-label={`Report ${target.username}`}
+                    aria-label={`Report ${displayNameOf(target)}`}
                   >
                     <Icon name="flag" size={15} className="chat-head-icon" />
                     <span className="chat-head-label">Report</span>
@@ -636,11 +637,11 @@ function ChatPage() {
                       type="button"
                       className="btn btn-sm btn-ghost"
                       onClick={() => {
-                        if (window.confirm(`Block ${target.username}? They won't be able to message you or add you.`)) {
+                        if (window.confirm(`Block ${displayNameOf(target)}? They won't be able to message you or add you.`)) {
                           social.block(target.id);
                         }
                       }}
-                      aria-label={`Block ${target.username}`}
+                      aria-label={`Block ${displayNameOf(target)}`}
                     >
                       <Icon name="block" size={15} className="chat-head-icon" />
                       <span className="chat-head-label">Block</span>
@@ -681,7 +682,7 @@ function ChatPage() {
                 <div className="chat-empty">
                   {isDm ? (
                     <>
-                      <strong>This is the start of your chat{target ? ` with ${target.username}` : ""}.</strong>
+                      <strong>This is the start of your chat{target ? ` with ${displayNameOf(target)}` : ""}.</strong>
                       <span>Say something nice.</span>
                     </>
                   ) : (
@@ -772,7 +773,7 @@ function ChatPage() {
                 onKeyDown={onKeyDown}
                 onPaste={onPaste}
                 maxLength={limit}
-                placeholder={isDm && target ? `Message ${target.username}` : "Message the lounge"}
+                placeholder={isDm && target ? `Message ${displayNameOf(target)}` : "Message the lounge"}
                 aria-label="Message"
               />
 
@@ -794,9 +795,9 @@ function ChatPage() {
           target && (
             <div className="chat-locked">
               {relation === "blocked" ? (
-                <span>You blocked {target.username}.</span>
+                <span>You blocked {displayNameOf(target)}.</span>
               ) : (
-                <span>You can message {target.username} once you're friends.</span>
+                <span>You can message {displayNameOf(target)} once you're friends.</span>
               )}
               <FriendButton profile={target} size="sm" showMessage={false} />
             </div>

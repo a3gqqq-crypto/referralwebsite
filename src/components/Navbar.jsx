@@ -43,11 +43,11 @@ function playClick() {
 }
 
 function Navbar({ user, onLogout }) {
-  const { profile, username: profileName, isAdmin } = useMyProfile();
+  const { profile, displayName, isAdmin } = useMyProfile();
   const { badgeCount } = useSocial();
 
   const username =
-    profileName || user?.user_metadata?.username || "Member";
+    displayName || user?.user_metadata?.username || "Member";
 
   const equipped = equippedFrom(profile);
 
