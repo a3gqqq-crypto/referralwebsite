@@ -391,9 +391,14 @@ function Auth({ onAuthenticated }) {
            PASSWORD
         ================================= */
 
-        if (password.length < 6) {
+        // Matches the Supabase Auth setting: 8+ characters with letters and digits.
+        if (
+          password.length < 8 ||
+          !/[a-zA-Z]/.test(password) ||
+          !/[0-9]/.test(password)
+        ) {
           setError(
-            "Password must be at least 6 characters."
+            "Password needs at least 8 characters, with letters and numbers."
           );
 
           return;
@@ -758,7 +763,7 @@ function Auth({ onAuthenticated }) {
                   setPassword(event.target.value)
                 }
                 placeholder={
-                  isLogin ? "Your password" : "At least 6 characters"
+                  isLogin ? "Your password" : "8+ characters, letters and numbers"
                 }
                 autoComplete={
                   isLogin ? "current-password" : "new-password"
