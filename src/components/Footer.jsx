@@ -45,7 +45,7 @@ function Footer() {
 
       <div className="footer-bottom">
         <span>© {year} Suffrova</span>
-        <span>Made by two friends, not a corporation.</span>
+        <span>Made by three friends, not a corporation.</span>
       </div>
     </footer>
   );
