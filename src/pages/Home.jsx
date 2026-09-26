@@ -7,6 +7,7 @@ import Icon from "../components/Icon";
 import SkeletonRows from "../components/SkeletonRows";
 import StreakCard from "../components/StreakCard";
 import QuestsCard from "../components/QuestsCard";
+import InstaCard from "../components/home/InstaCard";
 import ActivityFeed from "../components/home/ActivityFeed";
 import { MiniBoard, RaceCard } from "../components/home/RaceCard";
 import { FramedAvatar } from "../components/Cosmetics";
@@ -192,6 +193,8 @@ function Home({ user }) {
 
         <ActivityFeed />
       </div>
+
+      <InstaCard />
 
       <section className="dash-events">
         <div className="dash-section-head">

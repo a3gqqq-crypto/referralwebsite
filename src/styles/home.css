@@ -279,6 +279,88 @@
 
 /* ---------- Streak / quests / feed ---------- */
 
+/* One-time "follow us on Instagram" reward strip. */
+.insta-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-top: 16px;
+  padding: 14px 16px;
+
+  border-color: rgba(255, 92, 141, 0.35);
+
+  background:
+    radial-gradient(420px 140px at 0% 50%, rgba(255, 92, 141, 0.14), transparent 70%),
+    var(--surface);
+}
+
+.insta-card-logo {
+  width: 44px;
+  height: 44px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 14px;
+
+  background: linear-gradient(135deg, #feda75, #fa7e1e 30%, #d62976 60%, #962fbf 85%, #4f5bd5);
+  color: #fff;
+}
+
+.insta-card.is-done .insta-card-logo {
+  background: var(--accent-grad);
+}
+
+.insta-card-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.insta-card-text strong {
+  font-size: 15.5px;
+}
+
+.insta-card-text span {
+  color: var(--text-soft);
+
+  font-size: 13.5px;
+}
+
+.insta-card-text .insta-card-error {
+  color: var(--rose);
+}
+
+.insta-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .insta-card {
+    flex-wrap: wrap;
+  }
+
+  .insta-card-text {
+    flex-basis: calc(100% - 58px);
+  }
+
+  .insta-card-actions {
+    width: 100%;
+  }
+
+  .insta-card-actions .btn {
+    flex: 1;
+  }
+}
+
 .dash-mid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

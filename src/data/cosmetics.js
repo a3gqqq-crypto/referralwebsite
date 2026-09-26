@@ -200,6 +200,16 @@ export const COSMETICS = [
     earn: { manual: true, label: "Finish top 3 in an event" },
   },
   {
+    id: "badge-insta",
+    type: "badge",
+    name: "Insta Fam",
+    description: "Follows @suffrova on Instagram.",
+    rarity: "rare",
+    icon: "instagram",
+    price: null,
+    earn: { manual: true, label: "Follow @suffrova on Instagram" },
+  },
+  {
     id: "badge-supporter",
     type: "badge",
     name: "Supporter",
