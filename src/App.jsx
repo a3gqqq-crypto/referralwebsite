@@ -14,6 +14,7 @@ import Footer from "./components/Footer";
 import MobileTabBar from "./components/MobileTabBar";
 import Auth from "./components/Auth";
 import ErrorBoundary from "./components/ErrorBoundary";
+import ResetPassword from "./components/ResetPassword";
 
 import Home from "./pages/Home";
 import MomentViewPage from "./pages/MomentViewPage";
@@ -42,7 +43,7 @@ import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
 import { SocialProvider } from "./context/SocialContext";
 
-import { supabase } from "./lib/supabaseClient";
+import { openedFromResetLink, supabase } from "./lib/supabaseClient";
 
 import "./styles/navbar.css";
 import "./styles/footer.css";
@@ -150,6 +151,7 @@ function useClickSound() {
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(openedFromResetLink);
 
   useClickSound();
 
@@ -165,7 +167,8 @@ function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (event === "PASSWORD_RECOVERY") setResetting(true);
       setSession(newSession);
     });
 
@@ -189,6 +192,8 @@ function App() {
 
   const gated = loading ? (
     loadingScreen
+  ) : session && resetting ? (
+    <ResetPassword onDone={() => setResetting(false)} onCancel={() => setResetting(false)} />
   ) : session ? (
     <AuthenticatedApp session={session} onLogout={handleLogout} />
   ) : (

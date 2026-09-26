@@ -299,6 +299,45 @@
   font-weight: 500;
 }
 
+.auth-forgot {
+  align-self: flex-end;
+
+  padding: 2px 0;
+
+  border: none;
+  background: none;
+
+  color: var(--gold-soft);
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.auth-forgot:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* Full-page "set a new password" screen after a reset link. */
+.auth-reset {
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  padding: 40px var(--gutter, 20px);
+
+  background:
+    radial-gradient(700px 420px at 50% 0%, rgba(255, 92, 141, 0.12), transparent 65%),
+    var(--bg);
+}
+
+.auth-reset .auth-brand {
+  display: flex;
+
+  margin-bottom: 28px;
+}
+
 .auth-rules {
   margin-top: 14px;
 

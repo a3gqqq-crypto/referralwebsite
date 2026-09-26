@@ -203,6 +203,9 @@ function Auth({ onAuthenticated }) {
   const isLogin =
     mode === "login";
 
+  const isForgot =
+    mode === "forgot";
+
 
   /* =========================================
      LIVE EVENT (FOR REFERRAL BANNER)
@@ -245,6 +248,75 @@ function Auth({ onAuthenticated }) {
       }
     }
   }, []);
+
+
+  /* =========================================
+     EXPIRED RESET LINK
+  ========================================= */
+
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+
+    if (hash.get("error_code") || hash.get("error")) {
+      setMode("forgot");
+      setError(
+        hash.get("error_code") === "otp_expired"
+          ? "That reset link has expired or was already used. Get a new one below."
+          : "That link didn't work. Get a new one below."
+      );
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
+
+
+  /* =========================================
+     FORGOT PASSWORD
+  ========================================= */
+
+  const openForgot = () => {
+    setMode("forgot");
+    setPassword("");
+    setMessage("");
+    setError("");
+  };
+
+  const backToLogin = () => {
+    setMode("login");
+    setMessage("");
+    setError("");
+  };
+
+  const handleForgot = async (event) => {
+    event.preventDefault();
+
+    const login = email.trim();
+
+    if (!login) {
+      setError("Enter your email or username.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    // Always the same answer, so nobody can use this to check who has an account.
+    const { error: resetError } = await supabase.functions.invoke("request-password-reset", {
+      body: { login },
+    });
+
+    setLoading(false);
+
+    if (resetError) {
+      console.error(resetError);
+      setError("Couldn't send the email. Try again in a minute.");
+      return;
+    }
+
+    setMessage(
+      "If that account exists, a reset link is on its way. Check your email (and spam). It can take a minute."
+    );
+  };
 
 
   /* =========================================
@@ -664,17 +736,19 @@ function Auth({ onAuthenticated }) {
         <div className="auth-card">
 
           <span className="eyebrow">
-            {isLogin ? "Welcome back" : "Join Vexora"}
+            {isForgot ? "No worries" : isLogin ? "Welcome back" : "Join Vexora"}
           </span>
 
           <h2>
-            {isLogin ? "Log in" : "Create your account"}
+            {isForgot ? "Forgot password" : isLogin ? "Log in" : "Create your account"}
           </h2>
 
           <p className="auth-sub">
-            {isLogin
-              ? "Use your email or username."
-              : "Takes 20 seconds. Your invite link is ready the moment you're in."}
+            {isForgot
+              ? "Enter your email or username and we'll email you a link to set a new password."
+              : isLogin
+                ? "Use your email or username."
+                : "Takes 20 seconds. Your invite link is ready the moment you're in."}
           </p>
 
 
@@ -702,6 +776,39 @@ function Auth({ onAuthenticated }) {
           )}
 
 
+          {isForgot ? (
+            <form className="auth-form" onSubmit={handleForgot}>
+              <div className="field">
+                <label htmlFor="reset-login">Email or username</label>
+                <input
+                  id="reset-login"
+                  type="text"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com or username"
+                  autoComplete="username"
+                  disabled={loading}
+                  autoFocus
+                />
+              </div>
+
+              {error && (
+                <div className="notice notice-error" role="alert">
+                  {error}
+                </div>
+              )}
+
+              {message && (
+                <div className="notice notice-success" role="status">
+                  {message}
+                </div>
+              )}
+
+              <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
+                {loading ? "Sending…" : message ? "Send again" : "Send reset link"}
+              </button>
+            </form>
+          ) : (
           <form
             className="auth-form"
             onSubmit={handleSubmit}
@@ -770,6 +877,17 @@ function Auth({ onAuthenticated }) {
                 }
                 disabled={loading}
               />
+
+              {isLogin && (
+                <button
+                  type="button"
+                  className="auth-forgot"
+                  onClick={openForgot}
+                  disabled={loading}
+                >
+                  Forgot password?
+                </button>
+              )}
             </div>
 
             {error && (
@@ -797,19 +915,22 @@ function Auth({ onAuthenticated }) {
             </button>
 
           </form>
+          )}
 
 
           <p className="auth-switch">
-            {isLogin
-              ? "New here?"
-              : "Already have an account?"}{" "}
+            {isForgot
+              ? "Remembered it?"
+              : isLogin
+                ? "New here?"
+                : "Already have an account?"}{" "}
 
             <button
               type="button"
-              onClick={switchMode}
+              onClick={isForgot ? backToLogin : switchMode}
               disabled={loading}
             >
-              {isLogin ? "Create an account" : "Log in"}
+              {isForgot ? "Back to log in" : isLogin ? "Create an account" : "Log in"}
             </button>
           </p>
 

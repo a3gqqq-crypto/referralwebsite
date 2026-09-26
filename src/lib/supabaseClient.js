@@ -11,6 +11,10 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
+// Read before the client tidies the URL: a password reset email link lands
+// here with "type=recovery" in the hash.
+export const openedFromResetLink = /type=recovery/.test(window.location.hash);
+
 export const supabase = createClient(
   supabaseUrl,
   supabasePublishableKey,
