@@ -1,0 +1,7 @@
+# Moments are private messages between friends; the app pages need an account.
+User-agent: *
+Disallow: /m/
+Disallow: /admin
+Disallow: /chat
+
+Sitemap: https://www.suffrova.com/sitemap.xml
