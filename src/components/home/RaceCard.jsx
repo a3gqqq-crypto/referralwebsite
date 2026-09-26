@@ -5,7 +5,8 @@ import Icon from "../Icon";
 import PlayerChip from "../PlayerChip";
 import { useEvents } from "../../context/EventContext";
 import { useCopy, canNativeShare, nativeShare } from "../../hooks/useCopy";
-import { shareBragImage } from "../../lib/bragImage";
+import { bragShareText, renderBragImage } from "../../lib/bragImage";
+import { useStoryShare } from "../StoryShare";
 import { displayNameOf } from "../../data/cosmetics";
 
 const SHARE_TEXT = "Join me on Vexora — invite friends, climb the board, win real prizes.";
@@ -74,7 +75,7 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
   const [copied, copy] = useCopy();
   const { joinEvent } = useEvents();
   const [joining, setJoining] = useState(false);
-  const [bragging, setBragging] = useState(false);
+  const [startStoryShare, storySheet] = useStoryShare();
 
   const line = event && !loading ? raceLine(event, standings, userId) : null;
   const daysLeft = event ? Math.max(0, Math.floor((new Date(event.endDate) - now) / 86400000)) : null;
@@ -88,10 +89,9 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
 
   const whatsapp = `https://wa.me/?text=${encodeURIComponent(`${SHARE_TEXT} ${referralLink}`)}`;
 
-  const brag = async () => {
+  const brag = () => {
     const me = standings.find((player) => player.id === userId);
-    setBragging(true);
-    await shareBragImage({
+    const details = {
       username,
       avatar,
       rank: line.rank,
@@ -100,12 +100,15 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
       daysLeft,
       prize: rewardFor(event, 1),
       link: referralLink,
-    });
-    setBragging(false);
+    };
+
+    startStoryShare({ link: referralLink, text: bragShareText(details), render: () => renderBragImage(details) });
   };
 
   return (
     <section className="dash-race card">
+      {storySheet}
+
       <span className="eyebrow">
         {event
           ? `Your race · ${event.title} · ${daysLeft === 0 ? "last day" : `${daysLeft}d left`}`
@@ -173,9 +176,9 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
           )}
 
           {line?.state === "in" && referralLink && (
-            <button type="button" className="btn btn-sm btn-sun" onClick={brag} disabled={bragging}>
+            <button type="button" className="btn btn-sm btn-sun" onClick={brag}>
               <Icon name="trophy" size={15} />
-              {bragging ? "Making…" : "Brag"}
+              Brag
             </button>
           )}
         </div>

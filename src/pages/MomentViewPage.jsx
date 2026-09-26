@@ -6,7 +6,8 @@ import Icon from "../components/Icon";
 import MomentCard from "../components/MomentCard";
 import { templateById } from "../data/momentTemplates";
 import { useCopy, canNativeShare, nativeShare } from "../hooks/useCopy";
-import { shareOrSaveMomentImage } from "../lib/momentImage";
+import { renderMomentImage } from "../lib/momentImage";
+import { useStoryShare } from "../components/StoryShare";
 
 import "../styles/moments.css";
 
@@ -59,7 +60,7 @@ function MomentViewPage() {
   const [moment, setMoment] = useState(null);
   const [state, setState] = useState("loading");
   const [opened, setOpened] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [startStoryShare, storySheet] = useStoryShare();
   const [copied, copy] = useCopy();
 
   useEffect(() => {
@@ -105,14 +106,16 @@ function MomentViewPage() {
     });
   };
 
-  const saveImage = async () => {
-    setSaving(true);
-    await shareOrSaveMomentImage(moment);
-    setSaving(false);
-  };
+  const saveImage = () =>
+    startStoryShare({
+      link: publicLink,
+      text: `${moment.from_name} made you something ✦`,
+      render: () => renderMomentImage(moment),
+    });
 
   return (
     <div className="moment-view" style={{ "--m-glow": template.bg[1] }}>
+      {storySheet}
 
       <header className="moment-view-bar">
         <Link to={`/${ref}`} className="navbar-brand">
@@ -188,9 +191,9 @@ function MomentViewPage() {
             </div>
 
             <div className="moment-view-actions">
-              <button type="button" className="btn btn-primary" onClick={saveImage} disabled={saving}>
+              <button type="button" className="btn btn-primary" onClick={saveImage}>
                 <Icon name="download" />
-                {saving ? "Making image…" : "Save or share image"}
+                Save or share image
               </button>
 
               <button

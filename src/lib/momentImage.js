@@ -214,8 +214,3 @@ export async function shareOrSaveFile(file, text) {
 
   return "saved";
 }
-
-export async function shareOrSaveMomentImage(moment) {
-  const file = await renderMomentImage(moment);
-  return shareOrSaveFile(file, `${moment.from_name} made you something ✦`);
-}

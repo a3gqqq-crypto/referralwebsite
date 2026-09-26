@@ -6,7 +6,8 @@ import Icon from "../components/Icon";
 import MomentCard, { MomentArt } from "../components/MomentCard";
 import { MOMENT_TEMPLATES, templateById } from "../data/momentTemplates";
 import { useCopy, canNativeShare, nativeShare } from "../hooks/useCopy";
-import { shareOrSaveMomentImage } from "../lib/momentImage";
+import { renderMomentImage } from "../lib/momentImage";
+import { useStoryShare } from "../components/StoryShare";
 
 import "../styles/moments.css";
 
@@ -109,7 +110,7 @@ function MomentsPage({ user }) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [startStoryShare, storySheet] = useStoryShare();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [copied, copy] = useCopy();
@@ -167,11 +168,12 @@ function MomentsPage({ user }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const saveImage = async () => {
-    setSaving(true);
-    await shareOrSaveMomentImage(created);
-    setSaving(false);
-  };
+  const saveImage = () =>
+    startStoryShare({
+      link: created.link,
+      text: `${created.from_name} made you something ✦`,
+      render: () => renderMomentImage(created),
+    });
 
   const whatsapp = created
     ? `https://wa.me/?text=${encodeURIComponent(`${created.from_name} made you something ✦ ${created.link}`)}`
@@ -188,6 +190,7 @@ function MomentsPage({ user }) {
 
   return (
     <main className="page moments-page">
+      {storySheet}
 
       <header className="page-header">
         <span className="eyebrow">Moments</span>
@@ -242,9 +245,9 @@ function MomentsPage({ user }) {
                 </button>
               )}
 
-              <button type="button" className="btn" onClick={saveImage} disabled={saving}>
+              <button type="button" className="btn" onClick={saveImage}>
                 <Icon name="download" />
-                {saving ? "Making…" : "Story image"}
+                Story image
               </button>
             </div>
 

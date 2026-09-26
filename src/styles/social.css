@@ -101,3 +101,83 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
+
+/* =========================================
+   STORY SHARE SHEET
+========================================= */
+
+.story-share-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  list-style: none;
+}
+
+.story-share-steps li {
+  display: flex;
+  gap: 12px;
+}
+
+.story-share-steps li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  min-width: 0;
+}
+
+.story-share-steps span:not(.story-share-num) {
+  color: var(--text-soft);
+
+  font-size: 14px;
+}
+
+.story-share-num {
+  width: 26px;
+  height: 26px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: var(--accent-grad);
+  color: #fff;
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.story-share-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.story-share-link code {
+  flex: 1;
+  min-width: 0;
+
+  padding: 8px 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 10px;
+
+  background: var(--bg-raised);
+  color: var(--gold-soft);
+
+  font-size: 13px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.story-share .report-modal-actions .btn-primary {
+  flex: 1;
+}

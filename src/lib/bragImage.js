@@ -1,5 +1,5 @@
 import { avatarSrc } from "../data/avatars";
-import { fitText, roundedRect, shareOrSaveFile } from "./momentImage";
+import { fitText, roundedRect } from "./momentImage";
 
 // "I'm #2 in Round 2 — beat me" story image (1080x1920) with the player's invite link.
 const W = 1080;
@@ -169,7 +169,5 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   return new File([blob], `vexora-rank-${rank}.jpg`, { type: "image/jpeg" });
 }
 
-export async function shareBragImage(details) {
-  const file = await renderBragImage(details);
-  return shareOrSaveFile(file, `I'm #${details.rank} in ${details.eventTitle} on Vexora. Beat me: ${details.link}`);
-}
+export const bragShareText = (details) =>
+  `I'm #${details.rank} in ${details.eventTitle} on Vexora. Beat me: ${details.link}`;
