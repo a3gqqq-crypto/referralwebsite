@@ -30,7 +30,6 @@ const EventDetailsPage = lazyPage(() => import("./pages/EventDetails"));
 const EventLeaderboardPage = lazyPage(() => import("./pages/EventLeaderboardPage"));
 const InvitesPage = lazyPage(() => import("./pages/InvitesPage"));
 const DonationsPage = lazyPage(() => import("./pages/DonationsPage"));
-const DiscordPage = lazyPage(() => import("./pages/DiscordPage"));
 const MomentsPage = lazyPage(() => import("./pages/MomentsPage"));
 const LockerPage = lazyPage(() => import("./pages/LockerPage"));
 const ShopPage = lazyPage(() => import("./pages/ShopPage"));
@@ -49,7 +48,6 @@ import "./styles/navbar.css";
 import "./styles/footer.css";
 import "./styles/auth.css";
 import "./styles/donation.css";
-import "./styles/discord.css";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -101,7 +99,6 @@ function AuthenticatedApp({ session, onLogout }) {
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/chat/:username" element={<ChatPage />} />
               <Route path="/donations" element={<DonationsPage />} />
-              <Route path="/discord" element={<DiscordPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/rules" element={<RulesPage />} />
               <Route path="*" element={<NotFound />} />

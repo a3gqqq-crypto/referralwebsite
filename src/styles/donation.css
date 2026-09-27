@@ -81,3 +81,141 @@
     padding: 28px 22px;
   }
 }
+
+
+/* Crypto donations */
+.donation-card p strong {
+  color: var(--gold-soft);
+}
+
+.donation-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.donation-amounts button,
+.donation-custom {
+  min-width: 64px;
+  height: 46px;
+
+  padding: 0 16px;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+
+  background: var(--surface-2);
+  color: var(--text);
+
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.donation-amounts button.active,
+.donation-custom.active {
+  border-color: var(--gold);
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+}
+
+.donation-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  cursor: text;
+}
+
+.donation-custom input {
+  width: 64px;
+
+  padding: 0;
+
+  border: none;
+  background: none;
+  color: inherit;
+
+  font: inherit;
+
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.donation-custom input::-webkit-outer-spin-button,
+.donation-custom input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.donation-public {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 18px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.donation-public input {
+  width: 18px;
+  height: 18px;
+
+  accent-color: var(--gold);
+}
+
+.donation-card .notice {
+  margin-top: 14px;
+}
+
+.donation-go {
+  margin-top: 20px;
+  min-height: 50px;
+  padding: 0 28px;
+
+  font-size: 16px;
+}
+
+.donation-side {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.donation-wall {
+  padding: 20px 22px;
+}
+
+.donation-wall ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-top: 14px;
+
+  list-style: none;
+}
+
+.donation-wall a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 4px 12px 4px 4px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface-2);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-decoration: none;
+}

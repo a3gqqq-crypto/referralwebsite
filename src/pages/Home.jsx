@@ -216,8 +216,8 @@ function Home({ user }) {
           </div>
         ) : (
           <div className="card dash-idle">
-            Nothing running right now. New events get announced in the{" "}
-            <Link to="/discord">Discord</Link> first.
+            Nothing running right now. New events get announced on our{" "}
+            <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">Instagram</a> first.
           </div>
         )}
       </section>

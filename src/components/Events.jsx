@@ -78,12 +78,12 @@ function Events() {
 
           <p>
             Nothing's running right now. The next event gets
-            announced in the Discord first.
+            announced on our Instagram first.
           </p>
 
-          <Link to="/discord" className="btn btn-sm btn-dark">
+          <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer" className="btn btn-sm btn-dark">
             Get notified
-          </Link>
+          </a>
         </div>
       )}
 
@@ -99,14 +99,14 @@ function Events() {
           <h3>No events yet</h3>
 
           <p>
-            The first competition is on its way. Hang out in
-            the Discord or send someone a Moment meanwhile.
+            The first competition is on its way. Follow us on
+            Instagram or send someone a Moment meanwhile.
           </p>
 
           <div className="empty-state-actions">
-            <Link to="/discord" className="btn btn-primary">
-              Join Discord
-            </Link>
+            <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer" className="btn btn-primary">
+              Follow @suffrova
+            </a>
 
             <Link to="/moments" className="btn">
               Send a Moment

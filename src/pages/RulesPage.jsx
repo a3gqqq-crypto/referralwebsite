@@ -64,7 +64,7 @@ function RulesPage({ standalone = false }) {
         <h1>
           How Suffrova <span className="mark">works.</span>
         </h1>
-        <p>Short answers to what people ask most. Still stuck? Ask in the Discord.</p>
+        <p>Short answers to what people ask most. Still stuck? DM us on Instagram.</p>
       </header>
 
       <nav className="rules-jump" aria-label="Sections">
@@ -103,7 +103,8 @@ function RulesPage({ standalone = false }) {
       </section>
 
       <p className="rules-foot">
-        Questions or problems? <Link to="/discord">Ask on Discord</Link>.
+        Questions or problems?{" "}
+        <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">DM @suffrova on Instagram</a>.
       </p>
     </main>
   );

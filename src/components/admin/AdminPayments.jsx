@@ -101,7 +101,7 @@ function AdminPayments() {
             {orders.map((order) => (
               <li key={order.id} className={order.status === "paid" ? "is-paid" : ""}>
                 <span>
-                  <strong>{order.username}</strong> · {cosmeticById(order.cosmetic_id)?.name || order.cosmetic_id}
+                  <strong>{order.username}</strong> · {order.kind === "donation" ? "💛 Donation" : cosmeticById(order.cosmetic_id)?.name || order.cosmetic_id}
                 </span>
                 <span className="mono">
                   {Number(order.amount).toFixed(4)} {order.token} · {NET_NAME[order.network]}

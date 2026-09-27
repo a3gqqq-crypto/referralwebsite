@@ -117,7 +117,7 @@ function ShopPage() {
     if (!PURCHASES_ENABLED) {
       setNotice({
         type: "gold",
-        text: "Checkout isn't open yet — it's coming soon. Watch the Discord for the launch.",
+        text: "Checkout isn't open yet — it's coming soon. Follow @suffrova on Instagram for the launch.",
       });
     }
   };

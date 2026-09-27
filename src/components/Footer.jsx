@@ -35,7 +35,6 @@ function Footer() {
             <span className="eyebrow">Community</span>
             <Link to="/chat">Lounge</Link>
             <Link to="/people">Find people</Link>
-            <Link to="/discord">Discord</Link>
             <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">
               Instagram
             </a>

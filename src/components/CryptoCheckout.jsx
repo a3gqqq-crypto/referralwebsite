@@ -23,9 +23,12 @@ function formatLeft(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-// Pay for a shop item in USDT/USDC. The order has a unique amount; after
-// paying, the buyer pastes the transaction ID and the server checks the chain.
-function CryptoCheckout({ item, onClose, onPaid }) {
+// Pay for a shop item, or donate, in USDT/USDC. The order has a unique amount;
+// after paying, the buyer pastes the transaction ID and the server checks the chain.
+// Pass either `item` (a cosmetic) or `donation` ({ dollars, showPublicly }).
+function CryptoCheckout({ item, donation, onClose, onPaid }) {
+  const title = item ? item.name : `Donate $${donation.dollars}`;
+
   const [option, setOption] = useState(null);
   const [order, setOrder] = useState(null);
   const [qr, setQr] = useState("");
@@ -67,11 +70,18 @@ function CryptoCheckout({ item, onClose, onPaid }) {
     setBusy(true);
     setStatus(null);
 
-    const { data, error } = await supabase.rpc("create_crypto_order", {
-      p_cosmetic: item.id,
-      p_network: choice.network,
-      p_token: choice.token,
-    });
+    const { data, error } = item
+      ? await supabase.rpc("create_crypto_order", {
+          p_cosmetic: item.id,
+          p_network: choice.network,
+          p_token: choice.token,
+        })
+      : await supabase.rpc("create_crypto_donation", {
+          p_dollars: donation.dollars,
+          p_network: choice.network,
+          p_token: choice.token,
+          p_public: donation.showPublicly,
+        });
 
     setBusy(false);
 
@@ -135,7 +145,7 @@ function CryptoCheckout({ item, onClose, onPaid }) {
         <div className="checkout-head">
           <div>
             <span className="eyebrow">Checkout</span>
-            <h2>{item.name}</h2>
+            <h2>{title}</h2>
           </div>
           <button type="button" className="checkout-close" onClick={onClose} aria-label="Close">
             <Icon name="close" size={16} strokeWidth={2.6} />
@@ -147,8 +157,17 @@ function CryptoCheckout({ item, onClose, onPaid }) {
             <span className="checkout-done-icon" aria-hidden="true">
               <Icon name="check" size={28} strokeWidth={2.8} />
             </span>
-            <strong>Paid! {item.name} is yours.</strong>
-            <p>Close this and tap Equip to wear it. Thanks for supporting Suffrova 💛</p>
+            {item ? (
+              <>
+                <strong>Paid! {item.name} is yours.</strong>
+                <p>Close this and tap Equip to wear it. Thanks for supporting Suffrova 💛</p>
+              </>
+            ) : (
+              <>
+                <strong>Thank you so much 💛</strong>
+                <p>Your donation arrived. You've unlocked the Supporter badge. Show it off from your profile.</p>
+              </>
+            )}
             <button type="button" className="btn btn-primary btn-block" onClick={onClose}>
               Done
             </button>
