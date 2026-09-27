@@ -122,6 +122,8 @@ export function CallProvider({ user, children }) {
   const autoRejoinRef = useRef(false);
   const joinRef = useRef(null);
   const keyRef = useRef(null);
+  // Did the person mean to have their mic on? (False only after they tap mute.)
+  const micWantedRef = useRef(true);
 
   // Technical call events for diagnosing problems (never audio or content).
   const dbg = useCallback((event, detail = null) => {
@@ -372,6 +374,7 @@ export function CallProvider({ user, children }) {
       });
 
       retriesRef.current = 0;
+      micWantedRef.current = true;
       rememberCall(key);
       setNeedsAudioTap(!next.canPlaybackAudio);
       setPresenceCall(key === "lounge" ? "lounge" : "private");
@@ -441,9 +444,37 @@ export function CallProvider({ user, children }) {
 
   const toggleMic = useCallback(async () => {
     if (!local) return;
-    await local.setMicrophoneEnabled(!local.isMicrophoneEnabled).catch(() => {});
+    micWantedRef.current = !local.isMicrophoneEnabled;
+    await local.setMicrophoneEnabled(micWantedRef.current).catch(() => {});
     rerender();
   }, [local, rerender]);
+
+  // Android mutes a website's mic while you're in another app. When you come
+  // back, switch it on again (unless you muted it yourself).
+  useEffect(() => {
+    if (!room) return;
+
+    const restore = async () => {
+      if (document.visibilityState !== "visible" || !micWantedRef.current) return;
+
+      const publication = room.localParticipant.getTrackPublication("microphone");
+      const track = publication?.track;
+      const broken = !publication || publication.isMuted || track?.mediaStreamTrack?.readyState === "ended";
+      if (!broken) return;
+
+      try {
+        if (track?.mediaStreamTrack?.readyState === "ended") await track.restartTrack();
+        await room.localParticipant.setMicrophoneEnabled(true);
+        dbg("mic_restored");
+      } catch (restoreError) {
+        dbg("mic_restore_failed", { name: restoreError?.name });
+      }
+      rerender();
+    };
+
+    document.addEventListener("visibilitychange", restore);
+    return () => document.removeEventListener("visibilitychange", restore);
+  }, [room, dbg, rerender]);
 
   const toggleCamera = useCallback(async () => {
     if (!local) return;
