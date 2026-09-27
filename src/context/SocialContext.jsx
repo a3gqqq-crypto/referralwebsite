@@ -74,8 +74,35 @@ export function SocialProvider({ user, children }) {
 
     const timer = setInterval(load, 30000);
 
-    return () => clearInterval(timer);
+    // Coming back to the tab catches anything that changed while away.
+    const onReturn = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onReturn);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onReturn);
+    };
   }, [load]);
+
+  // Friend requests live: reload the moment one is sent, accepted or removed.
+  useEffect(() => {
+    if (!me) return;
+
+    const involvesMe = (row) => row && (row.user_a === me || row.user_b === me);
+
+    const channel = supabase
+      .channel(`friendships-${me}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "friendships" }, (payload) => {
+        if (involvesMe(payload.new) || involvesMe(payload.old)) load();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [me, load]);
 
   useEffect(() => {
     if (!me) return;
