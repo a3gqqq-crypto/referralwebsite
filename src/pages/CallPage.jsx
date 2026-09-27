@@ -44,6 +44,16 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
 
   const camera = participant.getTrackPublication(Track.Source.Camera);
   const cameraOn = Boolean(camera?.track) && !camera.isMuted;
+
+  // Is this person's sound actually reaching you?
+  const mic = participant.getTrackPublication(Track.Source.Microphone);
+  const audioIssue = isLocal
+    ? null
+    : !mic
+      ? "No mic"
+      : !mic.isMuted && !mic.isSubscribed
+        ? "🔈 Connecting audio…"
+        : null;
   const weak = [ConnectionQuality.Poor, ConnectionQuality.Lost].includes(participant.connectionQuality);
 
   return (
@@ -63,6 +73,8 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
         {name}
         {isLocal && <small> (you)</small>}
       </span>
+
+      {audioIssue && <span className="call-tile-audio">{audioIssue}</span>}
 
       {weak && (
         <span className="call-tile-weak" title="Weak connection">
@@ -215,6 +227,16 @@ function CallPage() {
           )}
 
           {call.message && <div className="notice notice-error call-message">{call.message}</div>}
+
+          <p className={`call-mic-status ${!local?.isMicrophoneEnabled ? "is-off" : local?.isSpeaking ? "is-live" : ""}`}>
+            {!local?.isMicrophoneEnabled
+              ? "🔇 You're muted. Tap the mic button to talk."
+              : local?.isSpeaking
+                ? "🎙️ They can hear you"
+                : call.everyone.length > 1
+                  ? "🎙️ Mic on. Say something: your tile glows green when they can hear you."
+                  : "🎙️ Mic on. Waiting for others to join…"}
+          </p>
 
           {screenTrack && (
             <div className="call-stage">

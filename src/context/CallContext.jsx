@@ -121,6 +121,14 @@ export function CallProvider({ user, children }) {
   const retriesRef = useRef(0);
   const autoRejoinRef = useRef(false);
   const joinRef = useRef(null);
+  const keyRef = useRef(null);
+
+  // Technical call events for diagnosing problems (never audio or content).
+  const dbg = useCallback((event, detail = null) => {
+    supabase
+      .rpc("log_call_event", { p_room: keyRef.current, p_event: event, p_detail: detail })
+      .then(() => {}, () => {});
+  }, []);
 
   const rerender = useCallback(() => setTick((n) => n + 1), []);
 
@@ -191,6 +199,7 @@ export function CallProvider({ user, children }) {
       }
 
       setRoomKey(key);
+      keyRef.current = key;
       setPhase("joining");
       setMessage("");
       setInfo(null);
@@ -233,18 +242,39 @@ export function CallProvider({ user, children }) {
           rerender();
         })
         .on(RoomEvent.ActiveSpeakersChanged, rerender)
-        .on(RoomEvent.TrackMuted, rerender)
         .on(RoomEvent.TrackUnmuted, rerender)
         .on(RoomEvent.TrackPublished, rerender)
         .on(RoomEvent.TrackUnpublished, rerender)
         .on(RoomEvent.LocalTrackPublished, rerender)
         .on(RoomEvent.LocalTrackUnpublished, rerender)
         .on(RoomEvent.ConnectionQualityChanged, rerender)
-        .on(RoomEvent.TrackSubscribed, (track) => {
+        .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
           if (track.kind === Track.Kind.Audio) {
             const element = track.attach();
             element.dataset.callAudio = "1";
+            element.autoplay = true;
+            element.setAttribute("playsinline", "");
             audioRef.current?.appendChild(element);
+
+            // If the browser refuses to play, ask for a tap instead of staying silent.
+            element.play?.().catch((playError) => {
+              dbg("audio_play_blocked", { name: playError?.name, from: participant?.identity });
+              setNeedsAudioTap(true);
+            });
+          }
+          dbg("subscribed", { kind: track.kind, from: participant?.identity });
+          rerender();
+        })
+        .on(RoomEvent.TrackSubscriptionFailed, (sid, participant, reason) => {
+          dbg("subscribe_failed", { sid, from: participant?.identity, reason: String(reason ?? "") });
+        })
+        .on(RoomEvent.MediaDevicesError, (deviceError) => {
+          dbg("media_error", { name: deviceError?.name, message: String(deviceError?.message || "").slice(0, 200) });
+          setMessage("Your mic or camera stopped working. Check browser permissions or close other apps using the mic.");
+        })
+        .on(RoomEvent.TrackMuted, (publication, participant) => {
+          if (participant === next.localParticipant && publication.source === Track.Source.Microphone) {
+            dbg("local_mic_muted");
           }
           rerender();
         })
@@ -252,10 +282,19 @@ export function CallProvider({ user, children }) {
           track.detach().forEach((element) => element.remove());
           rerender();
         })
-        .on(RoomEvent.Reconnecting, () => setReconnecting(true))
+        .on(RoomEvent.Reconnecting, () => {
+          dbg("reconnecting");
+          setReconnecting(true);
+        })
         .on(RoomEvent.SignalReconnecting, () => setReconnecting(true))
-        .on(RoomEvent.Reconnected, () => setReconnecting(false))
-        .on(RoomEvent.AudioPlaybackStatusChanged, () => setNeedsAudioTap(!next.canPlaybackAudio))
+        .on(RoomEvent.Reconnected, () => {
+          dbg("reconnected");
+          setReconnecting(false);
+        })
+        .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+          dbg("playback_status", { can: next.canPlaybackAudio });
+          setNeedsAudioTap(!next.canPlaybackAudio);
+        })
         .on(RoomEvent.DataReceived, (payload, participant) => {
           try {
             const packet = JSON.parse(new TextDecoder().decode(payload));
@@ -273,6 +312,8 @@ export function CallProvider({ user, children }) {
         .on(RoomEvent.Disconnected, (reason) => {
           // Page refresh/close: keep the call remembered so the reload rejoins it.
           if (unloadingRef.current || roomRef.current !== next) return;
+
+          dbg("disconnected", { reason: String(reason ?? "") });
 
           const final = [
             DisconnectReason.PARTICIPANT_REMOVED,
@@ -304,6 +345,7 @@ export function CallProvider({ user, children }) {
         await next.connect(data.url, data.token);
       } catch (connectError) {
         console.error(connectError);
+        dbg("connect_failed", { message: String(connectError?.message || "").slice(0, 200) });
         roomRef.current = null;
         setPhase("error");
         setMessage("Couldn't connect. Check your internet and try again.");
@@ -311,10 +353,23 @@ export function CallProvider({ user, children }) {
       }
 
       try {
-        await next.localParticipant.setMicrophoneEnabled(true);
-      } catch {
-        setMessage("Your microphone is blocked, so others can't hear you. Allow it in your browser settings.");
+        const micPublication = await next.localParticipant.setMicrophoneEnabled(true);
+        const micTrack = micPublication?.track?.mediaStreamTrack;
+        dbg("mic_on", { ready: micTrack?.readyState, muted: micTrack?.muted, enabled: micTrack?.enabled });
+      } catch (micError) {
+        dbg("mic_error", { name: micError?.name, message: String(micError?.message || "").slice(0, 200) });
+        setMessage(
+          micError?.name === "NotAllowedError"
+            ? "Your microphone is blocked, so others can't hear you. Allow it in your browser settings, then rejoin."
+            : "Couldn't start your microphone. Close other apps using it (games, calls) and rejoin."
+        );
       }
+
+      dbg("joined", {
+        ua: navigator.userAgent.slice(0, 200),
+        canPlayback: next.canPlaybackAudio,
+        others: next.remoteParticipants.size,
+      });
 
       retriesRef.current = 0;
       rememberCall(key);
@@ -325,7 +380,7 @@ export function CallProvider({ user, children }) {
       setRoom(next);
       setPhase("live");
     },
-    [roomKey, leave, rerender, addReaction, finish, keepAwake]
+    [roomKey, leave, rerender, addReaction, finish, keepAwake, dbg]
   );
 
   // Lets the disconnect handler retry with the latest join().
@@ -348,9 +403,13 @@ export function CallProvider({ user, children }) {
     if (!room || !needsAudioTap) return;
 
     const unlock = () => {
+      audioRef.current?.querySelectorAll("audio").forEach((element) => element.play?.().catch(() => {}));
       room
         .startAudio()
-        .then(() => setNeedsAudioTap(!room.canPlaybackAudio))
+        .then(() => {
+          setNeedsAudioTap(!room.canPlaybackAudio);
+          dbg("audio_unlocked");
+        })
         .catch(() => {});
     };
 
@@ -361,7 +420,7 @@ export function CallProvider({ user, children }) {
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("keydown", unlock);
     };
-  }, [room, needsAudioTap]);
+  }, [room, needsAudioTap, dbg]);
 
   // Leave cleanly when the tab closes or the person logs out.
   useEffect(() => {
