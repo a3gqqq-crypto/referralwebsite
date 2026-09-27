@@ -47,6 +47,7 @@ import { CallDock, IncomingCall } from "./components/CallDock";
 
 import { openedFromResetLink, supabase } from "./lib/supabaseClient";
 import { startPresence, stopPresence } from "./lib/presence";
+import { refreshPush } from "./lib/push";
 
 import "./styles/navbar.css";
 import "./styles/footer.css";
@@ -79,6 +80,7 @@ function usePresence(userId) {
     if (!userId) return;
 
     startPresence(userId);
+    refreshPush();
 
     const touch = () => supabase.rpc("touch_last_seen").then(() => {});
     touch();

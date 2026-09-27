@@ -6,6 +6,7 @@ import "./styles/theme.css";
 import "./styles/global.css";
 
 import App from "./App.jsx";
+import { registerServiceWorker } from "./lib/push";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -14,3 +15,5 @@ createRoot(document.getElementById("root")).render(
     <Analytics />
   </StrictMode>
 );
+
+registerServiceWorker();

@@ -13,21 +13,43 @@ export const REACTIONS = ["😂", "🔥", "👏", "❤️", "😮", "🎉"];
 
 let audioContext = null;
 
+function getAudio() {
+  audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+  return audioContext;
+}
+
+// Browsers keep sound muted until the person taps the page once, so wake the
+// audio engine on the first tap; after that the ringtone can play by itself.
+if (typeof window !== "undefined") {
+  const unlock = () => {
+    try {
+      getAudio().resume();
+    } catch {
+      // No audio support.
+    }
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("keydown", unlock);
+  };
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("keydown", unlock);
+}
+
 // Tiny synthesized sounds, so there are no audio files to load.
 function beep(notes) {
   try {
-    audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
-    const start = audioContext.currentTime;
+    const context = getAudio();
+    if (context.state === "suspended") context.resume();
+    const start = context.currentTime;
 
     notes.forEach(([frequency, at, length, volume = 0.08]) => {
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
+      const osc = context.createOscillator();
+      const gain = context.createGain();
       osc.type = "sine";
       osc.frequency.value = frequency;
       gain.gain.setValueAtTime(0, start + at);
       gain.gain.linearRampToValueAtTime(volume, start + at + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + at + length);
-      osc.connect(gain).connect(audioContext.destination);
+      osc.connect(gain).connect(context.destination);
       osc.start(start + at);
       osc.stop(start + at + length + 0.05);
     });
@@ -39,7 +61,14 @@ function beep(notes) {
 const SOUNDS = {
   join: () => beep([[660, 0, 0.12], [990, 0.1, 0.18]]),
   leave: () => beep([[880, 0, 0.12], [520, 0.1, 0.2]]),
-  ring: () => beep([[880, 0, 0.35, 0.12], [1100, 0, 0.35, 0.06], [880, 0.45, 0.35, 0.12], [1100, 0.45, 0.35, 0.06]]),
+  ring: () => {
+    beep([[880, 0, 0.35, 0.18], [1100, 0, 0.35, 0.09], [880, 0.45, 0.35, 0.18], [1100, 0.45, 0.35, 0.09]]);
+    try {
+      navigator.vibrate?.([400, 150, 400]);
+    } catch {
+      // No vibration on this device.
+    }
+  },
 };
 
 export function CallProvider({ user, children }) {

@@ -847,3 +847,8 @@
   background: var(--gold-wash);
   color: var(--gold-soft);
 }
+
+
+.push-card-logo {
+  background: linear-gradient(135deg, #3ddc84, #1fa463);
+}

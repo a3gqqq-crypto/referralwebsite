@@ -8,6 +8,7 @@ import SkeletonRows from "../components/SkeletonRows";
 import StreakCard from "../components/StreakCard";
 import QuestsCard from "../components/QuestsCard";
 import InstaCard from "../components/home/InstaCard";
+import PushCard from "../components/home/PushCard";
 import SpendBoard from "../components/SpendBoard";
 import ActivityFeed from "../components/home/ActivityFeed";
 import { MiniBoard, RaceCard } from "../components/home/RaceCard";
@@ -204,6 +205,8 @@ function Home({ user }) {
 
         <ActivityFeed />
       </div>
+
+      <PushCard />
 
       <InstaCard />
 
