@@ -335,3 +335,10 @@
 .shop-owner-done {
   color: var(--mint);
 }
+
+
+.shop-spenders {
+  max-width: 560px;
+
+  margin-top: 32px;
+}

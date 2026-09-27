@@ -14,7 +14,7 @@ const PAY_OPTIONS = [
   { network: "polygon", token: "USDC", netName: "Polygon", netShort: "Polygon" },
 ];
 
-const RETRY_MS = 10000;
+const RETRY_MS = 8000;
 
 function formatLeft(ms) {
   if (ms <= 0) return "expired";
@@ -23,8 +23,9 @@ function formatLeft(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-// Pay for a shop item, or donate, in USDT/USDC. The order has a unique amount;
-// after paying, the buyer pastes the transaction ID and the server checks the chain.
+// Pay for a shop item, or donate, in USDT/USDC. The order has a unique amount,
+// so after "I paid" the server can find the payment on chain by itself; pasting
+// the transaction ID is only a fallback.
 // Pass either `item` (a cosmetic) or `donation` ({ dollars, showPublicly }).
 function CryptoCheckout({ item, donation, onClose, onPaid }) {
   const title = item ? item.name : `Donate $${donation.dollars}`;
@@ -33,6 +34,8 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
   const [order, setOrder] = useState(null);
   const [qr, setQr] = useState("");
   const [txHash, setTxHash] = useState("");
+  const [watching, setWatching] = useState(false);
+  const [showPublicly, setShowPublicly] = useState(true);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState(null);
   const [paid, setPaid] = useState(false);
@@ -75,6 +78,7 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
           p_cosmetic: item.id,
           p_network: choice.network,
           p_token: choice.token,
+          p_public: showPublicly,
         })
       : await supabase.rpc("create_crypto_donation", {
           p_dollars: donation.dollars,
@@ -94,24 +98,29 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
     setOrder(data);
   };
 
-  const check = async (auto = false) => {
+  // withHash: use the pasted transaction ID instead of searching.
+  const check = async ({ withHash = false } = {}) => {
     clearTimeout(retryRef.current);
 
-    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash.trim())) {
-      setStatus({ type: "error", text: "Paste the transaction ID. It starts with 0x and is 66 characters long." });
+    const hash = txHash.trim();
+
+    if (withHash && !/^0x[0-9a-fA-F]{64}$/.test(hash)) {
+      setStatus({ type: "error", text: "That doesn't look like a transaction ID. It starts with 0x and is 66 characters long." });
       return;
     }
 
-    if (!auto) setBusy(true);
+    setWatching(true);
+    setBusy(true);
 
     const { data, error } = await supabase.functions.invoke("verify-crypto-payment", {
-      body: { order_id: order.id, tx_hash: txHash.trim() },
+      body: withHash ? { order_id: order.id, tx_hash: hash } : { order_id: order.id },
     });
 
     setBusy(false);
 
     if (error || !data) {
-      setStatus({ type: "error", text: "Couldn't check right now. Try again in a moment." });
+      setStatus({ type: "gold", text: "Couldn't reach the checker. Trying again…" });
+      retryRef.current = setTimeout(() => check({ withHash }), RETRY_MS);
       return;
     }
 
@@ -124,11 +133,18 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
 
     if (data.status === "waiting") {
       setStatus({ type: "gold", text: data.message });
-      // Keep checking on our own while they wait for confirmations.
-      retryRef.current = setTimeout(() => check(true), RETRY_MS);
+
+      // Keep looking until well past the deadline (slow wallets, confirmations).
+      if (Date.now() < new Date(order.expires_at).getTime() + 30 * 60_000) {
+        retryRef.current = setTimeout(() => check({ withHash }), RETRY_MS);
+      } else {
+        setWatching(false);
+        setStatus({ type: "error", text: "We couldn't find the payment. If you sent it, paste the transaction ID below." });
+      }
       return;
     }
 
+    setWatching(false);
     setStatus({ type: "error", text: data.message || "That didn't work." });
   };
 
@@ -192,6 +208,13 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
               ))}
             </div>
 
+            {item && (
+            <label className="checkout-public">
+              <input type="checkbox" checked={showPublicly} onChange={(event) => setShowPublicly(event.target.checked)} />
+              Show me in the feed and on the top spenders board
+            </label>
+            )}
+
             {status && <div className={`notice notice-${status.type}`}>{status.text}</div>}
           </>
         ) : (
@@ -226,30 +249,46 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
             </div>
 
             <p className={`checkout-timer mono ${left <= 0 ? "is-late" : ""}`}>
-              {left > 0 ? `Pay within ${formatLeft(left)}` : "Time's up. If you already paid, still paste the ID below."}
+              {left > 0 ? `Pay within ${formatLeft(left)}` : "Time's up. If you already paid, tap below anyway."}
             </p>
-
-            <div className="field">
-              <label htmlFor="tx-hash">After paying, paste the transaction ID</label>
-              <input
-                id="tx-hash"
-                value={txHash}
-                onChange={(event) => setTxHash(event.target.value)}
-                placeholder="0x…"
-                autoComplete="off"
-                spellCheck="false"
-                disabled={busy}
-              />
-              <span className="checkout-hint">
-                In Trust Wallet: tap the payment in your history → copy the Transaction ID (or open it on the explorer and copy the hash).
-              </span>
-            </div>
 
             {status && <div className={`notice notice-${status.type}`}>{status.text}</div>}
 
-            <button type="button" className="btn btn-primary btn-block" onClick={() => check(false)} disabled={busy || !txHash.trim()}>
-              {busy ? "Checking…" : "I paid, check it"}
+            <button type="button" className="btn btn-primary btn-block" onClick={() => check()} disabled={watching}>
+              {watching ? (
+                <>
+                  <span className="chat-send-spinner" aria-hidden="true" />
+                  Checking for your payment…
+                </>
+              ) : (
+                "I paid"
+              )}
             </button>
+
+            {watching && (
+              <p className="checkout-hint checkout-center">
+                Usually takes under a minute. You can keep this open. It unlocks by itself.
+              </p>
+            )}
+
+            <details className="checkout-manual">
+              <summary>Paid but it's not showing up?</summary>
+              <div className="field">
+                <label htmlFor="tx-hash">Paste the transaction ID</label>
+                <input
+                  id="tx-hash"
+                  value={txHash}
+                  onChange={(event) => setTxHash(event.target.value)}
+                  placeholder="0x…"
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+                <span className="checkout-hint">In Trust Wallet: tap the payment in your history → Transaction ID.</span>
+              </div>
+              <button type="button" className="btn btn-sm" onClick={() => check({ withHash: true })} disabled={busy || !txHash.trim()}>
+                Check this ID
+              </button>
+            </details>
           </>
         )}
       </div>

@@ -1,10 +1,11 @@
-// Checks a stablecoin payment on chain and unlocks the shop item.
+// Checks a stablecoin payment on chain and unlocks the shop item or donation.
 //
-// The buyer sends { order_id, tx_hash }. We read the transaction receipt from
-// public RPC nodes and accept it only if it has an ERC-20 Transfer of the
-// order's token, to the order's address, for the order's exact amount, mined
-// while the order was open and with enough confirmations. The database makes
-// each tx hash usable once.
+// The buyer sends { order_id } (and optionally tx_hash). Without a hash we
+// search recent Transfer logs to the order's address for the order's unique
+// amount. Either way we accept a transaction only if it has an ERC-20
+// Transfer of the order's token, to the order's address, for the exact
+// amount, mined while the order was open, with enough confirmations. The
+// database makes each tx hash usable once.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
@@ -12,7 +13,9 @@ const SITES = ["https://www.suffrova.com", "https://suffrova.com", "http://local
 
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 
-const NETWORKS: Record<string, { rpcs: string[]; confirmations: number; tokens: Record<string, { address: string; decimals: number }> }> = {
+type LogNode = { url: string; maxRange: number };
+
+const NETWORKS: Record<string, { rpcs: string[]; logNodes: LogNode[]; secondsPerBlock: number; confirmations: number; tokens: Record<string, { address: string; decimals: number }> }> = {
   bsc: {
     rpcs: [
       "https://bsc-dataseed.bnbchain.org",
@@ -21,6 +24,10 @@ const NETWORKS: Record<string, { rpcs: string[]; confirmations: number; tokens: 
       "https://bsc-dataseed1.ninicoin.io",
       "https://bsc.drpc.org",
     ],
+    // Most public nodes refuse log searches; these allow them.
+    logNodes: [{ url: "https://bsc-rpc.publicnode.com", maxRange: 5000 }],
+    // A bit under the real ~0.45s so the search reaches back far enough.
+    secondsPerBlock: 0.4,
     confirmations: 15,
     tokens: {
       USDT: { address: "0x55d398326f99059ff775485246999027b3197955", decimals: 18 },
@@ -29,6 +36,11 @@ const NETWORKS: Record<string, { rpcs: string[]; confirmations: number; tokens: 
   },
   polygon: {
     rpcs: ["https://polygon-bor-rpc.publicnode.com", "https://polygon.drpc.org", "https://1rpc.io/matic"],
+    logNodes: [
+      { url: "https://polygon-bor-rpc.publicnode.com", maxRange: 5000 },
+      { url: "https://polygon.drpc.org", maxRange: 100 },
+    ],
+    secondsPerBlock: 1.2,
     confirmations: 30,
     tokens: {
       USDT: { address: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f", decimals: 6 },
@@ -69,6 +81,34 @@ async function rpc(urls: string[], method: string, params: unknown[]) {
   throw lastError ?? new Error("No RPC node answered");
 }
 
+// Transfer logs to `payTo` between two blocks, split into ranges each node allows.
+async function findTransfers(nodes: LogNode[], token: string, payTo: string, from: number, to: number) {
+  let lastError: unknown = null;
+
+  for (const node of nodes) {
+    try {
+      const logs = [];
+
+      for (let start = from; start <= to; start += node.maxRange) {
+        const end = Math.min(to, start + node.maxRange - 1);
+        // Nodes can be a few blocks apart; asking past a node's head is an error, so the last chunk ends at "latest".
+        const toBlock = end >= to ? "latest" : "0x" + end.toString(16);
+        logs.push(
+          ...(await rpc([node.url], "eth_getLogs", [
+            { fromBlock: "0x" + start.toString(16), toBlock, address: token, topics: [TRANSFER_TOPIC, null, payTo] },
+          ]))
+        );
+      }
+
+      return logs;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("No node could search logs");
+}
+
 // "1.4940" with 6 decimals -> 1494000n, without floating point.
 function toUnits(amount: string, decimals: number): bigint {
   const [whole, fraction = ""] = amount.split(".");
@@ -107,7 +147,7 @@ Deno.serve(async (req) => {
 
   if (!/^[0-9a-f-]{36}$/i.test(orderId)) return reply({ status: "error", message: "Order not found." });
 
-  if (!/^0x[0-9a-f]{64}$/.test(txHash)) {
+  if (txHash && !/^0x[0-9a-f]{64}$/.test(txHash)) {
     return reply({ status: "error", message: "That doesn't look like a transaction ID. It starts with 0x and is 66 characters long." });
   }
 
@@ -119,6 +159,53 @@ Deno.serve(async (req) => {
   const network = NETWORKS[order.network];
   const token = network?.tokens[order.token];
   if (!network || !token) return reply({ status: "error", message: "Unknown network." });
+
+  const netName = order.network === "bsc" ? "BNB Smart Chain" : "Polygon";
+  const payTo = "0x" + order.pay_to.slice(2).toLowerCase().padStart(64, "0");
+  const expected = toUnits(String(order.amount), token.decimals);
+  // Accept up to 0.00009 over, in case a wallet rounds up; the next order's tail is 0.0001 away.
+  const tolerance = toUnits("0.00009", token.decimals);
+
+  // No hash given: look for a transfer of this exact amount since the order opened.
+  if (!txHash) {
+    let candidates: { transactionHash: string }[] = [];
+
+    try {
+      const latestBlock = await rpc(network.rpcs, "eth_getBlockByNumber", ["latest", false]);
+      const latestNumber = Number(BigInt(latestBlock.number));
+      const chainNow = Number(BigInt(latestBlock.timestamp));
+      const secondsBack = chainNow - new Date(order.created_at).getTime() / 1000 + 180;
+      const blocksBack = Math.min(15000, Math.ceil(Math.max(secondsBack, 60) / network.secondsPerBlock));
+
+      const logs = await findTransfers(network.logNodes, token.address, payTo, Math.max(0, latestNumber - blocksBack), latestNumber);
+
+      candidates = logs.filter((log: { data: string }) => {
+        const value = BigInt(log.data);
+        return value >= expected && value <= expected + tolerance;
+      });
+    } catch (error) {
+      console.error("Log search failed:", error);
+      return reply({ status: "waiting", message: "Couldn't reach the blockchain. Trying again…" });
+    }
+
+    if (!candidates.length) {
+      return reply({
+        status: "waiting",
+        message: `Looking for your payment of ${order.amount} ${order.token} on ${netName}…`,
+      });
+    }
+
+    const hashes = candidates.map((log) => log.transactionHash.toLowerCase());
+    const { data: taken } = await admin.from("crypto_orders").select("tx_hash").in("tx_hash", hashes);
+    const takenSet = new Set((taken ?? []).map((row: { tx_hash: string }) => row.tx_hash));
+    const free = hashes.find((hash) => !takenSet.has(hash));
+
+    if (!free) {
+      return reply({ status: "waiting", message: `Looking for your payment of ${order.amount} ${order.token} on ${netName}…` });
+    }
+
+    txHash = free;
+  }
 
   const { data: used } = await admin.from("crypto_orders").select("id").eq("tx_hash", txHash).maybeSingle();
   if (used) return reply({ status: "error", message: "That transaction was already used for another order." });
@@ -136,8 +223,6 @@ Deno.serve(async (req) => {
     return reply({ status: "waiting", message: "Couldn't reach the blockchain. Trying again…" });
   }
 
-  const netName = order.network === "bsc" ? "BNB Smart Chain" : "Polygon";
-
   if (!receipt) {
     return reply({
       status: "waiting",
@@ -146,11 +231,6 @@ Deno.serve(async (req) => {
   }
 
   if (receipt.status !== "0x1") return reply({ status: "error", message: "That transaction failed on the blockchain." });
-
-  const payTo = "0x" + order.pay_to.slice(2).toLowerCase().padStart(64, "0");
-  const expected = toUnits(String(order.amount), token.decimals);
-  // Accept up to 0.00009 over, in case a wallet rounds up; the next order's tail is 0.0001 away.
-  const tolerance = toUnits("0.00009", token.decimals);
 
   const transfer = (receipt.logs ?? []).find((log: { address: string; topics: string[]; data: string }) =>
     log.address?.toLowerCase() === token.address &&

@@ -120,6 +120,28 @@ export function ProfileProvider({ user, children }) {
     refresh();
   }, [refresh]);
 
+  // If someone paid and closed checkout before it finished, finish it on their next visit.
+  useEffect(() => {
+    if (!userId) return;
+
+    const since = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+
+    supabase
+      .from("crypto_orders")
+      .select("id")
+      .eq("status", "pending")
+      .gt("created_at", since)
+      .then(async ({ data }) => {
+        const results = await Promise.all(
+          (data || []).map((order) =>
+            supabase.functions.invoke("verify-crypto-payment", { body: { order_id: order.id } })
+          )
+        );
+
+        if (results.some((result) => result.data?.status === "paid")) refresh();
+      });
+  }, [userId, refresh]);
+
   useEffect(() => {
     const onReturn = () => {
       if (document.visibilityState === "visible" && checkedIn.current !== today()) {

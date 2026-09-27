@@ -3,10 +3,9 @@ import { Link } from "react-router-dom";
 
 import Icon from "./Icon";
 import CryptoCheckout from "./CryptoCheckout";
-import { FramedAvatar } from "./Cosmetics";
+import SpendBoard from "./SpendBoard";
 import { supabase } from "../lib/supabaseClient";
 import { useMyProfile } from "../context/ProfileContext";
-import { displayNameOf, equippedFrom } from "../data/cosmetics";
 
 const AMOUNTS = [1, 3, 5, 10, 25];
 const INSTAGRAM_URL = "https://www.instagram.com/suffrova";
@@ -19,11 +18,8 @@ function DonationCard() {
   const [custom, setCustom] = useState("");
   const [showPublicly, setShowPublicly] = useState(true);
   const [checkout, setCheckout] = useState(null);
-  const [supporters, setSupporters] = useState([]);
+  const [boardKey, setBoardKey] = useState(0);
   const [error, setError] = useState("");
-
-  const loadSupporters = () =>
-    supabase.rpc("supporters_wall").then(({ data }) => setSupporters(data || []));
 
   useEffect(() => {
     supabase
@@ -32,8 +28,6 @@ function DonationCard() {
       .eq("key", "crypto_address")
       .maybeSingle()
       .then(({ data }) => setReady(Boolean(data?.value)));
-
-    loadSupporters();
   }, []);
 
   const amount = custom ? Number(custom) : dollars;
@@ -56,7 +50,7 @@ function DonationCard() {
           onClose={() => setCheckout(null)}
           onPaid={() => {
             refresh();
-            loadSupporters();
+            setBoardKey((key) => key + 1);
           }}
         />
       )}
@@ -122,7 +116,7 @@ function DonationCard() {
 
             <label className="donation-public">
               <input type="checkbox" checked={showPublicly} onChange={(event) => setShowPublicly(event.target.checked)} />
-              Show my name on the supporters wall (never the amount)
+              Show me on the supporters leaderboard
             </label>
 
             {error && <div className="notice notice-error">{error}</div>}
@@ -136,26 +130,12 @@ function DonationCard() {
       </section>
 
       <div className="donation-side">
-        {supporters.length > 0 && (
-          <section className="donation-wall card">
-            <span className="eyebrow">Supporters 💛</span>
-            <ul>
-              {supporters.map((person) => (
-                <li key={person.id}>
-                  <Link to={`/u/${encodeURIComponent(person.username)}`}>
-                    <FramedAvatar
-                      name={displayNameOf(person)}
-                      frame={equippedFrom(person).frame}
-                      avatar={person.avatar}
-                      size={34}
-                    />
-                    <span>{displayNameOf(person)}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <SpendBoard
+          donationsOnly
+          title="Top supporters 💛"
+          empty="No supporters yet. Be the first. You'll be #1 on this board."
+          reloadKey={boardKey}
+        />
 
         <section className="donation-free">
           <span className="eyebrow">Free ways to help</span>

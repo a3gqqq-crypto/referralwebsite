@@ -272,3 +272,58 @@
     width: 100%;
   }
 }
+
+
+.checkout-public {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: var(--text-soft);
+
+  font-size: 13.5px;
+
+  cursor: pointer;
+}
+
+.checkout-public input {
+  width: 17px;
+  height: 17px;
+
+  accent-color: var(--gold);
+}
+
+.checkout-center {
+  text-align: center;
+}
+
+.checkout-modal .btn .chat-send-spinner {
+  width: 16px;
+  height: 16px;
+}
+
+.checkout-manual {
+  padding-top: 4px;
+
+  border-top: 1px solid var(--line);
+
+  font-size: 14px;
+}
+
+.checkout-manual summary {
+  padding: 8px 0;
+
+  color: var(--text-mute);
+
+  cursor: pointer;
+}
+
+.checkout-manual[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkout-manual .btn {
+  align-self: flex-start;
+}

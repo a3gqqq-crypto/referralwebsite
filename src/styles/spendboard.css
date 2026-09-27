@@ -1,0 +1,54 @@
+.spend-board {
+  padding: 20px 22px;
+}
+
+.spend-board ol {
+  margin-top: 12px;
+
+  list-style: none;
+}
+
+.spend-board li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 0;
+}
+
+.spend-board li + li {
+  border-top: 1px solid var(--line);
+}
+
+.spend-board-rank {
+  width: 26px;
+
+  flex-shrink: 0;
+
+  color: var(--text-mute);
+
+  font-size: 15px;
+  text-align: center;
+}
+
+.spend-board li .player-chip {
+  flex: 1;
+  min-width: 0;
+}
+
+.spend-board-total {
+  flex-shrink: 0;
+
+  color: var(--gold-soft);
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.spend-board-empty {
+  margin-top: 10px;
+
+  color: var(--text-mute);
+
+  font-size: 14px;
+}

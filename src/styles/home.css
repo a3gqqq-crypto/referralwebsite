@@ -507,6 +507,16 @@
   color: var(--mint);
 }
 
+.dash-feed-icon.kind-purchase {
+  background: var(--accent-grad);
+  color: #fff;
+}
+
+.dash-feed-icon.kind-donation {
+  background: rgba(255, 92, 141, 0.2);
+  color: #ff8fb1;
+}
+
 .dash-feed-text {
   flex: 1;
   min-width: 0;

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import Icon from "../Icon";
 
-const KIND_ICON = { join: "users", new: "sparkles", level: "star", passed: "trophy", moment: "heart" };
+const KIND_ICON = { join: "users", new: "sparkles", level: "star", passed: "trophy", moment: "heart", purchase: "bag", donation: "heart" };
 
 function timeAgo(date) {
   const seconds = Math.max(0, (Date.now() - new Date(date).getTime()) / 1000);
@@ -30,6 +30,10 @@ function describe(item) {
       return <><Name name={item.actor} /> passed <Name name={item.target} /></>;
     case "moment":
       return <><Name name={item.actor} /> sent a Moment</>;
+    case "purchase":
+      return <><Name name={item.actor} /> got <b>{item.detail || "something"}</b> from the <Link to="/shop">shop</Link></>;
+    case "donation":
+      return <><Name name={item.actor} /> <Link to="/donations">supported Suffrova</Link> 💛</>;
     default:
       return null;
   }

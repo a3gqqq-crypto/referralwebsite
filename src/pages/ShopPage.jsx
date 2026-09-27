@@ -7,6 +7,7 @@ import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { supabase } from "../lib/supabaseClient";
 import CryptoCheckout from "../components/CryptoCheckout";
+import SpendBoard from "../components/SpendBoard";
 import {
   COSMETICS,
   MAX_BADGES,
@@ -38,6 +39,7 @@ function ShopPage() {
   const [busy, setBusy] = useState(false);
   const tryOnRef = useRef(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [boardKey, setBoardKey] = useState(0);
   // Crypto checkout opens once the owner has set a wallet address.
   const [cryptoReady, setCryptoReady] = useState(false);
 
@@ -172,7 +174,10 @@ function ShopPage() {
         <CryptoCheckout
           item={selected}
           onClose={() => setCheckoutOpen(false)}
-          onPaid={refresh}
+          onPaid={() => {
+            refresh();
+            setBoardKey((key) => key + 1);
+          }}
         />
       )}
 
@@ -371,7 +376,16 @@ function ShopPage() {
             Open your locker
             <Icon name="arrowRight" size={15} />
           </Link>
+
         </aside>
+      </div>
+
+      <div className="shop-spenders">
+        <SpendBoard
+          title="Top spenders 👑"
+          empty="Nobody's bought anything yet. First purchase takes #1."
+          reloadKey={boardKey}
+        />
       </div>
     </main>
   );
