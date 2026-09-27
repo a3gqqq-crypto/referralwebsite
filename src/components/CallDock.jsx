@@ -20,6 +20,17 @@ export function CallDock() {
   const call = useCall();
   const { pathname } = useLocation();
 
+  if (call.phase === "joining" && !call.live && pathname !== `/call/${call.roomKey}`) {
+    return (
+      <div className="call-dock" role="status">
+        <span className="call-dock-text">
+          <strong>Joining call…</strong>
+          <small>Getting you back in</small>
+        </span>
+      </div>
+    );
+  }
+
   if (!call.live || pathname === `/call/${call.roomKey}`) return null;
 
   const speakers = call.everyone.filter((participant) => participant.isSpeaking).slice(0, 3);
@@ -41,7 +52,13 @@ export function CallDock() {
         </span>
         <span className="call-dock-text">
           <strong>{call.roomKey === "lounge" ? "Lounge voice" : "In a call"}</strong>
-          <small>{call.reconnecting ? "Reconnecting…" : `${call.everyone.length} in call · tap to open`}</small>
+          <small className={call.needsAudioTap ? "is-warn" : ""}>
+            {call.needsAudioTap
+              ? "🔇 Tap anywhere to hear"
+              : call.reconnecting
+                ? "Reconnecting…"
+                : `${call.everyone.length} in call · tap to open`}
+          </small>
         </span>
       </Link>
 

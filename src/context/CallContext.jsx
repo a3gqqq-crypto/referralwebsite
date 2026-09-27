@@ -71,6 +71,34 @@ const SOUNDS = {
   },
 };
 
+// Remember the active call for this tab so a refresh rejoins it.
+const ACTIVE_KEY = "suffrova_active_call";
+
+const rememberCall = (key) => {
+  try {
+    sessionStorage.setItem(ACTIVE_KEY, JSON.stringify({ key, at: Date.now() }));
+  } catch {
+    // Private mode: no auto-rejoin, the call still works.
+  }
+};
+
+const forgetCall = () => {
+  try {
+    sessionStorage.removeItem(ACTIVE_KEY);
+  } catch {
+    // Nothing to forget.
+  }
+};
+
+const rememberedCall = () => {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(ACTIVE_KEY) || "null");
+    return saved && Date.now() - saved.at < 30 * 60 * 1000 ? saved.key : null;
+  } catch {
+    return null;
+  }
+};
+
 export function CallProvider({ user, children }) {
   const me = user?.id;
 
@@ -89,6 +117,10 @@ export function CallProvider({ user, children }) {
   const roomRef = useRef(null);
   const audioRef = useRef(null);
   const wakeLockRef = useRef(null);
+  const unloadingRef = useRef(false);
+  const retriesRef = useRef(0);
+  const autoRejoinRef = useRef(false);
+  const joinRef = useRef(null);
 
   const rerender = useCallback(() => setTick((n) => n + 1), []);
 
@@ -143,6 +175,7 @@ export function CallProvider({ user, children }) {
       const current = roomRef.current;
       if (!current) return;
 
+      forgetCall();
       finish(text);
       SOUNDS.leave();
       await current.disconnect();
@@ -228,6 +261,7 @@ export function CallProvider({ user, children }) {
             const packet = JSON.parse(new TextDecoder().decode(payload));
             if (packet.t === "react" && REACTIONS.includes(packet.e)) addReaction(packet.e, participant?.name);
             if (packet.t === "end" && !data.isHost && roomRef.current === next) {
+              forgetCall();
               finish("The host ended the call.");
               SOUNDS.leave();
               next.disconnect();
@@ -237,14 +271,33 @@ export function CallProvider({ user, children }) {
           }
         })
         .on(RoomEvent.Disconnected, (reason) => {
-          if (roomRef.current !== next) return;
-          finish(
-            reason === DisconnectReason.PARTICIPANT_REMOVED
-              ? "You were removed from the call."
-              : reason === DisconnectReason.ROOM_DELETED
-                ? "The call ended."
-                : "You got disconnected. Tap Rejoin."
-          );
+          // Page refresh/close: keep the call remembered so the reload rejoins it.
+          if (unloadingRef.current || roomRef.current !== next) return;
+
+          const final = [
+            DisconnectReason.PARTICIPANT_REMOVED,
+            DisconnectReason.ROOM_DELETED,
+            DisconnectReason.DUPLICATE_IDENTITY,
+            DisconnectReason.CLIENT_INITIATED,
+          ].includes(reason);
+
+          if (reason === DisconnectReason.PARTICIPANT_REMOVED) {
+            forgetCall();
+            finish("You were removed from the call.");
+          } else if (reason === DisconnectReason.ROOM_DELETED) {
+            forgetCall();
+            finish("The call ended.");
+          } else if (reason === DisconnectReason.DUPLICATE_IDENTITY) {
+            forgetCall();
+            finish("You joined this call somewhere else.");
+          } else if (!final && retriesRef.current < 3) {
+            // Network dropped for good: try to get back in by ourselves.
+            retriesRef.current += 1;
+            finish("Connection lost. Rejoining…");
+            setTimeout(() => joinRef.current?.(key), 1500 * retriesRef.current);
+          } else {
+            finish("You got disconnected. Tap Rejoin.");
+          }
         });
 
       try {
@@ -263,6 +316,8 @@ export function CallProvider({ user, children }) {
         setMessage("Your microphone is blocked, so others can't hear you. Allow it in your browser settings.");
       }
 
+      retriesRef.current = 0;
+      rememberCall(key);
       setNeedsAudioTap(!next.canPlaybackAudio);
       setPresenceCall(key === "lounge" ? "lounge" : "private");
       keepAwake(true);
@@ -273,9 +328,47 @@ export function CallProvider({ user, children }) {
     [roomKey, leave, rerender, addReaction, finish, keepAwake]
   );
 
+  // Lets the disconnect handler retry with the latest join().
+  useEffect(() => {
+    joinRef.current = join;
+  }, [join]);
+
+  // After a refresh, get back into the call this tab was in.
+  useEffect(() => {
+    if (!me || autoRejoinRef.current) return;
+    autoRejoinRef.current = true;
+
+    const key = rememberedCall();
+    if (key) join(key);
+  }, [me, join]);
+
+  // Browsers block call audio until the person taps the page. Any tap
+  // anywhere (not just the call page's button) turns it on.
+  useEffect(() => {
+    if (!room || !needsAudioTap) return;
+
+    const unlock = () => {
+      room
+        .startAudio()
+        .then(() => setNeedsAudioTap(!room.canPlaybackAudio))
+        .catch(() => {});
+    };
+
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, [room, needsAudioTap]);
+
   // Leave cleanly when the tab closes or the person logs out.
   useEffect(() => {
-    const onUnload = () => roomRef.current?.disconnect();
+    const onUnload = () => {
+      unloadingRef.current = true;
+      roomRef.current?.disconnect();
+    };
     window.addEventListener("pagehide", onUnload);
     return () => {
       window.removeEventListener("pagehide", onUnload);

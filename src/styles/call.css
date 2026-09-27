@@ -769,3 +769,10 @@
     max-width: none;
   }
 }
+
+
+.call-dock-text small.is-warn {
+  color: #ffcf8a;
+
+  font-weight: 700;
+}
