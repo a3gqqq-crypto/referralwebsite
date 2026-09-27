@@ -181,6 +181,7 @@ function CryptoCheckout({ item, onClose, onPaid }) {
               <Icon name="shield" size={15} />
               <span>
                 Send <b>{option.token}</b> on <b>{option.netName}</b> only. Other coins or networks can be lost.
+                You also need a few cents of <b>{option.network === "bsc" ? "BNB" : "POL"}</b> in your wallet for the network fee.
               </span>
             </div>
 
