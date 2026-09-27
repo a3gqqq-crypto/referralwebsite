@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
 import Icon from "../components/Icon";
@@ -6,6 +6,7 @@ import ProfileCard from "../components/ProfileCard";
 import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { supabase } from "../lib/supabaseClient";
+import CryptoCheckout from "../components/CryptoCheckout";
 import {
   COSMETICS,
   MAX_BADGES,
@@ -36,6 +37,18 @@ function ShopPage() {
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState(false);
   const tryOnRef = useRef(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  // Crypto checkout opens once the owner has set a wallet address.
+  const [cryptoReady, setCryptoReady] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("app_settings")
+      .select("value")
+      .eq("key", "crypto_address")
+      .maybeSingle()
+      .then(({ data }) => setCryptoReady(Boolean(data?.value)));
+  }, []);
 
   const selected = cosmeticById(selectedId) || items[0];
   const equipped = equippedFrom(profile);
@@ -95,6 +108,12 @@ function ShopPage() {
   };
 
   const buySelected = () => {
+    if (cryptoReady) {
+      setNotice(null);
+      setCheckoutOpen(true);
+      return;
+    }
+
     if (!PURCHASES_ENABLED) {
       setNotice({
         type: "gold",
@@ -149,6 +168,14 @@ function ShopPage() {
 
   return (
     <main className="page shop-page">
+      {checkoutOpen && selected && (
+        <CryptoCheckout
+          item={selected}
+          onClose={() => setCheckoutOpen(false)}
+          onPaid={refresh}
+        />
+      )}
+
       <header className="page-header shop-header">
         <span className="eyebrow">The shop</span>
 

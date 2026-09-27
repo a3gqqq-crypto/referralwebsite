@@ -608,3 +608,52 @@
 
   color: var(--text-soft);
 }
+
+
+/* Payments tab */
+.admin-orders {
+  padding: 22px 24px;
+}
+
+.admin-orders-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+
+  margin-bottom: 12px;
+}
+
+.admin-orders-head h3 {
+  font-size: 24px;
+}
+
+.admin-orders ul {
+  list-style: none;
+}
+
+.admin-orders li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) auto auto;
+  align-items: center;
+  gap: 6px 14px;
+
+  padding: 10px 0;
+
+  border-top: 1px solid var(--line);
+
+  font-size: 14px;
+}
+
+.admin-orders li.is-paid a {
+  color: var(--mint);
+
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .admin-orders li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

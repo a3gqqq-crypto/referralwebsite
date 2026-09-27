@@ -8,6 +8,7 @@ import AdminEvents from "../components/admin/AdminEvents";
 import AdminWinners from "../components/admin/AdminWinners";
 import AdminLog from "../components/admin/AdminLog";
 import AdminAnnounce from "../components/admin/AdminAnnounce";
+import AdminPayments from "../components/admin/AdminPayments";
 import { useMyProfile } from "../context/ProfileContext";
 import NotFound from "./NotFound";
 
@@ -21,6 +22,7 @@ const TABS = [
   { id: "winners", label: "Winners" },
   { id: "log", label: "Log" },
   { id: "announce", label: "📣 Announce", ownerOnly: true },
+  { id: "payments", label: "💸 Payments", ownerOnly: true },
 ];
 
 function AdminPage() {
@@ -67,6 +69,7 @@ function AdminPage() {
         {tab === "winners" && <AdminWinners />}
         {tab === "log" && <AdminLog />}
         {tab === "announce" && <AdminAnnounce />}
+        {tab === "payments" && <AdminPayments />}
       </div>
     </main>
   );
