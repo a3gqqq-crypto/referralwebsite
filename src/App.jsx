@@ -37,6 +37,7 @@ const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
 const ChatPage = lazyPage(() => import("./pages/ChatPage"));
 const AdminPage = lazyPage(() => import("./pages/AdminPage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
+const CallPage = lazyPage(() => import("./pages/CallPage"));
 
 import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
@@ -97,7 +98,7 @@ function usePresence(userId) {
 function AuthenticatedApp({ session, onLogout }) {
   const user = session.user;
   const { pathname } = useLocation();
-  const fullHeight = pathname.startsWith("/chat");
+  const fullHeight = pathname.startsWith("/chat") || pathname.startsWith("/call");
 
   usePresence(user?.id);
 
@@ -125,6 +126,7 @@ function AuthenticatedApp({ session, onLogout }) {
               <Route path="/people" element={<PeoplePage />} />
               <Route path="/chat" element={<ChatPage />} />
               <Route path="/chat/:username" element={<ChatPage />} />
+              <Route path="/call/:roomId" element={<CallPage />} />
               <Route path="/donations" element={<DonationsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/rules" element={<RulesPage />} />

@@ -1181,3 +1181,17 @@ button.chat-quote {
 
   box-shadow: 0 0 8px rgba(61, 220, 132, 0.6);
 }
+
+
+/* Lounge voice button in the chat header */
+.chat-head-lounge {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-voice-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+
+  gap: 6px;
+}

@@ -5,14 +5,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
 import Icon from "../components/Icon";
 import FriendButton from "../components/FriendButton";
 import ReportModal from "../components/ReportModal";
 import MuteModal from "../components/MuteModal";
-import { useOnlineUsers } from "../lib/presence";
+import { useInCallCount, useOnlineUsers } from "../lib/presence";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
@@ -226,6 +226,23 @@ function ChatPage() {
   const [reporting, setReporting] = useState(null);
   const [muting, setMuting] = useState(null);
   const onlineCount = useOnlineUsers().size;
+  const inVoice = useInCallCount("lounge");
+  const navigate = useNavigate();
+  const [calling, setCalling] = useState(false);
+
+  // Start a private call with this friend; they get a "calling you" notification.
+  const callFriend = async () => {
+    setCalling(true);
+    const { data, error: callError } = await supabase.rpc("start_call", { p_invite: [target.id] });
+    setCalling(false);
+
+    if (callError) {
+      setError(callError.message);
+      return;
+    }
+
+    navigate(`/call/${data}`);
+  };
   const [pinned, setPinned] = useState(null);
   const [dismissedPin, setDismissedPin] = useState(() => {
     try {
@@ -859,6 +876,19 @@ function ChatPage() {
                 <PlayerChip player={target} size={38} />
 
                 <div className="chat-head-actions">
+                  {relation === "friends" && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-primary"
+                      onClick={callFriend}
+                      disabled={calling}
+                      aria-label={`Call ${displayNameOf(target)}`}
+                    >
+                      <Icon name="phone" size={15} className="chat-head-icon" />
+                      <span className="chat-head-label">{calling ? "Calling…" : "Call"}</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="btn btn-sm btn-ghost"
@@ -906,6 +936,11 @@ function ChatPage() {
                 </strong>
                 <small>Be kind · no links · reports go to the Suffrova team</small>
               </div>
+            
+              <Link to="/call/lounge" className="btn btn-sm chat-voice-btn">
+                <Icon name="phone" size={15} />
+                <span>Voice{inVoice > 0 ? ` · ${inVoice}` : ""}</span>
+              </Link>
             </div>
           )}
         </header>

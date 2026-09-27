@@ -7,7 +7,10 @@ import { supabase } from "./supabaseClient";
 // update live. Nothing is stored in the database for this.
 
 let online = new Set();
+let inCalls = {}; // room key -> number of people in it
 let channel = null;
+let currentCall = null;
+let since = null;
 const listeners = new Set();
 
 const emit = () => listeners.forEach((listener) => listener());
@@ -19,12 +22,30 @@ export function startPresence(userId) {
 
   channel
     .on("presence", { event: "sync" }, () => {
-      online = new Set(Object.keys(channel?.presenceState() || {}));
+      const state = channel?.presenceState() || {};
+      online = new Set(Object.keys(state));
+
+      const counts = {};
+      Object.values(state).forEach((metas) => {
+        const room = metas.find((meta) => meta.call)?.call;
+        if (room) counts[room] = (counts[room] || 0) + 1;
+      });
+      inCalls = counts;
+
       emit();
     })
     .subscribe((status) => {
-      if (status === "SUBSCRIBED") channel?.track({ since: new Date().toISOString() });
+      if (status === "SUBSCRIBED") {
+        since = since || new Date().toISOString();
+        channel?.track({ since, call: currentCall });
+      }
     });
+}
+
+// Tell everyone which call you're in (null when you leave).
+export function setPresenceCall(roomKey) {
+  currentCall = roomKey;
+  channel?.track({ since: since || new Date().toISOString(), call: roomKey });
 }
 
 export function stopPresence() {
@@ -33,6 +54,7 @@ export function stopPresence() {
   supabase.removeChannel(channel);
   channel = null;
   online = new Set();
+  inCalls = {};
   emit();
 }
 
@@ -43,6 +65,10 @@ const subscribe = (listener) => {
 
 export function useOnlineUsers() {
   return useSyncExternalStore(subscribe, () => online);
+}
+
+export function useInCallCount(roomKey) {
+  return useSyncExternalStore(subscribe, () => inCalls[roomKey] || 0);
 }
 
 export function useIsOnline(userId) {

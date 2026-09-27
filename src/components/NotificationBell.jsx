@@ -13,6 +13,7 @@ const KIND_ICON = {
   gift: "sparkles",
   payout: "gem",
   announcement: "megaphone",
+  call: "phone",
 };
 
 const COLUMNS = "id, kind, title, body, link, created_at, read_at";
