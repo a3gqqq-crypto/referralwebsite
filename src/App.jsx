@@ -42,6 +42,8 @@ const CallPage = lazyPage(() => import("./pages/CallPage"));
 import { EventProvider } from "./context/EventContext";
 import { ProfileProvider } from "./context/ProfileContext";
 import { SocialProvider } from "./context/SocialContext";
+import { CallProvider } from "./context/CallContext";
+import { CallDock, IncomingCall } from "./components/CallDock";
 
 import { openedFromResetLink, supabase } from "./lib/supabaseClient";
 import { startPresence, stopPresence } from "./lib/presence";
@@ -106,38 +108,43 @@ function AuthenticatedApp({ session, onLogout }) {
     <EventProvider user={user}>
       <ProfileProvider user={user}>
         <SocialProvider user={user}>
-          <div className={`app ${fullHeight ? "app-fill" : ""}`}>
-            <ScrollToTop />
+          <CallProvider user={user}>
+            <div className={`app ${fullHeight ? "app-fill" : ""}`}>
+              <ScrollToTop />
 
-            <Navbar user={user} onLogout={onLogout} />
+              <Navbar user={user} onLogout={onLogout} />
 
-            <Suspense fallback={<PageLoading />}>
-            <Routes>
-              <Route path="/" element={<Home user={user} />} />
-              <Route path="/events" element={<EventsPage />} />
-              <Route path="/leaderboard" element={<LeaderboardRedirect />} />
-              <Route path="/events/:eventId" element={<EventDetailsPage user={user} />} />
-              <Route path="/events/:eventId/leaderboard" element={<EventLeaderboardPage user={user} />} />
-              <Route path="/invites" element={<InvitesPage user={user} />} />
-              <Route path="/moments" element={<MomentsPage user={user} />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/profile" element={<LockerPage />} />
-              <Route path="/u/:username" element={<ProfilePage viewer={user} />} />
-              <Route path="/people" element={<PeoplePage />} />
-              <Route path="/chat" element={<ChatPage />} />
-              <Route path="/chat/:username" element={<ChatPage />} />
-              <Route path="/call/:roomId" element={<CallPage />} />
-              <Route path="/donations" element={<DonationsPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/rules" element={<RulesPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            </Suspense>
+              <Suspense fallback={<PageLoading />}>
+              <Routes>
+                <Route path="/" element={<Home user={user} />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route path="/leaderboard" element={<LeaderboardRedirect />} />
+                <Route path="/events/:eventId" element={<EventDetailsPage user={user} />} />
+                <Route path="/events/:eventId/leaderboard" element={<EventLeaderboardPage user={user} />} />
+                <Route path="/invites" element={<InvitesPage user={user} />} />
+                <Route path="/moments" element={<MomentsPage user={user} />} />
+                <Route path="/shop" element={<ShopPage />} />
+                <Route path="/profile" element={<LockerPage />} />
+                <Route path="/u/:username" element={<ProfilePage viewer={user} />} />
+                <Route path="/people" element={<PeoplePage />} />
+                <Route path="/chat" element={<ChatPage />} />
+                <Route path="/chat/:username" element={<ChatPage />} />
+                <Route path="/call/:roomId" element={<CallPage />} />
+                <Route path="/donations" element={<DonationsPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/rules" element={<RulesPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              </Suspense>
 
-            {!fullHeight && <Footer />}
+              {!fullHeight && <Footer />}
 
-            <MobileTabBar />
-          </div>
+              <CallDock />
+              <IncomingCall />
+
+              <MobileTabBar />
+            </div>
+          </CallProvider>
         </SocialProvider>
       </ProfileProvider>
     </EventProvider>

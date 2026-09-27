@@ -13,6 +13,7 @@ import FriendButton from "../components/FriendButton";
 import ReportModal from "../components/ReportModal";
 import MuteModal from "../components/MuteModal";
 import { useInCallCount, useOnlineUsers } from "../lib/presence";
+import { useCall } from "../context/CallContext";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
@@ -228,6 +229,7 @@ function ChatPage() {
   const onlineCount = useOnlineUsers().size;
   const inVoice = useInCallCount("lounge");
   const navigate = useNavigate();
+  const call = useCall();
   const [calling, setCalling] = useState(false);
 
   // Start a private call with this friend; they get a "calling you" notification.
@@ -241,7 +243,9 @@ function ChatPage() {
       return;
     }
 
+    // Tapping Call is the join: go straight into the call while they ring.
     navigate(`/call/${data}`);
+    call.join(data);
   };
   const [pinned, setPinned] = useState(null);
   const [dismissedPin, setDismissedPin] = useState(() => {
