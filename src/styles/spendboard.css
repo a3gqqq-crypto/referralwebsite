@@ -2,6 +2,13 @@
   padding: 20px 22px;
 }
 
+.spend-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .spend-board ol {
   margin-top: 12px;
 
@@ -50,5 +57,21 @@
 
   color: var(--text-mute);
 
+  font-size: 14px;
+}
+
+.spend-board.is-compact {
+  padding: 16px 18px;
+}
+
+.spend-board.is-compact ol {
+  margin-top: 8px;
+}
+
+.spend-board.is-compact li {
+  padding: 6px 0;
+}
+
+.spend-board.is-compact .spend-board-total {
   font-size: 14px;
 }

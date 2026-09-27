@@ -8,6 +8,7 @@ import SkeletonRows from "../components/SkeletonRows";
 import StreakCard from "../components/StreakCard";
 import QuestsCard from "../components/QuestsCard";
 import InstaCard from "../components/home/InstaCard";
+import SpendBoard from "../components/SpendBoard";
 import ActivityFeed from "../components/home/ActivityFeed";
 import { MiniBoard, RaceCard } from "../components/home/RaceCard";
 import { FramedAvatar } from "../components/Cosmetics";
@@ -180,14 +181,24 @@ function Home({ user }) {
       </div>
 
       <div className="dash-mid">
-        <StreakCard
-          compact
-          userId={user?.id}
-          streak={profile?.checkin_streak}
-          lastCheckin={profile?.last_checkin}
-          streakEvent={streakEvent}
-          now={now}
-        />
+        <div className="dash-stack">
+          <StreakCard
+            compact
+            userId={user?.id}
+            streak={profile?.checkin_streak}
+            lastCheckin={profile?.last_checkin}
+            streakEvent={streakEvent}
+            now={now}
+          />
+
+          <SpendBoard
+            compact
+            limit={3}
+            title="Top spenders 👑"
+            empty="Nobody's bought anything yet. First purchase takes #1."
+            moreLink={{ to: "/shop", label: "Shop" }}
+          />
+        </div>
 
         <QuestsCard compact now={now} />
 

@@ -361,6 +361,14 @@
   }
 }
 
+.dash-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  min-width: 0;
+}
+
 .dash-mid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
