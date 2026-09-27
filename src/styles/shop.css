@@ -342,3 +342,34 @@
 
   margin-top: 32px;
 }
+
+
+/* Shop-only legendaries */
+.shop-exclusive {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  background: var(--accent-grad);
+  color: #fff;
+
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  box-shadow: 0 4px 14px -4px rgba(255, 92, 141, 0.7);
+}
+
+.shop-exclusive.is-inline {
+  position: static;
+
+  margin-left: 10px;
+
+  vertical-align: middle;
+}

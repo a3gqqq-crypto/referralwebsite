@@ -242,6 +242,8 @@ function ShopPage() {
                   onClick={() => choose(item.id)}
                   aria-pressed={selected?.id === item.id}
                 >
+                  {item.exclusive && <span className="shop-exclusive">Exclusive</span>}
+
                   <span className="shop-item-preview">
                     <CosmeticPreview item={item} username={username || "you"} avatar={profile?.avatar} />
                   </span>
@@ -292,7 +294,10 @@ function ShopPage() {
             <div className="shop-detail card">
               <div className="shop-detail-head">
                 <div>
-                  <h2>{selected.name}</h2>
+                  <h2>
+                    {selected.name}
+                    {selected.exclusive && <span className="shop-exclusive is-inline">Exclusive</span>}
+                  </h2>
                   <span className={`rarity-text-${selected.rarity}`}>
                     {RARITY_LABEL[selected.rarity]} {SLOTS[selected.type].single.toLowerCase()}
                   </span>
