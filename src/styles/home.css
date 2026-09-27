@@ -815,3 +815,35 @@
     height: 56px;
   }
 }
+
+
+/* All time / This event switch on the home leaderboard card */
+.dash-board-tabs {
+  display: inline-flex;
+  gap: 2px;
+
+  padding: 3px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface-2);
+}
+
+.dash-board-tabs button {
+  padding: 5px 12px;
+
+  border: none;
+  border-radius: 999px;
+
+  background: none;
+  color: var(--text-mute);
+
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.dash-board-tabs button.active {
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+}

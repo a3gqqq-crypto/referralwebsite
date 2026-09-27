@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Icon from "../Icon";
-import PlayerChip from "../PlayerChip";
+import PlayerChip, { PLAYER_COLUMNS } from "../PlayerChip";
+import { supabase } from "../../lib/supabaseClient";
 import { useEvents } from "../../context/EventContext";
 import { useCopy, canNativeShare, nativeShare } from "../../hooks/useCopy";
 import { bragShareText, renderBragImage } from "../../lib/bragImage";
@@ -189,23 +190,58 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
 
 const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
+// Home leaderboard card: all-time invites, or the live event's board.
 export function MiniBoard({ event, standings, loading, userId }) {
-  const top = standings.slice(0, 5).map((player, index) => ({ ...player, rank: index + 1 }));
-  const meIndex = standings.findIndex((player) => player.id === userId);
-  const rows = meIndex >= 5 ? [...top, { ...standings[meIndex], rank: meIndex + 1, gap: true }] : top;
+  const [tab, setTab] = useState("all");
+  const [allTime, setAllTime] = useState(null);
+
+  const showAll = tab === "all" || !event;
+
+  useEffect(() => {
+    if (!showAll || allTime) return;
+
+    supabase
+      .from("profiles")
+      .select(PLAYER_COLUMNS)
+      .not("username", "is", null)
+      .gt("referral_count", 0)
+      .order("referral_count", { ascending: false })
+      .order("created_at", { ascending: true })
+      .limit(50)
+      .then(({ data }) => setAllTime(data || []));
+  }, [showAll, allTime]);
+
+  const list = showAll ? allTime || [] : standings;
+  const busy = showAll ? allTime === null : loading;
+
+  const top = list.slice(0, 5).map((player, index) => ({ ...player, rank: index + 1 }));
+  const meIndex = list.findIndex((player) => player.id === userId);
+  const rows = meIndex >= 5 ? [...top, { ...list[meIndex], rank: meIndex + 1, gap: true }] : top;
 
   return (
     <section className="dash-board card">
       <div className="dash-card-head">
-        <span className="eyebrow">{event ? "Live top 5" : "Top inviters"}</span>
-        {event && (
+        {event ? (
+          <div className="dash-board-tabs" role="tablist" aria-label="Leaderboard">
+            <button type="button" role="tab" aria-selected={showAll} className={showAll ? "active" : ""} onClick={() => setTab("all")}>
+              All time
+            </button>
+            <button type="button" role="tab" aria-selected={!showAll} className={!showAll ? "active" : ""} onClick={() => setTab("event")}>
+              This event
+            </button>
+          </div>
+        ) : (
+          <span className="eyebrow">All-time top inviters</span>
+        )}
+
+        {!showAll && (
           <Link to={`/events/${event.id}/leaderboard`} className="dash-more">
             Full board <Icon name="arrowRight" size={14} />
           </Link>
         )}
       </div>
 
-      {loading ? (
+      {busy ? (
         <div className="dash-board-empty">Loading…</div>
       ) : rows.length === 0 ? (
         <div className="dash-board-empty">Nobody's on the board yet. Be first.</div>
