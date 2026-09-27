@@ -6,6 +6,7 @@ import SkeletonRows from "../SkeletonRows";
 import { EVENT_COLUMNS, eventKind, toEvent } from "../../data/events";
 import { getEventStatus } from "../../hooks/useCountdown";
 import { adminCall, formatDateTime } from "./adminApi";
+import { useMyProfile } from "../../context/ProfileContext";
 
 const PODIUM_ITEMS = ["badge-podium", "frame-podium"];
 
@@ -51,6 +52,9 @@ function WinnerRow({ event, place, player, payout, quality, ended, onChanged }) 
     if (!result.ok) setNotice({ type: "error", text: result.error });
     else onChanged();
   };
+
+  // Giving items is owner-only (the server checks too).
+  const { isOwner } = useMyProfile();
 
   const givePodium = async () => {
     setBusy(true);
@@ -106,9 +110,11 @@ function WinnerRow({ event, place, player, payout, quality, ended, onChanged }) 
           {paid ? "Mark unpaid" : "Mark paid"}
         </button>
 
-        <button type="button" className="btn btn-sm" disabled={busy || !ended} onClick={givePodium}>
-          Give podium items
-        </button>
+        {isOwner && (
+          <button type="button" className="btn btn-sm" disabled={busy || !ended} onClick={givePodium}>
+            Give podium items
+          </button>
+        )}
       </div>
 
       {notice && <div className={`notice notice-${notice.type} admin-row-notice`}>{notice.text}</div>}

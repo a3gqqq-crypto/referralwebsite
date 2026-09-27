@@ -191,39 +191,42 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
           </button>
         )}
 
-        <div className="admin-grant field">
-          <select
-            value={item}
-            onChange={(event) => setItem(event.target.value)}
-            aria-label={`Item to give ${person.username}`}
-          >
-            <option value="">Give an item…</option>
-            {Object.keys(SLOTS).map((slot) => (
-              <optgroup key={slot} label={SLOTS[slot].label}>
-                {COSMETICS.filter((cosmetic) => cosmetic.type === slot).map((cosmetic) => (
-                  <option key={cosmetic.id} value={cosmetic.id}>
-                    {cosmetic.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+        {/* Giving items is owner-only (the server checks too). */}
+        {canManageRoles && (
+          <div className="admin-grant field">
+            <select
+              value={item}
+              onChange={(event) => setItem(event.target.value)}
+              aria-label={`Item to give ${person.username}`}
+            >
+              <option value="">Give an item…</option>
+              {Object.keys(SLOTS).map((slot) => (
+                <optgroup key={slot} label={SLOTS[slot].label}>
+                  {COSMETICS.filter((cosmetic) => cosmetic.type === slot).map((cosmetic) => (
+                    <option key={cosmetic.id} value={cosmetic.id}>
+                      {cosmetic.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
 
-          <button
-            type="button"
-            className="btn btn-sm btn-primary"
-            disabled={busy || !item}
-            onClick={() =>
-              run(
-                "admin_grant_cosmetic",
-                { p_user: person.id, p_cosmetic: item },
-                `Gave ${COSMETICS.find((cosmetic) => cosmetic.id === item)?.name}.`
-              )
-            }
-          >
-            Give
-          </button>
-        </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-primary"
+              disabled={busy || !item}
+              onClick={() =>
+                run(
+                  "admin_grant_cosmetic",
+                  { p_user: person.id, p_cosmetic: item },
+                  `Gave ${COSMETICS.find((cosmetic) => cosmetic.id === item)?.name}.`
+                )
+              }
+            >
+              Give
+            </button>
+          </div>
+        )}
       </div>
 
       {notice && <div className={`notice notice-${notice.type} admin-row-notice`}>{notice.text}</div>}
