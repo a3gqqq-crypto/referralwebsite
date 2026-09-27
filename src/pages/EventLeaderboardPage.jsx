@@ -212,6 +212,7 @@ function EventLeaderboardPage({ user }) {
                   className="board-podium-who"
                 >
                   <FramedAvatar
+                    userId={player.id}
                     name={displayNameOf(player)}
                     frame={equippedFrom(player).frame}
                     avatar={player.avatar}

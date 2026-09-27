@@ -1152,3 +1152,32 @@ button.chat-quote {
 .chat-pinned-close:hover {
   background: var(--surface);
 }
+
+
+/* "5 online" next to the Lounge title. */
+.chat-online-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-left: 10px;
+
+  color: #3ddc84;
+
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.chat-online-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #3ddc84;
+
+  box-shadow: 0 0 8px rgba(61, 220, 132, 0.6);
+}

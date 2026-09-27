@@ -12,6 +12,7 @@ import Icon from "../components/Icon";
 import FriendButton from "../components/FriendButton";
 import ReportModal from "../components/ReportModal";
 import MuteModal from "../components/MuteModal";
+import { useOnlineUsers } from "../lib/presence";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
@@ -105,7 +106,7 @@ function MessageRow({
       <div className="chat-msg-avatar">
         {!compact && (
           <Link to={href} tabIndex={-1} aria-hidden="true">
-            <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={38} />
+            <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={38} userId={message.sender_id} />
           </Link>
         )}
       </div>
@@ -224,6 +225,7 @@ function ChatPage() {
   const [listOpen, setListOpen] = useState(false);
   const [reporting, setReporting] = useState(null);
   const [muting, setMuting] = useState(null);
+  const onlineCount = useOnlineUsers().size;
   const [pinned, setPinned] = useState(null);
   const [dismissedPin, setDismissedPin] = useState(() => {
     try {
@@ -812,6 +814,7 @@ function ChatPage() {
                     onClick={() => setListOpen(false)}
                   >
                     <FramedAvatar
+                      userId={profile.id}
                       name={displayNameOf(profile)}
                       frame={equipped.frame}
                       avatar={equipped.avatar}
@@ -892,7 +895,15 @@ function ChatPage() {
             <div className="chat-head-lounge">
               <span className="chat-room-icon" aria-hidden="true">#</span>
               <div>
-                <strong className="chat-head-title">Lounge</strong>
+                <strong className="chat-head-title">
+                  Lounge
+                  {onlineCount > 0 && (
+                    <span className="chat-online-count">
+                      <span className="chat-online-dot" aria-hidden="true" />
+                      {onlineCount} online
+                    </span>
+                  )}
+                </strong>
                 <small>Be kind · no links · reports go to the Suffrova team</small>
               </div>
             </div>

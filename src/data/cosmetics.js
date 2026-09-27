@@ -287,7 +287,7 @@ export function equippedFrom(profile) {
 }
 
 export const PROFILE_COLUMNS =
-  "id, username, display_name, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak, avatar";
+  "id, username, display_name, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak, avatar, last_seen_at";
 
 // The name people see: their display name if they set one, else the username.
 // Links, invites and logins always use the username.

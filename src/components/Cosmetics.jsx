@@ -3,13 +3,16 @@ import { useState } from "react";
 import Icon from "./Icon";
 import { cosmeticById } from "../data/cosmetics";
 import { avatarSrc } from "../data/avatars";
+import { useIsOnline } from "../lib/presence";
 
 import "../styles/cosmetics.css";
 
-export function FramedAvatar({ name, frame, avatar, size = 40, className = "" }) {
+// Pass userId to show a green dot while that person is online.
+export function FramedAvatar({ name, frame, avatar, size = 40, className = "", userId = null }) {
   const initial = (name || "?").charAt(0).toUpperCase();
   const src = avatarSrc(avatar);
   const [failed, setFailed] = useState(null);
+  const online = useIsOnline(userId);
 
   return (
     <span
@@ -37,6 +40,8 @@ export function FramedAvatar({ name, frame, avatar, size = 40, className = "" })
           <Icon name="crown" size={Math.max(12, size * 0.34)} strokeWidth={2} />
         </span>
       )}
+
+      {online && <span className="fav-online" title="Online now" aria-label="Online now" />}
     </span>
   );
 }

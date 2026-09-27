@@ -14,7 +14,7 @@ function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
 
   const inner = (
     <>
-      <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={size} />
+      <FramedAvatar name={name} frame={equipped.frame} avatar={equipped.avatar} size={size} userId={player?.id} />
 
       <span className="player-chip-name">
         <StyledName name={name} effect={equipped.name} />

@@ -43,6 +43,7 @@ import { ProfileProvider } from "./context/ProfileContext";
 import { SocialProvider } from "./context/SocialContext";
 
 import { openedFromResetLink, supabase } from "./lib/supabaseClient";
+import { startPresence, stopPresence } from "./lib/presence";
 
 import "./styles/navbar.css";
 import "./styles/footer.css";
@@ -69,10 +70,36 @@ function LeaderboardRedirect() {
   return <Navigate to={featured ? `/events/${featured.id}/leaderboard` : "/events"} replace />;
 }
 
+// Joins the "who's online" channel and keeps last_seen_at fresh while the tab is open.
+function usePresence(userId) {
+  useEffect(() => {
+    if (!userId) return;
+
+    startPresence(userId);
+
+    const touch = () => supabase.rpc("touch_last_seen").then(() => {});
+    touch();
+
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") touch();
+    }, 2 * 60 * 1000);
+
+    document.addEventListener("visibilitychange", touch);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", touch);
+      stopPresence();
+    };
+  }, [userId]);
+}
+
 function AuthenticatedApp({ session, onLogout }) {
   const user = session.user;
   const { pathname } = useLocation();
   const fullHeight = pathname.startsWith("/chat");
+
+  usePresence(user?.id);
 
   return (
     <EventProvider user={user}>

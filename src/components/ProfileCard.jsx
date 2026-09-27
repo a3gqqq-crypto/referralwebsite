@@ -6,6 +6,7 @@ import {
 } from "./Cosmetics";
 import { LevelBadge, LevelProgress } from "./Level";
 import StaffTag from "./StaffTag";
+import { lastSeenText, useIsOnline } from "../lib/presence";
 
 import "../styles/profile.css";
 
@@ -18,11 +19,14 @@ function ProfileCard({
   xp,
   streak,
   showProgress = false,
+  showStatus = false,
+  lastSeen = null,
   stats = [],
   size = "md",
   children,
 }) {
   const avatarSize = size === "lg" ? 116 : size === "sm" ? 64 : 84;
+  const online = useIsOnline(userId);
 
   return (
     <article className={`profile-card profile-card-${size}`}>
@@ -31,6 +35,7 @@ function ProfileCard({
       <div className="profile-card-body">
         <div className="profile-card-avatar">
           <FramedAvatar
+            userId={showStatus ? userId : null}
             name={displayName || username}
             frame={equipped.frame}
             avatar={equipped.avatar}
@@ -45,6 +50,12 @@ function ProfileCard({
 
           {displayName && username && displayName !== username && (
             <span className="profile-card-handle">@{username}</span>
+          )}
+
+          {showStatus && (
+            <span className={`profile-card-status ${online ? "is-online" : ""}`}>
+              {online ? "Online now" : lastSeenText(lastSeen)}
+            </span>
           )}
 
           <StaffTag userId={userId} size={size === "lg" ? "lg" : "sm"} />

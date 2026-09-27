@@ -38,6 +38,7 @@ function PersonCard({ person }) {
 
         <div className="person-card-id">
           <FramedAvatar
+            userId={person.id}
             name={name}
             frame={equipped.frame}
             avatar={equipped.avatar}
