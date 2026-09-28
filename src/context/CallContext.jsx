@@ -150,7 +150,8 @@ export function CallProvider({ user, children }) {
           delete next[identity];
           return next;
         }),
-      3200
+      // Multi-move emotes play 4 rounds of 0.4s per move.
+      emote.frames ? emote.frames.length * 400 * 4 + 200 : 3200
     );
   }, []);
 

@@ -5,7 +5,8 @@ import { ConnectionQuality, Track } from "livekit-client";
 import Icon from "../components/Icon";
 import { EmoteAvatar, FramedAvatar } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
-import { EMOTES, canUseEmote } from "../data/avatarParts";
+import { EMOTES, canUseEmote, parseDicebear } from "../data/avatarParts";
+import { fullBodySrc } from "../lib/avatarRender";
 import { supabase } from "../lib/supabaseClient";
 import { REACTIONS, useCall } from "../context/CallContext";
 import { useSocial } from "../context/SocialContext";
@@ -38,6 +39,65 @@ function TrackVideo({ track, mirrored = false, className = "" }) {
   return <video ref={ref} className={`call-video ${mirrored ? "is-mirrored" : ""} ${className}`} autoPlay playsInline muted />;
 }
 
+// Free Fire-style emote wheel: 8 slots around a circle, more on the next page.
+const WHEEL_SLOTS = 8;
+
+function EmoteWheel({ owned, onPick, onClose }) {
+  const usable = EMOTES.filter((emote) => canUseEmote(emote, owned));
+  const locked = EMOTES.length - usable.length;
+  const pages = Math.max(1, Math.ceil(usable.length / WHEEL_SLOTS));
+  const [page, setPage] = useState(0);
+  const shown = usable.slice(page * WHEEL_SLOTS, page * WHEEL_SLOTS + WHEEL_SLOTS);
+
+  useEffect(() => {
+    const onKey = (event) => event.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div className="emote-wheel-backdrop" onClick={onClose}>
+      <div className="emote-wheel" role="dialog" aria-label="Emotes" onClick={(event) => event.stopPropagation()}>
+        {shown.map((emote, index) => {
+          const angle = ((-90 + index * (360 / WHEEL_SLOTS)) * Math.PI) / 180;
+          return (
+            <button
+              key={emote.id}
+              type="button"
+              className="emote-wheel-slot"
+              style={{ left: `${50 + 37 * Math.cos(angle)}%`, top: `${50 + 37 * Math.sin(angle)}%` }}
+              onClick={() => onPick(emote)}
+            >
+              <span className="emote-wheel-emoji" aria-hidden="true">{emote.emoji}</span>
+              <span className="emote-wheel-name">{emote.name}</span>
+            </button>
+          );
+        })}
+
+        <div className="emote-wheel-center">
+          {pages > 1 && (
+            <button type="button" onClick={() => setPage((page + 1) % pages)} aria-label="More emotes">
+              <Icon name="arrowRight" size={18} />
+              <small>
+                {page + 1}/{pages}
+              </small>
+            </button>
+          )}
+          <button type="button" onClick={onClose} aria-label="Close emotes">
+            <Icon name="close" size={18} strokeWidth={2.4} />
+          </button>
+        </div>
+      </div>
+
+      {locked > 0 && (
+        <Link to="/shop?type=emote" className="emote-wheel-more" onClick={(event) => event.stopPropagation()}>
+          <Icon name="lock" size={13} /> {locked} more emotes in the shop
+        </Link>
+      )}
+    </div>
+  );
+}
+
 // One person: camera if on, otherwise their avatar. Tap for options.
 function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onKick, emoting }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,23 +118,39 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
         : null;
   const weak = [ConnectionQuality.Poor, ConnectionQuality.Lost].includes(participant.connectionQuality);
 
+  // Full-body avatars stand in the tile and move their mouth while talking.
+  const body = !cameraOn && parseDicebear(meta.avatar)?.s === "fb";
+  const talking = participant.isSpeaking && !mutedForMe && participant.isMicrophoneEnabled;
+
   return (
     <li
-      className={`call-tile ${participant.isSpeaking && !mutedForMe ? "is-speaking" : ""} ${cameraOn ? "has-video" : ""}`}
+      className={`call-tile ${participant.isSpeaking && !mutedForMe ? "is-speaking" : ""} ${cameraOn ? "has-video" : ""} ${body ? "has-body" : ""}`}
       onClick={() => !isLocal && setMenuOpen((open) => !open)}
     >
       {cameraOn ? (
         <TrackVideo track={camera.track} mirrored={isLocal} />
       ) : emoting ? (
-        <EmoteAvatar
-          key={emoting.id}
-          emote={emoting.emote}
-          name={name}
-          frame={meta.frame}
-          avatar={meta.avatar}
-          size={76}
-          loop={false}
-        />
+        <span className="call-figure">
+          <EmoteAvatar
+            key={emoting.id}
+            emote={emoting.emote}
+            name={name}
+            frame={meta.frame}
+            avatar={meta.avatar}
+            size={76}
+            loop={false}
+            full={body}
+          />
+        </span>
+      ) : body ? (
+        <span className="call-figure">
+          <img
+            className="call-body"
+            src={fullBodySrc(meta.avatar, talking ? "talk" : "live")}
+            alt=""
+            draggable="false"
+          />
+        </span>
       ) : (
         <FramedAvatar name={name} frame={meta.frame} avatar={meta.avatar} size={76} />
       )}
@@ -133,6 +209,7 @@ function CallPage() {
   const social = useSocial();
   const call = useCall();
   const { owned } = useMyProfile();
+  const [wheelOpen, setWheelOpen] = useState(false);
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [members, setMembers] = useState(() => new Set());
@@ -323,6 +400,17 @@ function CallPage() {
             </section>
           )}
 
+          {wheelOpen && (
+            <EmoteWheel
+              owned={owned}
+              onClose={() => setWheelOpen(false)}
+              onPick={(emote) => {
+                call.sendEmote(emote);
+                setWheelOpen(false);
+              }}
+            />
+          )}
+
           <div className="call-bar">
             <div className="call-bar-reacts">
               {REACTIONS.map((emoji) => (
@@ -333,18 +421,16 @@ function CallPage() {
 
               <span className="call-bar-divider" aria-hidden="true" />
 
-              {EMOTES.filter((emote) => canUseEmote(emote, owned)).map((emote) => (
-                <button
-                  key={emote.id}
-                  type="button"
-                  className="is-emote"
-                  onClick={() => call.sendEmote(emote)}
-                  aria-label={`Emote: ${emote.name}`}
-                  title={`${emote.name} emote`}
-                >
-                  {emote.emoji}
-                </button>
-              ))}
+              <button
+                type="button"
+                className="call-emote-open"
+                onClick={() => setWheelOpen(true)}
+                aria-label="Emotes"
+                title="Emotes"
+              >
+                <span aria-hidden="true">😎</span>
+                <small>Emotes</small>
+              </button>
             </div>
 
             <div className="call-bar-main">

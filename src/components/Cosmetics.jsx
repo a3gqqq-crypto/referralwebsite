@@ -50,6 +50,37 @@ export function FramedAvatar({ name, frame, avatar, size = 40, className = "", u
 }
 
 // A player's avatar doing an emote: animated face + big emoji.
+const FRAME_TIME = 0.4;
+
+// Stacked pictures of each move; CSS shows one at a time.
+function EmoteFrames({ emote, base, loop }) {
+  const frames = emote.frames || [emote.look];
+  const count = frames.length;
+
+  return (
+    <span className="emote-frames">
+      {frames.map((look, index) => (
+        <img
+          key={index}
+          className="emote-body"
+          src={drawFullBody({ ...base, ...look }, "live")}
+          alt=""
+          draggable="false"
+          style={
+            count > 1
+              ? {
+                  animation: `emote-frames-${count} ${count * FRAME_TIME}s step-end ${
+                    loop ? "infinite" : 4
+                  } ${-(count - index) * FRAME_TIME}s`,
+                }
+              : undefined
+          }
+        />
+      ))}
+    </span>
+  );
+}
+
 // A player's avatar doing an emote. Full-body avatars act it out (pose and
 // face change); pass `full` to show the whole body instead of the head.
 export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true, full = false }) {
@@ -67,7 +98,7 @@ export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true
     >
       <span className="emote-face">
         {whole ? (
-          <img className="emote-body" src={drawFullBody(acted.o, "live")} alt="" draggable="false" />
+          <EmoteFrames emote={emote} base={acted.o} loop={loop} />
         ) : (
           <FramedAvatar name={name} avatar={acted?.avatar || avatar} frame={frame} size={size} />
         )}

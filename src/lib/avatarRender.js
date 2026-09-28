@@ -77,7 +77,8 @@ export function useAvatarDicebear(avatar) {
 }
 
 // Full-body picture for a stored avatar, or null if it isn't a full-body one.
-export function fullBodySrc(avatar) {
+// view: "live" (idle animation) or "talk" (mouth moving too).
+export function fullBodySrc(avatar, view = "live") {
   const parsed = parseDicebear(avatar);
-  return parsed?.s === "fb" ? drawFullBody(parsed.o, "live") : null;
+  return parsed?.s === "fb" ? drawFullBody(parsed.o, view) : null;
 }

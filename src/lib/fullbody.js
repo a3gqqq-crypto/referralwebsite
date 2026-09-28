@@ -496,6 +496,17 @@ function drawMouth(o) {
   }
 }
 
+// While someone talks in a call: their own mouth, open and half-open,
+// cycling quickly (CSS in TALK_STYLE).
+let talking = false;
+
+function talkingMouth(o) {
+  const lip = "#7a2331";
+  return `<g class="fb-m0">${drawMouth(o)}</g>` +
+    `<g class="fb-m1"><ellipse cx="100" cy="120" rx="6.5" ry="7.5" fill="${lip}"/><ellipse cx="100" cy="124" rx="4" ry="2.8" fill="#ef7c8e"/><path d="M 94.5 115 Q 100 113.6 105.5 115" stroke="#fff" stroke-width="2" fill="none"/></g>` +
+    `<g class="fb-m2"><ellipse cx="100" cy="119.5" rx="7" ry="3.6" fill="${lip}"/><path d="M 94 118 Q 100 117 106 118" stroke="#fff" stroke-width="1.6" fill="none"/></g>`;
+}
+
 function drawFacialHair(o) {
   const c = paint.hair(o.hairColor);
   const stache = `<path d="M 87 113 Q 94 107 100 111 Q 106 107 113 113 Q 106 116 100 114 Q 94 116 87 113 Z" fill="${c}"/>`;
@@ -615,7 +626,7 @@ function drawHead(o, g, skin) {
   out += `<g class="fb-eyes">${drawEyes(o, g, skin)}</g>`;
   out += drawBrows(o, g);
   out += `<path d="M 100 100 Q 104 107 98 109" stroke="${shade(skin, 45)}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
-  out += drawMouth(o);
+  out += talking ? talkingMouth(o) : drawMouth(o);
   if (!(hides && ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun"].includes(o.hair))) {
     paint.flat = true;
     const shadow = hairFront({ ...o, hairColor: "#000000" });
@@ -643,15 +654,22 @@ const LIVE_STYLE = `<style>
 @keyframes fbH{25%{transform:rotate(1.5deg)}75%{transform:rotate(-1.5deg)}}
 @keyframes fbE{0%,93%,97%,100%{transform:scaleY(1)}95%{transform:scaleY(0.08)}}
 @keyframes fbW{50%{transform:rotate(-14deg)}}
+.fb-m0,.fb-m1,.fb-m2{animation-duration:.78s;animation-iteration-count:infinite;animation-timing-function:step-end}
+.fb-m0{animation-name:fbM0}.fb-m1{animation-name:fbM1;opacity:0}.fb-m2{animation-name:fbM2;opacity:0}
+@keyframes fbM0{0%{opacity:1}16.6%{opacity:0}66.6%{opacity:1}83.3%{opacity:0}}
+@keyframes fbM1{0%{opacity:0}16.6%{opacity:1}33.3%{opacity:0}50%{opacity:1}66.6%{opacity:0}}
+@keyframes fbM2{0%{opacity:0}33.3%{opacity:1}50%{opacity:0}83.3%{opacity:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>`;
 
 // view: "full" (whole body, transparent), "live" (full body that breathes,
-// blinks and waves) or "head" (square face crop with background).
+// blinks and waves), "talk" (live + moving mouth) or "head" (square face
+// crop with background).
 export function fullBodySvg(o, view = "full", bgColors = FB_BACKGROUND_FALLBACK) {
   paint = makePainter();
-  const live = view === "live";
+  const live = view === "live" || view === "talk";
   const full = view === "full" || live;
+  talking = view === "talk";
   const g = geometry(o);
   const skin = o.skin;
 

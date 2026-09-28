@@ -300,21 +300,32 @@ export function dicebearOptions(style, stored) {
 
 // Emotes: free ones for everyone, the rest are shop items (cosmetic id "emote-<id>").
 // look: what a full-body avatar changes into while doing the emote.
+// frames: optional sequence of looks it cycles through (a little dance).
 export const EMOTES = [
   { id: "wave", emoji: "👋", name: "Wave", anim: "wave", look: { pose: "wave", mouth: "grin" } },
   { id: "laugh", emoji: "😂", name: "Laugh", anim: "bounce", look: { eyes: "happy", mouth: "open" } },
-  { id: "gg", emoji: "🎉", name: "GG", anim: "pop", look: { pose: "peace", eyes: "happy", mouth: "grin" } },
-  { id: "dance", emoji: "💃", name: "Dance", anim: "dance", premium: "emote-dance", look: { pose: "flex", eyes: "happy", mouth: "smile" } },
+  { id: "gg", emoji: "🎉", name: "GG", anim: "pop", look: { pose: "peace", eyes: "happy", mouth: "grin" },
+    frames: [{ pose: "peace", eyes: "happy", mouth: "grin" }, { pose: "flex", eyes: "happy", mouth: "open" }] },
+  { id: "dance", emoji: "💃", name: "Dance", anim: "dance", premium: "emote-dance", look: { pose: "flex", eyes: "happy", mouth: "smile" },
+    frames: [
+      { pose: "flex", eyes: "happy", mouth: "smile" },
+      { pose: "hips", eyes: "happy", mouth: "open" },
+      { pose: "wave", eyes: "happy", mouth: "grin" },
+      { pose: "peace", eyes: "wink", mouth: "tongue" },
+    ] },
   { id: "love", emoji: "😍", name: "Love", anim: "pulse", premium: "emote-love", look: { eyes: "hearts", mouth: "grin" } },
   { id: "cry", emoji: "😭", name: "Cry", anim: "shake", premium: "emote-cry", look: { eyes: "sleepy", brows: "sad", mouth: "open" } },
-  { id: "rage", emoji: "😡", name: "Rage", anim: "rage", premium: "emote-rage", look: { brows: "angry", mouth: "flat", pose: "hips" } },
+  { id: "rage", emoji: "😡", name: "Rage", anim: "rage", premium: "emote-rage", look: { brows: "angry", mouth: "flat", pose: "hips" },
+    frames: [{ brows: "angry", mouth: "flat", pose: "hips" }, { brows: "angry", mouth: "open", pose: "flex" }] },
   { id: "fire", emoji: "🔥", name: "On fire", anim: "pulse", premium: "emote-fire", look: { pose: "flex", brows: "raised", mouth: "grin" } },
   { id: "crown", emoji: "👑", name: "Crowned", anim: "spin", premium: "emote-crown", look: { hat: "crown", pose: "hips", mouth: "smirk" } },
   { id: "shock", emoji: "😱", name: "Shook", anim: "jump", premium: "emote-shock", look: { brows: "raised", mouth: "open", pose: "flex" } },
   { id: "sleepy", emoji: "😴", name: "Sleepy", anim: "sway", premium: "emote-sleepy", look: { eyes: "sleepy", mouth: "flat" } },
-  { id: "clap", emoji: "👏", name: "Clap", anim: "bounce", premium: "emote-clap", look: { pose: "flex", eyes: "happy", mouth: "open" } },
+  { id: "clap", emoji: "👏", name: "Clap", anim: "bounce", premium: "emote-clap", look: { pose: "flex", eyes: "happy", mouth: "open" },
+    frames: [{ pose: "flex", eyes: "happy", mouth: "open" }, { pose: "hips", eyes: "happy", mouth: "grin" }] },
   { id: "cool", emoji: "😎", name: "Too cool", anim: "pop", premium: "emote-cool", look: { glasses: "sunglasses", pose: "peace", mouth: "smirk" } },
-  { id: "money", emoji: "💸", name: "Rich", anim: "spin", premium: "emote-money", look: { eyes: "star", pose: "hips", mouth: "grin" } },
+  { id: "money", emoji: "💸", name: "Rich", anim: "spin", premium: "emote-money", look: { eyes: "star", pose: "hips", mouth: "grin" },
+    frames: [{ eyes: "star", pose: "hips", mouth: "grin" }, { eyes: "star", pose: "peace", mouth: "open" }] },
   { id: "skull", emoji: "💀", name: "Dead", anim: "fall", premium: "emote-skull", look: { eyes: "sleepy", mouth: "tongue" } },
 ];
 

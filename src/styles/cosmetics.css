@@ -667,3 +667,21 @@ a.player-chip:hover .player-chip-name {
   top: 2%;
   right: -4%;
 }
+
+/* Multi-move emotes: frames stack, one shows at a time. */
+.emote-frames {
+  position: relative;
+  display: block;
+}
+
+.emote-frames .emote-body + .emote-body {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  opacity: 0;
+}
+
+@keyframes emote-frames-2 { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes emote-frames-3 { 0% { opacity: 1; } 33.3% { opacity: 0; } }
+@keyframes emote-frames-4 { 0% { opacity: 1; } 25% { opacity: 0; } }
