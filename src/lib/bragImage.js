@@ -1,4 +1,5 @@
 import { avatarSrc } from "../data/avatars";
+import { dicebearSrc } from "./avatarRender";
 import { fitText, roundedRect } from "./momentImage";
 
 // "I'm #2 in Round 2 — beat me" story image (1080x1920) with the player's invite link.
@@ -89,7 +90,7 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   ctx.fillStyle = "#35263a";
   ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
 
-  const image = await loadImage(avatarSrc(avatar));
+  const image = await loadImage((await dicebearSrc(avatar).catch(() => null)) || avatarSrc(avatar));
 
   if (image) {
     ctx.drawImage(image, cx - radius, cy - radius, radius * 2, radius * 2);

@@ -3,7 +3,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ConnectionQuality, Track } from "livekit-client";
 
 import Icon from "../components/Icon";
-import { FramedAvatar } from "../components/Cosmetics";
+import { EmoteAvatar, FramedAvatar } from "../components/Cosmetics";
+import { useMyProfile } from "../context/ProfileContext";
+import { EMOTES, canUseEmote } from "../data/avatarParts";
 import { supabase } from "../lib/supabaseClient";
 import { REACTIONS, useCall } from "../context/CallContext";
 import { useSocial } from "../context/SocialContext";
@@ -37,7 +39,7 @@ function TrackVideo({ track, mirrored = false, className = "" }) {
 }
 
 // One person: camera if on, otherwise their avatar. Tap for options.
-function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onKick }) {
+function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onKick, emoting }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const meta = readMeta(participant);
   const name = participant.name || meta.username || "Someone";
@@ -63,8 +65,24 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
     >
       {cameraOn ? (
         <TrackVideo track={camera.track} mirrored={isLocal} />
+      ) : emoting ? (
+        <EmoteAvatar
+          key={emoting.id}
+          emote={emoting.emote}
+          name={name}
+          frame={meta.frame}
+          avatar={meta.avatar}
+          size={76}
+          loop={false}
+        />
       ) : (
         <FramedAvatar name={name} frame={meta.frame} avatar={meta.avatar} size={76} />
+      )}
+
+      {cameraOn && emoting && (
+        <span key={emoting.id} className="call-tile-emote" aria-hidden="true">
+          {emoting.emote.emoji}
+        </span>
       )}
 
       <span className="call-tile-name">
@@ -114,6 +132,7 @@ function CallPage() {
   const navigate = useNavigate();
   const social = useSocial();
   const call = useCall();
+  const { owned } = useMyProfile();
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [members, setMembers] = useState(() => new Set());
@@ -255,6 +274,7 @@ function CallPage() {
                 mutedForMe={call.mutedForMe.has(participant.identity)}
                 onToggleMute={call.toggleMuteForMe}
                 onKick={call.kick}
+                emoting={call.emotes[participant.identity]}
               />
             ))}
           </ul>
@@ -308,6 +328,21 @@ function CallPage() {
               {REACTIONS.map((emoji) => (
                 <button key={emoji} type="button" onClick={() => call.react(emoji)} aria-label={`React ${emoji}`}>
                   {emoji}
+                </button>
+              ))}
+
+              <span className="call-bar-divider" aria-hidden="true" />
+
+              {EMOTES.filter((emote) => canUseEmote(emote, owned)).map((emote) => (
+                <button
+                  key={emote.id}
+                  type="button"
+                  className="is-emote"
+                  onClick={() => call.sendEmote(emote)}
+                  aria-label={`Emote: ${emote.name}`}
+                  title={`${emote.name} emote`}
+                >
+                  {emote.emoji}
                 </button>
               ))}
             </div>

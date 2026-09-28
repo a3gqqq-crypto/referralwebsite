@@ -3,9 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
-import { CosmeticPreview } from "../components/Cosmetics";
+import { CosmeticPreview, EmoteAvatar } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { supabase } from "../lib/supabaseClient";
+import { emoteById, packPreviewAvatar } from "../data/avatarParts";
 import CryptoCheckout from "../components/CryptoCheckout";
 import SpendBoard from "../components/SpendBoard";
 import {
@@ -15,13 +16,16 @@ import {
   RARITY_LABEL,
   SLOTS,
   cosmeticById,
+  displayNameOf,
   equippedFrom,
   formatPrice,
 } from "../data/cosmetics";
 
 import "../styles/shop.css";
 
-const FILTERS = ["all", "frame", "name", "banner", "badge"];
+const FILTERS = ["all", "avatar", "emote", "frame", "name", "banner", "badge"];
+// Not equipped on the profile: packs are used in the avatar maker, emotes in chat and calls.
+const USED_ELSEWHERE = { avatar: { to: "/profile", label: "Use it in the avatar maker" }, emote: { to: "/chat", label: "Use it in chat" } };
 
 function ShopPage() {
   const [params, setParams] = useSearchParams();
@@ -59,7 +63,11 @@ function ShopPage() {
   const tryOn = { ...equipped };
 
   if (selected) {
-    if (selected.type === "badge") {
+    if (selected.type === "avatar") {
+      tryOn.avatar = packPreviewAvatar(selected.id);
+    } else if (selected.type === "emote") {
+      // Previewed in the item tile.
+    } else if (selected.type === "badge") {
       tryOn.badges = equipped.badges.includes(selected.id)
         ? equipped.badges
         : [selected.id, ...equipped.badges].slice(0, MAX_BADGES);
@@ -189,8 +197,8 @@ function ShopPage() {
         </h1>
 
         <p>
-          Frames, name effects, banners and badges for your
-          profile. Purely cosmetic — they never affect rankings.
+          Avatar packs, emotes, frames, name effects, banners and badges.
+          Purely cosmetic — they never affect rankings.
         </p>
       </header>
 
@@ -290,6 +298,19 @@ function ShopPage() {
             xp={profile?.xp}
           />
 
+          {selected?.type === "emote" && (
+            <div className="shop-emote-stage card">
+              <EmoteAvatar
+                key={selected.id}
+                emote={emoteById(selected.id.slice(6))}
+                name={displayNameOf(profile, username || "you")}
+                avatar={profile?.avatar}
+                frame={equipped.frame}
+                size={96}
+              />
+            </div>
+          )}
+
           {selected && (
             <div className="shop-detail card">
               <div className="shop-detail-head">
@@ -312,7 +333,12 @@ function ShopPage() {
 
               <p className="shop-detail-desc">{selected.description}</p>
 
-              {isOwned ? (
+              {isOwned && USED_ELSEWHERE[selected.type] ? (
+                <Link to={USED_ELSEWHERE[selected.type].to} className="btn btn-block btn-primary">
+                  <Icon name="sparkles" size={16} />
+                  {USED_ELSEWHERE[selected.type].label}
+                </Link>
+              ) : isOwned ? (
                 <button
                   type="button"
                   className={`btn btn-block ${isEquipped ? "btn-success" : "btn-primary"}`}

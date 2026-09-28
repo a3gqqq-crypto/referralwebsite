@@ -344,7 +344,41 @@
 
 .call-bar-reacts {
   display: flex;
+  align-items: center;
   gap: 2px;
+
+  max-width: 100%;
+
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.call-bar-reacts button {
+  flex-shrink: 0;
+}
+
+.call-bar-reacts button.is-emote {
+  background: var(--gold-wash);
+}
+
+.call-bar-divider {
+  flex-shrink: 0;
+
+  width: 1px;
+  height: 24px;
+  margin: 0 6px;
+
+  background: var(--line-strong);
+}
+
+.call-tile-emote {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  font-size: 34px;
+
+  animation: emote-pop 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
 
 .call-bar-reacts button {

@@ -373,3 +373,10 @@
 
   vertical-align: middle;
 }
+
+.shop-emote-stage {
+  display: grid;
+  place-items: center;
+  padding: 18px 12px;
+  margin-top: 12px;
+}

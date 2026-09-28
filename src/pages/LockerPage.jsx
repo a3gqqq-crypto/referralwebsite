@@ -249,6 +249,7 @@ function LockerPage() {
                 username={username}
                 frame={equipped.frame}
                 current={profile?.avatar || null}
+                owned={owned}
                 busy={busy}
                 onPick={(avatar) => run(() => setAvatar(avatar), "Picture updated.")}
                 onUpload={(file) => run(() => uploadAvatar(file), "Photo uploaded.")}

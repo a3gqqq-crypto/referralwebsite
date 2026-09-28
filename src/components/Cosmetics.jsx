@@ -3,6 +3,8 @@ import { useState } from "react";
 import Icon from "./Icon";
 import { cosmeticById } from "../data/cosmetics";
 import { avatarSrc } from "../data/avatars";
+import { useAvatarDicebear } from "../lib/avatarRender";
+import { emoteById, packPreviewAvatar } from "../data/avatarParts";
 import { useIsOnline } from "../lib/presence";
 
 import "../styles/cosmetics.css";
@@ -10,7 +12,8 @@ import "../styles/cosmetics.css";
 // Pass userId to show a green dot while that person is online.
 export function FramedAvatar({ name, frame, avatar, size = 40, className = "", userId = null }) {
   const initial = (name || "?").charAt(0).toUpperCase();
-  const src = avatarSrc(avatar);
+  const drawn = useAvatarDicebear(avatar);
+  const src = drawn || avatarSrc(avatar);
   const [failed, setFailed] = useState(null);
   const online = useIsOnline(userId);
 
@@ -42,6 +45,27 @@ export function FramedAvatar({ name, frame, avatar, size = 40, className = "", u
       )}
 
       {online && <span className="fav-online" title="Online now" aria-label="Online now" />}
+    </span>
+  );
+}
+
+// A player's avatar doing an emote: animated face + big emoji.
+export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true }) {
+  if (!emote) return null;
+
+  return (
+    <span
+      className={`emote emote-${emote.anim} ${loop ? "is-loop" : ""}`}
+      style={{ "--emote-size": `${size}px` }}
+      role="img"
+      aria-label={`${name || "Someone"}: ${emote.name}`}
+    >
+      <span className="emote-face">
+        <FramedAvatar name={name} avatar={avatar} frame={frame} size={size} />
+      </span>
+      <span className="emote-emoji" aria-hidden="true">
+        {emote.emoji}
+      </span>
     </span>
   );
 }
@@ -96,6 +120,14 @@ export function ProfileBanner({ banner, className = "", children }) {
 }
 
 export function CosmeticPreview({ item, username = "you", avatar = null }) {
+  if (item.type === "avatar") {
+    return <FramedAvatar name={username} avatar={packPreviewAvatar(item.id)} size={76} />;
+  }
+
+  if (item.type === "emote") {
+    return <EmoteAvatar emote={emoteById(item.id.slice(6))} name={username} avatar={avatar} size={58} />;
+  }
+
   if (item.type === "frame") {
     return <FramedAvatar name={username} frame={item.id} avatar={avatar} size={76} />;
   }

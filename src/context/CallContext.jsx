@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 
 import { supabase } from "../lib/supabaseClient";
 import { setPresenceCall } from "../lib/presence";
+import { emoteById } from "../data/avatarParts";
 
 // The call lives here, above the pages, so it keeps going while people browse
 // the site (a floating dock shows it). LiveKit's library only downloads when
@@ -133,6 +134,25 @@ export function CallProvider({ user, children }) {
   }, []);
 
   const rerender = useCallback(() => setTick((n) => n + 1), []);
+
+  // identity -> { emote, id } while someone's avatar is doing an emote.
+  const [emotes, setEmotes] = useState({});
+
+  const showEmote = useCallback((identity, emote) => {
+    if (!identity || !emote) return;
+    const id = `${Date.now()}-${Math.random()}`;
+    setEmotes((current) => ({ ...current, [identity]: { emote, id } }));
+    setTimeout(
+      () =>
+        setEmotes((current) => {
+          if (current[identity]?.id !== id) return current;
+          const next = { ...current };
+          delete next[identity];
+          return next;
+        }),
+      3200
+    );
+  }, []);
 
   const addReaction = useCallback((emoji, name) => {
     const id = `${Date.now()}-${Math.random()}`;
@@ -301,6 +321,7 @@ export function CallProvider({ user, children }) {
           try {
             const packet = JSON.parse(new TextDecoder().decode(payload));
             if (packet.t === "react" && REACTIONS.includes(packet.e)) addReaction(packet.e, participant?.name);
+            if (packet.t === "emote" && emoteById(packet.e)) showEmote(participant?.identity, emoteById(packet.e));
             if (packet.t === "end" && !data.isHost && roomRef.current === next) {
               forgetCall();
               finish("The host ended the call.");
@@ -383,7 +404,7 @@ export function CallProvider({ user, children }) {
       setRoom(next);
       setPhase("live");
     },
-    [roomKey, leave, rerender, addReaction, finish, keepAwake, dbg]
+    [roomKey, leave, rerender, addReaction, showEmote, finish, keepAwake, dbg]
   );
 
   // Lets the disconnect handler retry with the latest join().
@@ -506,6 +527,14 @@ export function CallProvider({ user, children }) {
     [local, addReaction]
   );
 
+  const sendEmote = useCallback(
+    (emote) => {
+      local?.publishData(new TextEncoder().encode(JSON.stringify({ t: "emote", e: emote.id })), { reliable: true });
+      showEmote(local?.identity, emote);
+    },
+    [local, showEmote]
+  );
+
   const toggleMuteForMe = useCallback((participant) => {
     setMutedForMe((current) => {
       const next = new Set(current);
@@ -617,6 +646,8 @@ export function CallProvider({ user, children }) {
     toggleCamera,
     toggleScreen,
     react,
+    emotes,
+    sendEmote,
     toggleMuteForMe,
     kick,
     endForEveryone,

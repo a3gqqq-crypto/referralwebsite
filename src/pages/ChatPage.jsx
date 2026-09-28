@@ -16,12 +16,13 @@ import { useInCallCount, useOnlineUsers } from "../lib/presence";
 import { useCall } from "../context/CallContext";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
-import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
+import { BadgeRow, EmoteAvatar, FramedAvatar, StyledName } from "../components/Cosmetics";
+import { EMOTES, canUseEmote, emoteFromBody } from "../data/avatarParts";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
 import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
-import { displayNameOf, equippedFrom } from "../data/cosmetics";
+import { cosmeticById, displayNameOf, equippedFrom, formatPrice } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
 import "../styles/chat.css";
@@ -57,6 +58,54 @@ function ChatPhoto({ path, onOpen, onLoad }) {
 }
 
 // What a reply shows of the message it answers.
+// One-line text for previews (replies, recent chats).
+function previewText(message) {
+  const emote = emoteFromBody(message?.body);
+  if (emote) return `${emote.emoji} ${emote.name}`;
+  return message?.body || (message?.image ? "📷 Photo" : "");
+}
+
+function EmoteTray({ owned, disabled, onSend, onClose }) {
+  return (
+    <div className="chat-emotes" role="dialog" aria-label="Emotes">
+      <div className="chat-emotes-head">
+        <strong>Emotes</strong>
+        <Link to="/shop?type=emote" className="chat-emotes-shop">Get more</Link>
+        <button type="button" onClick={onClose} aria-label="Close emotes">
+          <Icon name="close" size={14} strokeWidth={2.6} />
+        </button>
+      </div>
+
+      <div className="chat-emotes-grid">
+        {EMOTES.map((emote) => {
+          const usable = canUseEmote(emote, owned);
+          const item = emote.premium ? cosmeticById(emote.premium) : null;
+
+          return usable ? (
+            <button
+              key={emote.id}
+              type="button"
+              className="chat-emote"
+              onClick={() => onSend(emote)}
+              disabled={disabled}
+            >
+              <span className="chat-emote-emoji">{emote.emoji}</span>
+              <span>{emote.name}</span>
+            </button>
+          ) : (
+            <Link key={emote.id} to={`/shop?type=emote&item=${emote.premium}`} className="chat-emote is-locked">
+              <span className="chat-emote-emoji">{emote.emoji}</span>
+              <span>
+                <Icon name="lock" size={10} /> {item ? formatPrice(item.price) : ""}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function QuoteBlock({ quote, onJump }) {
   if (quote === undefined) return null;
 
@@ -67,7 +116,7 @@ function QuoteBlock({ quote, onJump }) {
   return (
     <button type="button" className="chat-quote" onClick={() => onJump(quote.message.id)}>
       <strong>{displayNameOf(quote.sender, "…")}</strong>
-      <span>{quote.message.body || (quote.message.image ? "📷 Photo" : "")}</span>
+      <span>{previewText(quote.message)}</span>
     </button>
   );
 }
@@ -94,6 +143,7 @@ function MessageRow({
   const canReport = !isMine && sender;
   // A reply always shows who sent it, even in a run of messages from one person.
   const compact = grouped && !message.reply_to;
+  const emote = emoteFromBody(message.body);
 
   return (
     <li
@@ -131,7 +181,20 @@ function MessageRow({
           <ChatPhoto path={message.image} onOpen={onOpenPhoto} onLoad={onPhotoLoad} />
         )}
 
-        {message.body && <p className="chat-msg-body">{message.body}</p>}
+        {emote ? (
+          <div className="chat-msg-emote">
+            <EmoteAvatar
+              emote={emote}
+              name={name}
+              avatar={equipped.avatar}
+              frame={equipped.frame}
+              size={72}
+              loop={false}
+            />
+          </div>
+        ) : (
+          message.body && <p className="chat-msg-body">{message.body}</p>
+        )}
       </div>
 
       <div className="chat-msg-actions">
@@ -219,7 +282,8 @@ function ChatPage() {
   const quotedRef = useRef({});
   const photoInputRef = useRef(null);
 
-  const { profile: myProfile, isOwner } = useMyProfile();
+  const { profile: myProfile, isOwner, owned } = useMyProfile();
+  const [emotesOpen, setEmotesOpen] = useState(false);
   const canPostLoungePhoto = (myProfile?.xp || 0) >= 200;
 
   const [recent, setRecent] = useState({});
@@ -644,10 +708,10 @@ function ChatPage() {
     }
   };
 
-  const send = async (event) => {
+  const send = async (event, emote = null) => {
     event?.preventDefault();
 
-    const body = draft.trim();
+    const body = emote ? `::emote:${emote.id}::` : draft.trim();
 
     if ((!body && !photo) || sending || !canSend) return;
 
@@ -656,7 +720,7 @@ function ChatPage() {
 
     let imagePath = null;
 
-    if (photo) {
+    if (photo && !emote) {
       try {
         imagePath = await uploadChatImage(me, await prepareChatImage(photo.file));
       } catch (uploadError) {
@@ -687,8 +751,12 @@ function ChatPage() {
       return;
     }
 
-    clearPhoto();
-    setDraft("");
+    if (emote) {
+      setEmotesOpen(false);
+    } else {
+      clearPhoto();
+      setDraft("");
+    }
     setReplyTo(null);
     stickToBottom.current = true;
     setMessages((current) =>
@@ -846,7 +914,7 @@ function ChatPage() {
                       <StyledName name={displayNameOf(profile)} effect={equipped.name} />
                       <small>
                         {last
-                          ? `${last.sender_id === me ? "You: " : ""}${last.body || (last.image ? "📷 Photo" : "")}`
+                          ? `${last.sender_id === me ? "You: " : ""}${previewText(last)}`
                           : "Say hi 👋"}
                       </small>
                     </span>
@@ -1040,7 +1108,7 @@ function ChatPage() {
                 <Icon name="reply" size={16} />
                 <button type="button" className="chat-replying-text" onClick={() => jumpTo(replyTo.id)}>
                   <strong>Replying to {displayNameOf(profiles[replyTo.sender_id], "…")}</strong>
-                  <span>{replyTo.body || (replyTo.image ? "📷 Photo" : "")}</span>
+                  <span>{previewText(replyTo)}</span>
                 </button>
                 <button
                   type="button"
@@ -1051,6 +1119,15 @@ function ChatPage() {
                   <Icon name="close" size={14} strokeWidth={2.6} />
                 </button>
               </div>
+            )}
+
+            {emotesOpen && (
+              <EmoteTray
+                owned={owned}
+                disabled={sending}
+                onSend={(emote) => send(null, emote)}
+                onClose={() => setEmotesOpen(false)}
+              />
             )}
 
             {photo && (
@@ -1076,6 +1153,18 @@ function ChatPage() {
                 title={!isDm && !canPostLoungePhoto ? "Reach level 3 to post photos in the lounge" : "Add a photo"}
               >
                 <Icon name="image" size={20} />
+              </button>
+
+              <button
+                type="button"
+                className={`chat-attach chat-emote-toggle ${emotesOpen ? "is-open" : ""}`}
+                onClick={() => setEmotesOpen((open) => !open)}
+                disabled={sending}
+                aria-label="Emotes"
+                aria-expanded={emotesOpen}
+                title="Emotes"
+              >
+                <span aria-hidden="true">😄</span>
               </button>
 
               <input
