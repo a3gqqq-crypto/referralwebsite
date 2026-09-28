@@ -390,3 +390,28 @@
     white-space: nowrap;
   }
 }
+
+/* Full-body avatars celebrating on the podium. */
+.board-podium-body {
+  width: auto;
+  height: 132px;
+
+  margin-top: 22px;
+
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+
+.board-podium-body.place-1 {
+  height: 168px;
+}
+
+@media (max-width: 640px) {
+  .board-podium-body {
+    height: 96px;
+    margin-top: 26px;
+  }
+
+  .board-podium-body.place-1 {
+    height: 120px;
+  }
+}

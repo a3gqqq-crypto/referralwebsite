@@ -347,6 +347,16 @@ function hairBack(o) {
   const c = o.hairColor;
   const H = paint.hair(c);
   switch (o.hair) {
+    case "sidebangs":
+      return `<path d="M 56 88 Q 48 190 64 206 L 136 206 Q 152 190 144 88 Z" fill="${H}"/>`;
+    case "wolfcut":
+      return `<path d="M 54 84 Q 46 130 52 156 L 62 146 L 66 162 L 78 150 L 100 158 L 122 150 L 134 162 L 138 146 L 148 156 Q 154 130 146 84 Z" fill="${H}"/>`;
+    case "spacebuns":
+      return `<circle cx="66" cy="40" r="16" fill="${H}"/><circle cx="134" cy="40" r="16" fill="${H}"/>`;
+    case "locs":
+      return [58, 66, 74, 126, 134, 142]
+        .map((x, i) => `<rect x="${x - 4}" y="80" width="8" height="${92 + (i % 3) * 10}" rx="4" fill="${H}"/>`)
+        .join("");
     case "long":
       return `<path d="M 56 88 Q 48 192 64 208 L 136 208 Q 152 192 144 88 Z" fill="${H}"/>`;
     case "bob":
@@ -379,6 +389,25 @@ function hairFront(o) {
   const H = paint.hair(c);
   const d = shade(c, 25);
   switch (o.hair) {
+    case "slickback":
+      return `<path d="M 57 88 Q 54 38 100 36 Q 146 38 143 88 Q 140 62 100 56 Q 60 62 57 88 Z" fill="${H}"/><path d="M 72 58 Q 84 42 102 40 M 86 56 Q 96 44 112 42 M 100 55 Q 110 45 126 46" stroke="${d}" stroke-width="1.6" fill="none"/>`;
+    case "undercut":
+      return `<path d="M 56 86 Q 56 64 60 60 L 60 92 Z M 144 86 Q 144 64 140 60 L 140 92 Z" fill="${H}" opacity="0.4"/><path d="M 60 74 Q 56 32 104 30 Q 148 34 142 72 Q 126 56 102 58 Q 78 56 60 74 Z" fill="${H}"/>`;
+    case "twists":
+      return `<path d="M 57 88 Q 57 46 100 44 Q 143 46 143 88 Q 134 64 100 62 Q 66 64 57 88 Z" fill="${H}"/>` +
+        [[60, 72], [66, 56], [76, 45], [88, 38], [100, 36], [112, 38], [124, 45], [134, 56], [140, 72]]
+          .map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="5.5" ry="10" fill="${H}" stroke="${d}" stroke-width="1" transform="rotate(${(x - 100) * 0.9} ${x} ${y})"/>`)
+          .join("");
+    case "locs":
+      return `<path d="M 56 90 Q 54 40 100 38 Q 146 40 144 90 Q 136 62 100 58 Q 64 62 56 90 Z" fill="${H}"/>` +
+        [62, 138].map((x) => `<rect x="${x - 4}" y="76" width="8" height="70" rx="4" fill="${H}" stroke="${d}" stroke-width="1"/>`).join("");
+    case "sidebangs":
+      return `<path d="M 55 100 Q 48 35 100 35 Q 152 35 145 100 Q 140 70 126 62 Q 98 86 62 90 Q 57 94 55 100 Z" fill="${H}"/>` +
+        `<path d="M 55 94 Q 51 140 60 160 L 68 158 Q 61 130 63 98 Z M 145 94 Q 149 140 140 160 L 132 158 Q 139 130 137 98 Z" fill="${H}"/>`;
+    case "wolfcut":
+      return `<path d="M 55 96 Q 50 36 100 35 Q 150 36 145 96 L 138 80 L 134 90 L 126 74 L 118 84 L 110 70 L 100 82 L 90 70 L 82 84 L 74 74 L 66 90 L 62 80 Z" fill="${H}"/>`;
+    case "spacebuns":
+      return `<path d="M 55 100 Q 48 36 100 35 Q 152 36 145 100 Q 140 66 118 58 Q 100 70 78 66 Q 62 72 55 100 Z" fill="${H}"/><circle cx="66" cy="40" r="5" fill="#ff7aa5" opacity="0.9"/><circle cx="134" cy="40" r="5" fill="#ff7aa5" opacity="0.9"/>`;
     case "short":
       return `<path d="M 56 92 Q 52 38 100 37 Q 148 38 144 92 Q 140 70 128 63 Q 110 72 88 63 Q 70 66 60 76 Q 57 82 56 92 Z" fill="${H}"/>`;
     case "fade":
@@ -449,12 +478,30 @@ function drawEyes(o, g, skin) {
       case "hearts":
         return `<path d="M ${x} ${y + 7} C ${x - 12} ${y - 1} ${x - 6} ${y - 10} ${x} ${y - 3} C ${x + 6} ${y - 10} ${x + 12} ${y - 1} ${x} ${y + 7} Z" fill="#ef3b5d"/>`;
       default: {
-        let out = `<ellipse cx="${x}" cy="${y}" rx="8" ry="7.5" fill="#fff" stroke="${OUTLINE}" stroke-width="1"/>`;
-        out += `<circle cx="${x}" cy="${y + 0.6}" r="5.4" fill="${paint.rad(color)}"/><circle cx="${x}" cy="${y + 0.6}" r="2.7" fill="${dark}"/><circle cx="${x + 2}" cy="${y - 1.6}" r="1.7" fill="#fff"/><circle cx="${x - 1.8}" cy="${y + 2.6}" r="0.8" fill="#fff" opacity="0.8"/>`;
-        out += `<path d="M ${x - 9} ${y - 2} Q ${x} ${y - 10} ${x + 9} ${y - 2}" stroke="${dark}" stroke-width="${g.girl ? 2.6 : 2}" fill="none" stroke-linecap="round"/>`;
-        if (g.girl) {
-          const s = x < 100 ? -1 : 1;
-          out += `<path d="M ${x + s * 8} ${y - 3} L ${x + s * 12} ${y - 6}" stroke="${dark}" stroke-width="2" stroke-linecap="round"/>`;
+        const side = x < 100 ? -1 : 1;
+        const lidWidth = o.lashes ? 2.6 : 2;
+        let out;
+
+        if (o.eyeShape === "almond") {
+          out = `<path d="M ${x - 9} ${y} Q ${x} ${y - 8} ${x + 9} ${y} Q ${x} ${y + 6} ${x - 9} ${y} Z" fill="#fff" stroke="${OUTLINE}" stroke-width="1"/>`;
+          out += `<circle cx="${x}" cy="${y + 0.2}" r="4.8" fill="${paint.rad(color)}"/><circle cx="${x}" cy="${y + 0.2}" r="2.4" fill="${dark}"/><circle cx="${x + 1.8}" cy="${y - 1.6}" r="1.5" fill="#fff"/>`;
+          out += `<path d="M ${x - 9.5} ${y - 0.5} Q ${x} ${y - 8.6} ${x + 9.5} ${y - 0.5} L ${x + side * 11.5} ${y - 2.5}" stroke="${dark}" stroke-width="${lidWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+        } else if (o.eyeShape === "big") {
+          out = `<ellipse cx="${x}" cy="${y}" rx="9" ry="9.5" fill="#fff" stroke="${OUTLINE}" stroke-width="1"/>`;
+          out += `<circle cx="${x}" cy="${y + 1}" r="6.6" fill="${paint.rad(color)}"/><circle cx="${x}" cy="${y + 1}" r="3.2" fill="${dark}"/><circle cx="${x + 2.4}" cy="${y - 2}" r="2.3" fill="#fff"/><circle cx="${x - 2.2}" cy="${y + 3.6}" r="1.1" fill="#fff" opacity="0.85"/>`;
+          out += `<path d="M ${x - 10} ${y - 3} Q ${x} ${y - 13} ${x + 10} ${y - 3}" stroke="${dark}" stroke-width="${lidWidth + 0.4}" fill="none" stroke-linecap="round"/>`;
+        } else {
+          out = `<ellipse cx="${x}" cy="${y}" rx="8" ry="7.5" fill="#fff" stroke="${OUTLINE}" stroke-width="1"/>`;
+          out += `<circle cx="${x}" cy="${y + 0.6}" r="5.4" fill="${paint.rad(color)}"/><circle cx="${x}" cy="${y + 0.6}" r="2.7" fill="${dark}"/><circle cx="${x + 2}" cy="${y - 1.6}" r="1.7" fill="#fff"/><circle cx="${x - 1.8}" cy="${y + 2.6}" r="0.8" fill="#fff" opacity="0.8"/>`;
+          out += `<path d="M ${x - 9} ${y - 2} Q ${x} ${y - 10} ${x + 9} ${y - 2}" stroke="${dark}" stroke-width="${lidWidth}" fill="none" stroke-linecap="round"/>`;
+        }
+
+        if (o.lashes === "lashes") {
+          out += `<path d="M ${x + side * 8} ${y - 3} L ${x + side * 12} ${y - 6}" stroke="${dark}" stroke-width="2" stroke-linecap="round"/>`;
+        } else if (o.lashes === "long") {
+          out += [0, 1, 2]
+            .map((i) => `<path d="M ${x + side * (4 + i * 2.6)} ${y - 6.5 + i * 1.6} l ${side * (2.2 + i * 0.8)} ${-4 + i * 0.6}" stroke="${dark}" stroke-width="1.8" stroke-linecap="round"/>`)
+            .join("");
         }
         return out;
       }
@@ -463,6 +510,57 @@ function drawEyes(o, g, skin) {
 
   if (o.eyes === "wink") return one(83, "normal") + one(117, "happy");
   return one(83, o.eyes) + one(117, o.eyes);
+}
+
+function drawMakeup(o) {
+  if (!o.makeup) return "";
+  const c = o.makeupColor || "#b565d8";
+  let out = "";
+
+  for (const x of [83, 117]) {
+    const side = x < 100 ? -1 : 1;
+    const bold = o.makeup === "bold";
+    out += `<ellipse cx="${x + side * 1}" cy="90" rx="${bold ? 10.5 : 9.5}" ry="${bold ? 6 : 4.8}" fill="${c}" opacity="${bold ? 0.55 : 0.38}"/>`;
+    if (bold) out += `<path d="M ${x + side * 8} 94 L ${x + side * 14} 90" stroke="#231815" stroke-width="2.2" stroke-linecap="round"/>`;
+    if (o.makeup === "glitter" || o.makeup === "stars") {
+      out += [[-5, -2], [0, -4], [5, -1], [-2, 1], [3, 2]]
+        .map(([dx, dy]) => `<circle cx="${x + dx}" cy="${90 + dy}" r="0.9" fill="#fff" opacity="0.9"/>`)
+        .join("");
+    }
+    if (o.makeup === "stars") {
+      const sx = x + side * 7;
+      out += `<path d="M ${sx} 105 l 1.2 2.6 2.8 0.3 -2.1 1.9 0.6 2.8 -2.5 -1.4 -2.5 1.4 0.6 -2.8 -2.1 -1.9 2.8 -0.3 Z" fill="#ffd65a" stroke="#b7791f" stroke-width="0.5"/>`;
+    }
+  }
+  return out;
+}
+
+function drawNose(o, skin) {
+  const line = shade(skin, 45);
+  switch (o.nose) {
+    case "round":
+      return `<ellipse cx="100" cy="106" rx="5" ry="3.6" fill="${shade(skin, 20)}" opacity="0.7"/><circle cx="98.5" cy="104.8" r="1.2" fill="#fff" opacity="0.35"/>`;
+    case "pointy":
+      return `<path d="M 100 93 L 104.5 107 L 98 108.5" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+    case "wide":
+      return `<path d="M 93.5 105 Q 96 109.5 100 108 Q 104 109.5 106.5 105" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="97" cy="106.6" r="1" fill="${line}"/><circle cx="103" cy="106.6" r="1" fill="${line}"/>`;
+    default:
+      return `<path d="M 100 100 Q 104 107 98 109" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  }
+}
+
+// Face outline for each face shape (all centred on the same eyes and mouth).
+function facePath(shape) {
+  switch (shape) {
+    case "oval":
+      return { ellipse: [41, 50], ear: 45 };
+    case "square":
+      return { d: "M 56 88 Q 56 43 100 43 Q 144 43 144 88 L 142 113 Q 139 135 100 137 Q 61 135 58 113 Z", ear: 43 };
+    case "heart":
+      return { d: "M 56 86 Q 56 43 100 43 Q 144 43 144 86 Q 142 117 119 131 Q 100 141 81 131 Q 58 117 56 86 Z", ear: 43 };
+    default:
+      return { ellipse: [44, 47], ear: 43 };
+  }
 }
 
 function drawBrows(o, g) {
@@ -479,7 +577,7 @@ function drawBrows(o, g) {
 }
 
 function drawMouth(o) {
-  const lip = "#7a2331";
+  const lip = o.lipColor || "#7a2331";
   switch (o.mouth) {
     case "grin":
       return `<path d="M 89 117 Q 100 127 111 117" stroke="${lip}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
@@ -501,7 +599,7 @@ function drawMouth(o) {
 let talking = false;
 
 function talkingMouth(o) {
-  const lip = "#7a2331";
+  const lip = o.lipColor || "#7a2331";
   return `<g class="fb-m0">${drawMouth(o)}</g>` +
     `<g class="fb-m1"><ellipse cx="100" cy="120" rx="6.5" ry="7.5" fill="${lip}"/><ellipse cx="100" cy="124" rx="4" ry="2.8" fill="#ef7c8e"/><path d="M 94.5 115 Q 100 113.6 105.5 115" stroke="#fff" stroke-width="2" fill="none"/></g>` +
     `<g class="fb-m2"><ellipse cx="100" cy="119.5" rx="7" ry="3.6" fill="${lip}"/><path d="M 94 118 Q 100 117 106 118" stroke="#fff" stroke-width="1.6" fill="none"/></g>`;
@@ -618,16 +716,20 @@ function drawHead(o, g, skin) {
 
   out += `<rect x="91" y="128" width="18" height="30" rx="7" fill="${paint.lin(shade(skin, 18))}"/>`;
   out += `<ellipse cx="100" cy="134" rx="15" ry="7" fill="rgba(0,0,0,0.16)"/>`;
-  out += `<circle cx="57" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/><circle cx="143" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
-  out += `<ellipse cx="100" cy="90" rx="44" ry="47" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.4"/>`;
+  const face = facePath(o.faceShape);
+  out += `<circle cx="${100 - face.ear}" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/><circle cx="${100 + face.ear}" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
+  out += face.ellipse
+    ? `<ellipse cx="100" cy="90" rx="${face.ellipse[0]}" ry="${face.ellipse[1]}" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.4"/>`
+    : `<path d="${face.d}" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.4"/>`;
   out += `<ellipse cx="84" cy="64" rx="16" ry="9" fill="#fff" opacity="0.13"/>`;
   out += drawCheeks(o);
   out += drawFacialHair(o);
+  out += drawMakeup(o);
   out += `<g class="fb-eyes">${drawEyes(o, g, skin)}</g>`;
   out += drawBrows(o, g);
-  out += `<path d="M 100 100 Q 104 107 98 109" stroke="${shade(skin, 45)}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  out += drawNose(o, skin);
   out += talking ? talkingMouth(o) : drawMouth(o);
-  if (!(hides && ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun"].includes(o.hair))) {
+  if (!(hides && ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun", "slickback", "undercut", "twists"].includes(o.hair))) {
     paint.flat = true;
     const shadow = hairFront({ ...o, hairColor: "#000000" });
     paint.flat = false;

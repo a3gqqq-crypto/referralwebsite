@@ -355,3 +355,24 @@
   right: 5px;
   bottom: auto;
 }
+
+/* Close-up while editing face, hair and extras. */
+.avm-body.is-face {
+  width: 210px;
+  height: 210px;
+
+  border-radius: 32px;
+
+  animation: avm-zoom 0.25s ease-out;
+}
+
+@keyframes avm-zoom {
+  from { transform: scale(0.85); opacity: 0.4; }
+}
+
+@media (max-width: 480px) {
+  .avm-body.is-face {
+    width: 170px;
+    height: 170px;
+  }
+}

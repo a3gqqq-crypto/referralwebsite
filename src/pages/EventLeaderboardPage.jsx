@@ -15,10 +15,45 @@ import { useNow, getEventStatus } from "../hooks/useCountdown";
 import { referralLinkFor } from "../hooks/useCopy";
 import { bragShareText, renderBragImage } from "../lib/bragImage";
 import { useStoryShare } from "../components/StoryShare";
+import { parseDicebear } from "../data/avatarParts";
+import { drawFullBody } from "../lib/avatarRender";
 
 import "../styles/eventLeaderboard.css";
 
 const MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+// Top three celebrate on the podium: #1 flexes, #2 throws a peace sign, #3 waves.
+const PODIUM_POSE = { 1: "flex", 2: "peace", 3: "wave" };
+
+// The standings don't include 3D avatars, so fetch them for the podium only.
+function usePodiumBodies(ids) {
+  const key = ids.join(",");
+  const [bodies, setBodies] = useState({});
+
+  useEffect(() => {
+    if (!key) return;
+    let cancelled = false;
+
+    supabase
+      .from("profiles")
+      .select("id, body_avatar, avatar")
+      .in("id", key.split(","))
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setBodies(
+          Object.fromEntries(
+            data.map((row) => [row.id, equippedFrom(row).body]).filter(([, body]) => body)
+          )
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [key]);
+
+  return bodies;
+}
 
 function EventLeaderboardPage({ user }) {
   const { eventId } = useParams();
@@ -70,6 +105,8 @@ function EventLeaderboardPage({ user }) {
       clearInterval(timer);
     };
   }, [event]);
+
+  const bodies = usePodiumBodies(players.slice(0, 3).map((player) => player.id));
 
   if (!event && loadingEvents) return <PageLoading />;
 
@@ -211,13 +248,25 @@ function EventLeaderboardPage({ user }) {
                   to={`/u/${encodeURIComponent(player.username || "")}`}
                   className="board-podium-who"
                 >
-                  <FramedAvatar
-                    userId={player.id}
-                    name={displayNameOf(player)}
-                    frame={equippedFrom(player).frame}
-                    avatar={player.avatar}
-                    size={player.rank === 1 ? 76 : 62}
-                  />
+                  {bodies[player.id] ? (
+                    <img
+                      className={`board-podium-body place-${player.rank}`}
+                      src={drawFullBody(
+                        { ...parseDicebear(bodies[player.id]).o, pose: PODIUM_POSE[player.rank] },
+                        "live"
+                      )}
+                      alt=""
+                      draggable="false"
+                    />
+                  ) : (
+                    <FramedAvatar
+                      userId={player.id}
+                      name={displayNameOf(player)}
+                      frame={equippedFrom(player).frame}
+                      avatar={player.avatar}
+                      size={player.rank === 1 ? 76 : 62}
+                    />
+                  )}
 
                   <strong className="board-podium-name">
                     <StyledName

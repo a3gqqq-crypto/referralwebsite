@@ -448,6 +448,22 @@ export const COSMETICS = [
     price: 299,
   },
   {
+    id: "avatar-hair",
+    type: "avatar",
+    name: "Trendy hair",
+    description: "Wolf cut and space buns.",
+    rarity: "rare",
+    price: 299,
+  },
+  {
+    id: "avatar-glam",
+    type: "avatar",
+    name: "Glam",
+    description: "Glitter and star makeup.",
+    rarity: "epic",
+    price: 349,
+  },
+  {
     id: "emote-dance",
     type: "emote",
     name: "Dance",

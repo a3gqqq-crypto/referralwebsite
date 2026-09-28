@@ -92,6 +92,8 @@ const SKINS = ["ffe0cc", "f9cfae", "eeb892", "d99c6f", "b97a4f", "915a37", "6b3f
 const HAIR_COLORS = ["1f1612", "3b2417", "6b4226", "8f3b1b", "c98b3c", "e0b965", "efe3c2", "9a9a9a", "f07ca8", "d63b3b", "8a5cf0", "4f7cf0", "3fb37f"];
 const EYE_COLORS = ["5b3a22", "2a1d1a", "8a6d3b", "3b6fb6", "3f8f5a", "7b5cc4"];
 const CLOTHES = ["f4f4f4", "1f1f24", "8a8f98", "1f2433", "3f5f95", "4f9cf0", "2a9d8f", "3c6e4f", "7a7a3a", "f2b84b", "f08a4b", "e24b4a", "e2537f", "f7a8c4", "8a5cf0", "d8c3a5", "6b4226"];
+const LIPS = ["7a2331", "b5654f", "d4537e", "c62828", "7b1f4b", "4a1f2e"];
+const MAKEUP = ["b565d8", "f07ca8", "f2b84b", "4f9cf0", "3fb37f", "e24b4a", "8a6d3b"];
 const WITH_BOTTOMS = ["hoodie", "tee", "tank", "sweater", "shirt", "crop", "varsity", "tracksuit", "puffer", "bomber", "leather", "jersey", "suit"];
 
 // group: which tab it sits in. view: "full" shows the whole body in option tiles.
@@ -99,14 +101,21 @@ export const FB_PARTS = [
   { key: "body", label: "Body", group: "body", view: "full", values: ["guy", "girl"] },
   { key: "skin", label: "Skin", group: "body", color: true, values: SKINS },
   { key: "pose", label: "Pose", group: "body", view: "full", values: ["stand", "wave", "hips", "peace", "flex"] },
-  { key: "hair", label: "Hair", group: "hair", values: ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun", "afro", "long", "bob", "bun", "ponytail", "pigtails", "braids", "curlylong", "bald"] },
+  { key: "hair", label: "Hair", group: "hair", values: ["short", "fade", "buzz", "spiky", "sidepart", "slickback", "undercut", "curly", "twists", "locs", "mohawk", "manbun", "afro", "long", "sidebangs", "bob", "bun", "ponytail", "pigtails", "braids", "curlylong", "wolfcut", "spacebuns", "bald"] },
   { key: "hairColor", label: "Colour", group: "hair", color: true, values: HAIR_COLORS },
   { key: "facialHair", label: "Beard", group: "hair", optional: true, values: ["stubble", "mustache", "goatee", "beard"] },
+  { key: "faceShape", label: "Face shape", group: "face", values: ["round", "oval", "square", "heart"] },
   { key: "eyes", label: "Eyes", group: "face", values: ["normal", "happy", "wink", "sleepy", "star", "hearts"] },
+  { key: "eyeShape", label: "Eye shape", group: "face", values: ["round", "almond", "big"], showIf: { eyes: ["normal", "wink"] } },
   { key: "eyeColor", label: "Eye colour", group: "face", color: true, values: EYE_COLORS },
+  { key: "lashes", label: "Lashes", group: "face", optional: true, values: ["lashes", "long"] },
   { key: "brows", label: "Brows", group: "face", values: ["normal", "raised", "flat", "angry", "sad"] },
+  { key: "nose", label: "Nose", group: "face", values: ["button", "round", "pointy", "wide"] },
   { key: "mouth", label: "Mouth", group: "face", values: ["smile", "grin", "open", "smirk", "tongue", "flat"] },
+  { key: "lipColor", label: "Lips", group: "face", color: true, values: LIPS },
   { key: "cheeks", label: "Cheeks", group: "face", optional: true, values: ["blush", "freckles"] },
+  { key: "makeup", label: "Makeup", group: "face", optional: true, values: ["soft", "bold", "glitter", "stars"] },
+  { key: "makeupColor", label: "Makeup colour", group: "face", color: true, values: MAKEUP, showIf: { makeup: ["soft", "bold", "glitter", "stars"] } },
   { key: "hat", label: "Hats", group: "extras", optional: true, values: ["cap", "bandana", "bucket", "headband", "beanie", "catears", "headphones", "horns", "crown", "halo"] },
   { key: "hatColor", label: "Hat colour", group: "extras", color: true, values: CLOTHES, showIf: { hat: ["cap", "bandana", "bucket", "headband", "beanie", "catears"] } },
   { key: "glasses", label: "Glasses", group: "extras", optional: true, values: ["round", "square", "sunglasses", "aviators", "heart", "eyepatch"] },
@@ -130,8 +139,8 @@ export const FB_GROUPS = [
 ];
 
 export const FB_DEFAULTS = {
-  guy: { body: "guy", skin: "eeb892", pose: "stand", hair: "short", hairColor: "3b2417", facialHair: "", eyes: "normal", eyeColor: "5b3a22", brows: "normal", mouth: "smile", cheeks: "", hat: "", hatColor: "e24b4a", glasses: "", earrings: "", necklace: "", top: "hoodie", topColor: "e2537f", bottom: "jeans", bottomColor: "3f5f95", shoes: "sneakers", shoeColor: "f4f4f4", bg: "sky" },
-  girl: { body: "girl", skin: "f9cfae", pose: "stand", hair: "long", hairColor: "3b2417", facialHair: "", eyes: "normal", eyeColor: "5b3a22", brows: "normal", mouth: "smile", cheeks: "blush", hat: "", hatColor: "f7a8c4", glasses: "", earrings: "studs", necklace: "", top: "tee", topColor: "f4f4f4", bottom: "skirt", bottomColor: "1f1f24", shoes: "sneakers", shoeColor: "f4f4f4", bg: "peach" },
+  guy: { body: "guy", skin: "eeb892", pose: "stand", hair: "short", hairColor: "3b2417", facialHair: "", faceShape: "round", eyes: "normal", eyeShape: "round", eyeColor: "5b3a22", lashes: "", brows: "normal", nose: "button", mouth: "smile", lipColor: "7a2331", cheeks: "", makeup: "", makeupColor: "b565d8", hat: "", hatColor: "e24b4a", glasses: "", earrings: "", necklace: "", top: "hoodie", topColor: "e2537f", bottom: "jeans", bottomColor: "3f5f95", shoes: "sneakers", shoeColor: "f4f4f4", bg: "sky" },
+  girl: { body: "girl", skin: "f9cfae", pose: "stand", hair: "long", hairColor: "3b2417", facialHair: "", faceShape: "oval", eyes: "normal", eyeShape: "almond", eyeColor: "5b3a22", lashes: "lashes", brows: "normal", nose: "button", mouth: "smile", lipColor: "d4537e", cheeks: "blush", makeup: "", makeupColor: "f07ca8", hat: "", hatColor: "f7a8c4", glasses: "", earrings: "studs", necklace: "", top: "tee", topColor: "f4f4f4", bottom: "skirt", bottomColor: "1f1f24", shoes: "sneakers", shoeColor: "f4f4f4", bg: "peach" },
 };
 
 const FB_STYLE = { label: "Suffrova", parts: FB_PARTS, defaults: FB_DEFAULTS.guy };
@@ -141,6 +150,7 @@ const styleDef = (style) => (style === "fb" ? FB_STYLE : AVATAR_STYLES[style]);
 // Stored values -> what the drawing code wants (valid ids, "#" colours).
 export function fullBodyOptions(stored) {
   const merged = { ...FB_DEFAULTS.guy, ...stored };
+  if (stored?.lashes === undefined && stored?.body === "girl") merged.lashes = "lashes";
   const out = {};
   for (const part of FB_PARTS) {
     let value = merged[part.key];
@@ -212,6 +222,10 @@ export const PREMIUM_PARTS = {
   "fb.top.tracksuit": "avatar-sporty",
   "fb.bottom.trackpants": "avatar-sporty",
   "fb.hat.headband": "avatar-sporty",
+  "fb.hair.wolfcut": "avatar-hair",
+  "fb.hair.spacebuns": "avatar-hair",
+  "fb.makeup.glitter": "avatar-glam",
+  "fb.makeup.stars": "avatar-glam",
 };
 
 export function premiumFor(style, key, value) {
@@ -235,6 +249,8 @@ export const PACK_PREVIEW = {
   "avatar-gradients": fbPreview({ bg: "sunset" }),
   "avatar-royal": fbPreview({ hat: "crown", top: "suit", topColor: "1f2433", bottomColor: "1f2433", shoes: "boots", shoeColor: "1f1f24", bg: "gold" }),
   "avatar-poses": fbPreview({ pose: "peace", bg: "mint" }),
+  "avatar-hair": fbPreview({ ...FB_DEFAULTS.girl, hair: "spacebuns", hairColor: "8a5cf0", bg: "candy" }),
+  "avatar-glam": fbPreview({ ...FB_DEFAULTS.girl, makeup: "stars", makeupColor: "b565d8", eyeShape: "big", lashes: "long", lipColor: "c62828", bg: "galaxy" }),
   "avatar-street": fbPreview({ top: "varsity", topColor: "e24b4a", bottom: "ripped", bottomColor: "3f5f95", hat: "bucket", hatColor: "1f1f24", bg: "sand" }),
   "avatar-sporty": fbPreview({ ...FB_DEFAULTS.girl, top: "tracksuit", topColor: "2a9d8f", bottom: "trackpants", bottomColor: "2a9d8f", hat: "headband", hatColor: "f4f4f4", hair: "ponytail", bg: "mint" }),
 };
@@ -262,6 +278,8 @@ export function encodeDicebear(style, options) {
   for (const [key, value] of Object.entries(options)) {
     if (key in defaults && value !== defaults[key]) o[key] = value;
   }
+  // Girls get lashes unless they turn them off, so "off" has to be saved.
+  if (style === "fb" && options.body === "girl") o.lashes = options.lashes || "";
   return `db:${JSON.stringify({ s: style, o })}`;
 }
 

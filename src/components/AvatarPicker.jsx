@@ -45,6 +45,7 @@ const NAMES = {
   sidepart: "Side part", manbun: "Man bun", curlylong: "Long curls", catears: "Cat ears", hightops: "High-tops",
   crop: "Crop top", leather: "Leather", puffer: "Puffer", bomber: "Bomber", jersey: "Jersey", tee: "Tee",
   tank: "Tank top", varsity: "Varsity", tracksuit: "Tracksuit", trackpants: "Track pants", ripped: "Ripped jeans",
+  slickback: "Slick back", sidebangs: "Side bangs", wolfcut: "Wolf cut", spacebuns: "Space buns",
 };
 const nameOf = (value) => NAMES[value] || value.charAt(0).toUpperCase() + value.slice(1);
 
@@ -82,6 +83,7 @@ function randomDraft(draft, owned) {
 export function AvatarMaker({ username, frame, current, picture, owned, busy, onSave, onUseAsPicture }) {
   const saved = parseDicebear(current);
   const [draft, setDraft] = useState(() => (saved?.s === "fb" ? saved.o : FB_DEFAULTS.guy));
+  const [history, setHistory] = useState([]);
   const [group, setGroup] = useState("body");
   const [partKey, setPartKey] = useState("body");
 
@@ -104,20 +106,35 @@ export function AvatarMaker({ username, frame, current, picture, owned, busy, on
     ),
   ];
 
-  const set = (key, value) =>
-    setDraft((old) => {
-      if (key !== "body" || old.body === value) return { ...old, [key]: value };
+  // Every change is remembered so Undo can step back.
+  const change = (next) => {
+    setHistory((old) => [...old.slice(-40), draft]);
+    setDraft(next);
+  };
 
-      // Switching guy/girl: swap the other body's default bits for this one's.
-      const from = FB_DEFAULTS[old.body];
-      const to = FB_DEFAULTS[value];
-      const next = { ...old, body: value };
-      for (const item of ["hair", "top", "bottom", "bottomColor", "topColor", "cheeks", "earrings"]) {
-        if (old[item] === from[item]) next[item] = to[item];
-      }
-      if (value === "girl") next.facialHair = "";
-      return next;
-    });
+  const undo = () => {
+    if (!history.length) return;
+    setDraft(history[history.length - 1]);
+    setHistory((old) => old.slice(0, -1));
+  };
+
+  const set = (key, value) => {
+    if (draft[key] === value) return;
+    if (key !== "body") return change({ ...draft, [key]: value });
+
+    // Switching guy/girl: swap the other body's default bits for this one's.
+    const from = FB_DEFAULTS[draft.body];
+    const to = FB_DEFAULTS[value];
+    const next = { ...draft, body: value };
+    for (const item of ["hair", "top", "bottom", "bottomColor", "topColor", "cheeks", "earrings", "faceShape", "eyeShape", "lashes", "lipColor", "makeupColor"]) {
+      if (draft[item] === from[item]) next[item] = to[item];
+    }
+    if (value === "girl") next.facialHair = "";
+    change(next);
+  };
+
+  // Face, hair and extras are easier to see up close.
+  const zoomed = ["hair", "face", "extras"].includes(group);
 
   const lockBadge = (pack) => {
     const item = cosmeticById(pack);
@@ -132,7 +149,12 @@ export function AvatarMaker({ username, frame, current, picture, owned, busy, on
   return (
     <div className="avm">
       <div className="avm-stage">
-        <img className="avm-body" src={drawFullBody(draft, "live")} alt="Your avatar" draggable="false" />
+        <img
+          className={`avm-body ${zoomed ? "is-face" : ""}`}
+          src={drawFullBody(draft, zoomed ? "head" : "live")}
+          alt="Your avatar"
+          draggable="false"
+        />
 
         <div className="avm-stage-side">
           <FramedAvatar name={username} frame={frame} avatar={encoded} size={64} />
@@ -140,11 +162,16 @@ export function AvatarMaker({ username, frame, current, picture, owned, busy, on
           <button
             type="button"
             className="btn btn-sm"
-            onClick={() => setDraft(randomDraft(draft, owned))}
+            onClick={() => change(randomDraft(draft, owned))}
             disabled={busy}
           >
             <Icon name="sparkles" size={15} />
             Surprise me
+          </button>
+
+          <button type="button" className="btn btn-sm" onClick={undo} disabled={busy || !history.length}>
+            <Icon name="refresh" size={15} />
+            Undo
           </button>
 
           {unchanged && current && picture !== current && (
