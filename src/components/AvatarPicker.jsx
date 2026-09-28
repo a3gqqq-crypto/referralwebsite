@@ -44,6 +44,7 @@ const NAMES = {
   guy: "Guy", girl: "Girl", stand: "Chill", wave: "Wave", hips: "Hands on hips", peace: "Peace", flex: "Flex",
   sidepart: "Side part", manbun: "Man bun", curlylong: "Long curls", catears: "Cat ears", hightops: "High-tops",
   crop: "Crop top", leather: "Leather", puffer: "Puffer", bomber: "Bomber", jersey: "Jersey", tee: "Tee",
+  tank: "Tank top", varsity: "Varsity", tracksuit: "Tracksuit", trackpants: "Track pants", ripped: "Ripped jeans",
 };
 const nameOf = (value) => NAMES[value] || value.charAt(0).toUpperCase() + value.slice(1);
 

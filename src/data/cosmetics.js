@@ -432,6 +432,22 @@ export const COSMETICS = [
     price: 599,
   },
   {
+    id: "avatar-street",
+    type: "avatar",
+    name: "Streetwear",
+    description: "Varsity jacket, ripped jeans and a bucket hat.",
+    rarity: "epic",
+    price: 349,
+  },
+  {
+    id: "avatar-sporty",
+    type: "avatar",
+    name: "Sporty",
+    description: "Tracksuit, track pants and a headband.",
+    rarity: "rare",
+    price: 299,
+  },
+  {
     id: "emote-dance",
     type: "emote",
     name: "Dance",

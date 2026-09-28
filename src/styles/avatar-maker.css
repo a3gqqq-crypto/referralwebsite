@@ -348,3 +348,10 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Outfit tiles have a name at the bottom, so the price sits top-right. */
+.avm-options.is-full .avm-lock {
+  top: 5px;
+  right: 5px;
+  bottom: auto;
+}

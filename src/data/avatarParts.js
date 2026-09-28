@@ -92,7 +92,7 @@ const SKINS = ["ffe0cc", "f9cfae", "eeb892", "d99c6f", "b97a4f", "915a37", "6b3f
 const HAIR_COLORS = ["1f1612", "3b2417", "6b4226", "8f3b1b", "c98b3c", "e0b965", "efe3c2", "9a9a9a", "f07ca8", "d63b3b", "8a5cf0", "4f7cf0", "3fb37f"];
 const EYE_COLORS = ["5b3a22", "2a1d1a", "8a6d3b", "3b6fb6", "3f8f5a", "7b5cc4"];
 const CLOTHES = ["f4f4f4", "1f1f24", "8a8f98", "1f2433", "3f5f95", "4f9cf0", "2a9d8f", "3c6e4f", "7a7a3a", "f2b84b", "f08a4b", "e24b4a", "e2537f", "f7a8c4", "8a5cf0", "d8c3a5", "6b4226"];
-const WITH_BOTTOMS = ["hoodie", "tee", "sweater", "shirt", "crop", "puffer", "bomber", "leather", "jersey", "suit"];
+const WITH_BOTTOMS = ["hoodie", "tee", "tank", "sweater", "shirt", "crop", "varsity", "tracksuit", "puffer", "bomber", "leather", "jersey", "suit"];
 
 // group: which tab it sits in. view: "full" shows the whole body in option tiles.
 export const FB_PARTS = [
@@ -107,14 +107,14 @@ export const FB_PARTS = [
   { key: "brows", label: "Brows", group: "face", values: ["normal", "raised", "flat", "angry", "sad"] },
   { key: "mouth", label: "Mouth", group: "face", values: ["smile", "grin", "open", "smirk", "tongue", "flat"] },
   { key: "cheeks", label: "Cheeks", group: "face", optional: true, values: ["blush", "freckles"] },
-  { key: "hat", label: "Hats", group: "extras", optional: true, values: ["cap", "bandana", "beanie", "catears", "headphones", "horns", "crown", "halo"] },
-  { key: "hatColor", label: "Hat colour", group: "extras", color: true, values: CLOTHES, showIf: { hat: ["cap", "bandana", "beanie", "catears"] } },
+  { key: "hat", label: "Hats", group: "extras", optional: true, values: ["cap", "bandana", "bucket", "headband", "beanie", "catears", "headphones", "horns", "crown", "halo"] },
+  { key: "hatColor", label: "Hat colour", group: "extras", color: true, values: CLOTHES, showIf: { hat: ["cap", "bandana", "bucket", "headband", "beanie", "catears"] } },
   { key: "glasses", label: "Glasses", group: "extras", optional: true, values: ["round", "square", "sunglasses", "aviators", "heart", "eyepatch"] },
   { key: "earrings", label: "Earrings", group: "extras", optional: true, values: ["studs", "hoops"] },
   { key: "necklace", label: "Necklace", group: "extras", optional: true, values: ["pearls", "chain"] },
-  { key: "top", label: "Top", group: "outfit", view: "full", values: ["hoodie", "tee", "sweater", "shirt", "crop", "dress", "puffer", "bomber", "leather", "jersey", "suit"] },
+  { key: "top", label: "Top", group: "outfit", view: "full", values: ["hoodie", "tee", "tank", "sweater", "shirt", "crop", "dress", "varsity", "tracksuit", "puffer", "bomber", "leather", "jersey", "suit"] },
   { key: "topColor", label: "Top colour", group: "outfit", color: true, values: CLOTHES },
-  { key: "bottom", label: "Bottoms", group: "outfit", view: "full", values: ["jeans", "joggers", "shorts", "skirt", "cargo"], showIf: { top: WITH_BOTTOMS } },
+  { key: "bottom", label: "Bottoms", group: "outfit", view: "full", values: ["jeans", "joggers", "shorts", "skirt", "ripped", "trackpants", "cargo"], showIf: { top: WITH_BOTTOMS } },
   { key: "bottomColor", label: "Bottoms colour", group: "outfit", color: true, values: CLOTHES, showIf: { top: WITH_BOTTOMS } },
   { key: "shoes", label: "Shoes", group: "outfit", view: "full", values: ["sneakers", "slides", "boots", "hightops"] },
   { key: "shoeColor", label: "Shoe colour", group: "outfit", color: true, values: CLOTHES },
@@ -206,6 +206,12 @@ export const PREMIUM_PARTS = {
   "fb.top.suit": "avatar-royal",
   "fb.pose.peace": "avatar-poses",
   "fb.pose.flex": "avatar-poses",
+  "fb.top.varsity": "avatar-street",
+  "fb.bottom.ripped": "avatar-street",
+  "fb.hat.bucket": "avatar-street",
+  "fb.top.tracksuit": "avatar-sporty",
+  "fb.bottom.trackpants": "avatar-sporty",
+  "fb.hat.headband": "avatar-sporty",
 };
 
 export function premiumFor(style, key, value) {
@@ -229,6 +235,8 @@ export const PACK_PREVIEW = {
   "avatar-gradients": fbPreview({ bg: "sunset" }),
   "avatar-royal": fbPreview({ hat: "crown", top: "suit", topColor: "1f2433", bottomColor: "1f2433", shoes: "boots", shoeColor: "1f1f24", bg: "gold" }),
   "avatar-poses": fbPreview({ pose: "peace", bg: "mint" }),
+  "avatar-street": fbPreview({ top: "varsity", topColor: "e24b4a", bottom: "ripped", bottomColor: "3f5f95", hat: "bucket", hatColor: "1f1f24", bg: "sand" }),
+  "avatar-sporty": fbPreview({ ...FB_DEFAULTS.girl, top: "tracksuit", topColor: "2a9d8f", bottom: "trackpants", bottomColor: "2a9d8f", hat: "headband", hatColor: "f4f4f4", hair: "ponytail", bg: "mint" }),
 };
 
 export const packPreviewAvatar = (id) =>

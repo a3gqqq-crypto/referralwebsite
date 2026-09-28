@@ -116,6 +116,7 @@ const SLEEVES = {
   tee: "short", crop: "short", jersey: "none", dress: "none",
   hoodie: "long", sweater: "long", shirt: "long", bomber: "long",
   leather: "long", puffer: "long", suit: "long",
+  varsity: "long", tracksuit: "long", tank: "none",
 };
 
 function drawArm(a, o, g, skin) {
@@ -130,6 +131,9 @@ function drawArm(a, o, g, skin) {
     const cuff = lerp(a.H, a.E, 0.22);
     out += `<path d="M ${pt(a.S)} L ${pt(a.E)} L ${pt(cuff)}" stroke="${top}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
     out += tube(`M ${pt(a.S)} L ${pt(a.E)} L ${pt(cuff)}`, w);
+    if (o.top === "tracksuit") {
+      out += `<path d="M ${pt(a.S)} L ${pt(a.E)} L ${pt(cuff)}" transform="translate(${a.s * 3} 0)" stroke="#fff" stroke-width="2" stroke-linejoin="round" fill="none"/>`;
+    }
     if (o.top === "bomber" || o.top === "hoodie" || o.top === "sweater") {
       const band = lerp(a.H, a.E, 0.3);
       out += `<path d="M ${pt(band)} L ${pt(cuff)}" stroke="${o.top === "bomber" ? "#1d1d22" : shade(top, 22)}" stroke-width="${w}" stroke-linecap="butt" fill="none"/>`;
@@ -163,7 +167,7 @@ function drawHand(a, skin) {
   return out;
 }
 
-const sleeveColor = (o) => (o.top === "leather" ? "#232326" : o.topColor);
+const sleeveColor = (o) => (o.top === "leather" ? "#232326" : o.top === "varsity" ? "#f4f1ea" : o.topColor);
 
 function drawTop(o, g, skin) {
   const c = o.topColor;
@@ -234,6 +238,22 @@ function drawTop(o, g, skin) {
       out += `<path d="M 84 150 Q 100 162 116 150 L 116 158 Q 100 170 84 158 Z" fill="${d}"/>`;
       out += `<path d="M 100 162 L 100 240" stroke="${d}" stroke-width="2"/>`;
       break;
+    case "tank":
+      out += `<path d="M 84 153 Q 100 174 116 153" fill="${skin}" stroke="${d}" stroke-width="2"/>`;
+      out += `<path d="M ${100 - g.sw} 160 Q ${100 - g.sw + 10} 176 ${100 - g.sw + 3} 192 M ${100 + g.sw} 160 Q ${100 + g.sw - 10} 176 ${100 + g.sw - 3} 192" stroke="${d}" stroke-width="2" fill="none"/>`;
+      break;
+    case "varsity":
+      out += `<path d="M 84 152 Q 100 166 116 152" fill="none" stroke="#f4f1ea" stroke-width="6"/><path d="M 84 152 Q 100 166 116 152" fill="none" stroke="${d}" stroke-width="2" stroke-dasharray="0 3 30"/>`;
+      out += `<path d="M 100 160 L 100 234" stroke="${d}" stroke-width="1.6"/>`;
+      out += [176, 192, 208, 224].map((y) => `<circle cx="96" cy="${y}" r="1.8" fill="#f4f1ea"/>`).join("");
+      out += `<text x="${100 - g.sw + 17}" y="194" text-anchor="middle" font-family="Georgia, serif" font-weight="700" font-size="20" fill="#f4f1ea" stroke="${d}" stroke-width="0.8">S</text>`;
+      out += `<path d="M ${100 - g.hp + 1} 234 L ${100 + g.hp - 1} 234" stroke="#f4f1ea" stroke-width="7"/><path d="M ${100 - g.hp + 1} 234 L ${100 + g.hp - 1} 234" stroke="${d}" stroke-width="2"/>`;
+      break;
+    case "tracksuit":
+      out += `<path d="M 86 151 L 114 151 L 112 160 Q 100 164 88 160 Z" fill="${d}"/>`;
+      out += `<path d="M 100 158 L 100 240" stroke="#e8e8e8" stroke-width="2"/><circle cx="100" cy="170" r="2.4" fill="#e8e8e8"/>`;
+      out += `<path d="M ${100 - g.sw + 4} 166 L ${100 - g.hp + 3} 236 M ${100 + g.sw - 4} 166 L ${100 + g.hp - 3} 236" stroke="#fff" stroke-width="2.2"/>`;
+      break;
     case "suit":
       out += `<path d="M 90 153 L 100 190 L 110 153 Z" fill="#f7f7f7"/>`;
       out += `<path d="M 97 158 L 103 158 L 104 184 L 100 190 L 96 184 Z" fill="#c8323c"/>`;
@@ -277,6 +297,15 @@ function drawLegs(o, g, skin) {
       out += hips(c) + leg(lx, c) + leg(rx, c);
       out += `<rect x="${lx - w / 2}" y="312" width="${w}" height="8" rx="3" fill="${d}"/><rect x="${rx - w / 2}" y="312" width="${w}" height="8" rx="3" fill="${d}"/>`;
       out += `<path d="M ${lx + w / 2 - 3} 244 L ${lx + w / 2 - 3} 310 M ${rx - w / 2 + 3} 244 L ${rx - w / 2 + 3} 310" stroke="#fff" stroke-width="2" opacity="0.8"/>`;
+      break;
+    case "trackpants":
+      out += hips(c) + leg(lx, c) + leg(rx, c);
+      out += `<path d="M ${lx - w / 2 + 2} 240 L ${lx - w / 2 + 3} 322 M ${rx + w / 2 - 2} 240 L ${rx + w / 2 - 3} 322" stroke="#fff" stroke-width="2.4"/>`;
+      break;
+    case "ripped":
+      out += hips(c) + leg(lx, c) + leg(rx, c);
+      out += `<path d="M 100 240 L 100 262" stroke="${d}" stroke-width="1.3" opacity="0.8"/>`;
+      out += [[lx, 284], [rx, 278], [lx + 2, 306]].map(([x, y]) => `<path d="M ${x - 6} ${y} Q ${x} ${y - 4} ${x + 6} ${y} Q ${x} ${y + 5} ${x - 6} ${y} Z" fill="${skin}"/><path d="M ${x - 7} ${y} L ${x + 7} ${y}" stroke="#f4f4f4" stroke-width="1" opacity="0.8"/>`).join("");
       break;
     case "cargo":
       out += hips(c) + leg(lx, c) + leg(rx, c);
@@ -539,6 +568,10 @@ function drawHat(o) {
         [74, 92, 110, 128].map((x) => `<circle cx="${x}" cy="${70 - (x > 100 ? (128 - x) / 6 : (x - 74) / 6)}" r="1.6" fill="#fff"/>`).join("");
     case "horns":
       return `<path d="M 68 52 Q 50 40 56 16 Q 66 36 80 44 Z M 132 52 Q 150 40 144 16 Q 134 36 120 44 Z" fill="#c62828" stroke="#7f1414" stroke-width="1.5"/>`;
+    case "bucket":
+      return `<path d="M 60 70 Q 62 26 100 26 Q 138 26 140 70 Z" fill="${paint.rad(c)}" stroke="${OUTLINE}" stroke-width="1.2"/><path d="M 44 78 Q 100 56 156 78 Q 160 86 150 86 Q 100 70 50 86 Q 40 86 44 78 Z" fill="${d}"/><path d="M 62 64 Q 100 54 138 64" stroke="${d}" stroke-width="2" fill="none"/>`;
+    case "headband":
+      return `<path d="M 56 72 Q 100 56 144 72 L 144 84 Q 100 68 56 84 Z" fill="${paint.lin(c)}"/><path d="M 60 76 Q 100 62 140 76" stroke="#fff" stroke-width="1.6" fill="none" opacity="0.7"/>`;
     case "halo":
       return `<ellipse cx="100" cy="20" rx="30" ry="7" fill="none" stroke="#ffd65a" stroke-width="5"/>`;
     default:
