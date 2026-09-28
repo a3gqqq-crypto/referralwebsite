@@ -17,7 +17,7 @@ import { useCall } from "../context/CallContext";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { BadgeRow, EmoteAvatar, FramedAvatar, Sticker, StyledName } from "../components/Cosmetics";
-import { EMOTES, STICKERS, canUseEmote, emoteFromBody, stickerFromBody } from "../data/avatarParts";
+import { EMOTES, STICKERS, canUseEmote, canUseSticker, emoteFromBody, stickerFromBody } from "../data/avatarParts";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
 import { useMyProfile } from "../context/ProfileContext";
@@ -99,18 +99,32 @@ function EmoteTray({ owned, body, disabled, onSend, onSendSticker, onClose }) {
       {tab === "stickers" ? (
         body ? (
           <div className="chat-stickers-grid">
-            {STICKERS.map((sticker) => (
-              <button
-                key={sticker.id}
-                type="button"
-                className="chat-sticker-pick"
-                onClick={() => onSendSticker(sticker)}
-                disabled={disabled}
-                aria-label={`Sticker: ${sticker.text}`}
-              >
-                <Sticker sticker={sticker} body={body} size={74} />
-              </button>
-            ))}
+            {STICKERS.map((sticker) =>
+              canUseSticker(sticker, owned) ? (
+                <button
+                  key={sticker.id}
+                  type="button"
+                  className="chat-sticker-pick"
+                  onClick={() => onSendSticker(sticker)}
+                  disabled={disabled}
+                  aria-label={`Sticker: ${sticker.text}`}
+                >
+                  <Sticker sticker={sticker} body={body} size={74} />
+                </button>
+              ) : (
+                <Link
+                  key={sticker.id}
+                  to={`/shop?type=sticker&item=${sticker.premium}`}
+                  className="chat-sticker-pick is-locked"
+                  aria-label={`Sticker: ${sticker.text} (locked)`}
+                >
+                  <Sticker sticker={sticker} body={body} size={74} />
+                  <span className="chat-sticker-lock">
+                    <Icon name="lock" size={10} /> {formatPrice(cosmeticById(sticker.premium)?.price)}
+                  </span>
+                </Link>
+              )
+            )}
           </div>
         ) : (
           <div className="chat-stickers-empty">

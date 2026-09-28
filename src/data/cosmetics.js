@@ -10,6 +10,7 @@ export const SLOTS = {
   badge: { label: "Badges", single: "Badge" },
   avatar: { label: "Avatar packs", single: "Avatar pack" },
   emote: { label: "Emotes", single: "Emote" },
+  sticker: { label: "Sticker packs", single: "Sticker pack" },
 };
 
 export const MAX_BADGES = 3;
@@ -495,6 +496,22 @@ export const COSMETICS = [
     description: "Glitter and star makeup.",
     rarity: "epic",
     price: 349,
+  },
+  {
+    id: "stickers-savage",
+    type: "sticker",
+    name: "Savage",
+    description: "skill issue, ratio, cope, no cap, fr fr, slay.",
+    rarity: "rare",
+    price: 249,
+  },
+  {
+    id: "stickers-wholesome",
+    type: "sticker",
+    name: "Wholesome",
+    description: "proud of u, hug?, miss u, u got this, bestie, ily.",
+    rarity: "rare",
+    price: 249,
   },
   {
     id: "emote-dance",

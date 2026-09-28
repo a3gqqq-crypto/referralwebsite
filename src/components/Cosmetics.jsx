@@ -4,7 +4,10 @@ import Icon from "./Icon";
 import { cosmeticById } from "../data/cosmetics";
 import { avatarSrc } from "../data/avatars";
 import { drawFullBody, useAvatarDicebear } from "../lib/avatarRender";
-import { emoteAvatar, emoteById, packPreviewAvatar } from "../data/avatarParts";
+import { emoteAvatar, emoteById, packPreviewAvatar, stickersInPack } from "../data/avatarParts";
+
+// Used to preview stickers for people who haven't made a 3D avatar yet.
+const SAMPLE_BODY = `db:${JSON.stringify({ s: "fb", o: {} })}`;
 import { useIsOnline } from "../lib/presence";
 
 import "../styles/cosmetics.css";
@@ -182,6 +185,10 @@ export function ProfileBanner({ banner, className = "", children }) {
 export function CosmeticPreview({ item, username = "you", avatar = null, body = null }) {
   if (item.type === "avatar") {
     return <FramedAvatar name={username} avatar={packPreviewAvatar(item.id)} size={76} />;
+  }
+
+  if (item.type === "sticker") {
+    return <Sticker sticker={stickersInPack(item.id)[0]} body={body || SAMPLE_BODY} size={70} />;
   }
 
   if (item.type === "emote") {

@@ -377,7 +377,27 @@ export const STICKERS = [
   { id: "omw", text: "omw", color: "#9ad0ff", look: { pose: "wave", eyes: "wink", mouth: "grin" } },
   { id: "ty", text: "ty <3", color: "#ff7ab8", look: { eyes: "hearts", mouth: "grin" } },
   { id: "gn", text: "gn", color: "#c7a6ff", look: { eyes: "sleepy", mouth: "smile" } },
+
+  // Savage pack
+  { id: "skillissue", text: "skill issue", color: "#ff8a8a", premium: "stickers-savage", look: { mouth: "smirk", pose: "hips", brows: "raised" } },
+  { id: "ratio", text: "ratio", color: "#ffd166", premium: "stickers-savage", look: { mouth: "smirk", pose: "peace", glasses: "sunglasses" } },
+  { id: "cope", text: "cope", color: "#9ad0ff", premium: "stickers-savage", look: { eyes: "sleepy", mouth: "smirk" } },
+  { id: "nocap", text: "no cap", color: "#7cf0c4", premium: "stickers-savage", look: { mouth: "flat", brows: "angry", pose: "hips" } },
+  { id: "frfr", text: "fr fr", color: "#c7a6ff", premium: "stickers-savage", look: { mouth: "open", brows: "raised" } },
+  { id: "slay", text: "slay", color: "#ff7ab8", premium: "stickers-savage", look: { eyes: "star", mouth: "grin", pose: "flex" } },
+
+  // Wholesome pack
+  { id: "proud", text: "proud of u", color: "#ffd166", premium: "stickers-wholesome", look: { eyes: "happy", mouth: "smile", pose: "peace" } },
+  { id: "hug", text: "hug?", color: "#ff7ab8", premium: "stickers-wholesome", look: { eyes: "happy", mouth: "grin", pose: "flex" } },
+  { id: "missu", text: "miss u", color: "#c7a6ff", premium: "stickers-wholesome", look: { eyes: "sleepy", brows: "sad", mouth: "smile" } },
+  { id: "gotthis", text: "u got this", color: "#7cf0c4", premium: "stickers-wholesome", look: { pose: "flex", mouth: "grin", brows: "raised" } },
+  { id: "bestie", text: "bestie", color: "#ff7ab8", premium: "stickers-wholesome", look: { eyes: "hearts", pose: "wave", mouth: "grin" } },
+  { id: "ily", text: "ily", color: "#ff8a8a", premium: "stickers-wholesome", look: { eyes: "hearts", mouth: "smile" } },
 ];
+
+export const canUseSticker = (sticker, owned) => !sticker.premium || owned?.has(sticker.premium);
+
+export const stickersInPack = (packId) => STICKERS.filter((sticker) => sticker.premium === packId);
 
 export const stickerById = (id) => STICKERS.find((sticker) => sticker.id === id) || null;
 

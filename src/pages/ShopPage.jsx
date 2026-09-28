@@ -3,10 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
-import { CosmeticPreview, EmoteAvatar } from "../components/Cosmetics";
+import { CosmeticPreview, EmoteAvatar, Sticker } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { supabase } from "../lib/supabaseClient";
-import { emoteById, packPreviewAvatar } from "../data/avatarParts";
+import { emoteById, packPreviewAvatar, stickersInPack } from "../data/avatarParts";
 import CryptoCheckout from "../components/CryptoCheckout";
 import SpendBoard from "../components/SpendBoard";
 import {
@@ -23,9 +23,9 @@ import {
 
 import "../styles/shop.css";
 
-const FILTERS = ["all", "avatar", "emote", "frame", "name", "banner", "badge"];
+const FILTERS = ["all", "avatar", "emote", "sticker", "frame", "name", "banner", "badge"];
 // Not equipped on the profile: packs are used in the avatar maker, emotes in chat and calls.
-const USED_ELSEWHERE = { avatar: { to: "/profile", label: "Use it in the avatar maker" }, emote: { to: "/chat", label: "Use it in chat" } };
+const USED_ELSEWHERE = { avatar: { to: "/profile", label: "Use it in the avatar maker" }, emote: { to: "/chat", label: "Use it in chat" }, sticker: { to: "/chat", label: "Use them in chat" } };
 
 function ShopPage() {
   const [params, setParams] = useSearchParams();
@@ -65,7 +65,7 @@ function ShopPage() {
   if (selected) {
     if (selected.type === "avatar") {
       tryOn.body = packPreviewAvatar(selected.id);
-    } else if (selected.type === "emote") {
+    } else if (selected.type === "emote" || selected.type === "sticker") {
       // Previewed in the item tile.
     } else if (selected.type === "badge") {
       tryOn.badges = equipped.badges.includes(selected.id)
@@ -297,6 +297,19 @@ function ShopPage() {
             bio={profile?.bio}
             xp={profile?.xp}
           />
+
+          {selected?.type === "sticker" && (
+            <div className="shop-emote-stage shop-sticker-stage card">
+              {stickersInPack(selected.id).map((sticker) => (
+                <Sticker
+                  key={sticker.id}
+                  sticker={sticker}
+                  body={equipped.body || `db:${JSON.stringify({ s: "fb", o: {} })}`}
+                  size={78}
+                />
+              ))}
+            </div>
+          )}
 
           {selected?.type === "emote" && (
             <div className="shop-emote-stage card">
