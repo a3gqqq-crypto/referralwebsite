@@ -234,6 +234,39 @@ export const COSMETICS = [
     price: 449,
   },
 
+  {
+    id: "banner-beach",
+    type: "banner",
+    name: "Beach day",
+    description: "Golden hour, palm trees, waves.",
+    rarity: "rare",
+    price: 349,
+  },
+  {
+    id: "banner-city",
+    type: "banner",
+    name: "City nights",
+    description: "Skyline, lit windows, neon street.",
+    rarity: "epic",
+    price: 399,
+  },
+  {
+    id: "banner-gaming",
+    type: "banner",
+    name: "Gaming setup",
+    description: "Two monitors and RGB everything.",
+    rarity: "epic",
+    price: 399,
+  },
+  {
+    id: "banner-stadium",
+    type: "banner",
+    name: "Stadium",
+    description: "Floodlights and a roaring crowd.",
+    rarity: "legendary",
+    price: 499,
+  },
+
   /* ---------- Badges ---------- */
   {
     id: "badge-first",
