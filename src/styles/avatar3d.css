@@ -1,0 +1,31 @@
+/* 3D avatar viewer (components/Avatar3D.jsx) */
+
+.avatar-3d {
+  position: relative;
+}
+
+.avatar-3d canvas {
+  position: absolute;
+  inset: 0;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-3d-placeholder {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+/* On the profile banner it stands at the right, like the 2D one did. */
+.avatar-3d.profile-card-figure {
+  position: absolute;
+}

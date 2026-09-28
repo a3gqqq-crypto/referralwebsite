@@ -15,6 +15,7 @@ import {
 } from "../data/avatarParts";
 import { cosmeticById, formatPrice } from "../data/cosmetics";
 import { drawFullBody } from "../lib/avatarRender";
+import Avatar3D from "./Avatar3D";
 
 import "../styles/avatar-maker.css";
 
@@ -84,6 +85,8 @@ export function AvatarMaker({ username, frame, current, picture, owned, busy, on
   const saved = parseDicebear(current);
   const [draft, setDraft] = useState(() => (saved?.s === "fb" ? saved.o : FB_DEFAULTS.guy));
   const [history, setHistory] = useState([]);
+  const [view3d, setView3d] = useState(true);
+  const [talkTest, setTalkTest] = useState(false);
   const [group, setGroup] = useState("body");
   const [partKey, setPartKey] = useState("body");
 
@@ -149,15 +152,40 @@ export function AvatarMaker({ username, frame, current, picture, owned, busy, on
   return (
     <div className="avm">
       <div className="avm-stage">
-        <img
-          className={`avm-body ${zoomed ? "is-face" : ""}`}
-          src={drawFullBody(draft, zoomed ? "head" : "live")}
-          alt="Your avatar"
-          draggable="false"
-        />
+        {view3d ? (
+          <Avatar3D
+            options={draft}
+            talking={talkTest}
+            framing={zoomed ? "bust" : "full"}
+            className="avm-3d"
+            fallback={drawFullBody(draft, zoomed ? "head" : "live")}
+          />
+        ) : (
+          <img
+            className={`avm-body ${zoomed ? "is-face" : ""}`}
+            src={drawFullBody(draft, zoomed ? "head" : "live")}
+            alt="Your avatar"
+            draggable="false"
+          />
+        )}
 
         <div className="avm-stage-side">
           <FramedAvatar name={username} frame={frame} avatar={encoded} size={64} />
+
+          <div className="avm-view-toggle" role="group" aria-label="View">
+            <button type="button" className={!view3d ? "active" : ""} onClick={() => setView3d(false)}>
+              2D
+            </button>
+            <button type="button" className={view3d ? "active" : ""} onClick={() => setView3d(true)}>
+              3D
+            </button>
+          </div>
+
+          {view3d && (
+            <button type="button" className="btn btn-sm" onClick={() => setTalkTest((on) => !on)}>
+              {talkTest ? "Stop talking" : "Test talking"}
+            </button>
+          )}
 
           <button
             type="button"

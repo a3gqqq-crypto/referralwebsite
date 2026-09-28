@@ -376,3 +376,48 @@
     height: 170px;
   }
 }
+
+
+.avm-3d {
+  width: 220px;
+  height: 300px;
+
+  flex-shrink: 0;
+}
+
+.avm-view-toggle {
+  display: flex;
+  padding: 3px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+}
+
+.avm-view-toggle button {
+  flex: 1;
+
+  padding: 5px 12px;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--text-soft);
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.avm-view-toggle button.active {
+  background: var(--accent-grad);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .avm-3d {
+    width: 170px;
+    height: 250px;
+  }
+}

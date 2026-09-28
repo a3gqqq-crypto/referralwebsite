@@ -6,6 +6,7 @@ import Icon from "../components/Icon";
 import { EmoteAvatar, FramedAvatar } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { EMOTES, canUseEmote, parseDicebear } from "../data/avatarParts";
+import Avatar3D from "../components/Avatar3D";
 import { fullBodySrc } from "../lib/avatarRender";
 import { supabase } from "../lib/supabaseClient";
 import { REACTIONS, useCall } from "../context/CallContext";
@@ -99,7 +100,7 @@ function EmoteWheel({ owned, onPick, onClose }) {
 }
 
 // One person: camera if on, otherwise their avatar. Tap for options.
-function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onKick, emoting }) {
+function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onKick, emoting, use3d }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const meta = readMeta(participant);
   const name = participant.name || meta.username || "Someone";
@@ -130,6 +131,23 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
     >
       {cameraOn ? (
         <TrackVideo track={camera.track} mirrored={isLocal} />
+      ) : body && use3d ? (
+        // 3D avatar: moves its mouth while talking, acts out emotes.
+        <span className={`call-figure ${emoting ? `emote emote-${emoting.emote.anim}` : ""}`}>
+          <Avatar3D
+            className="call-3d emote-face"
+            options={{ ...parseDicebear(bodyAvatar).o, ...(emoting?.emote.look || {}) }}
+            talking={talking && !emoting}
+            lite
+            interactive={false}
+            fallback={fullBodySrc(bodyAvatar, talking ? "talk" : "live")}
+          />
+          {emoting && (
+            <span key={emoting.id} className="call-tile-emote" aria-hidden="true">
+              {emoting.emote.emoji}
+            </span>
+          )}
+        </span>
       ) : emoting ? (
         <span className="call-figure">
           <EmoteAvatar
@@ -354,6 +372,7 @@ function CallPage() {
                 onToggleMute={call.toggleMuteForMe}
                 onKick={call.kick}
                 emoting={call.emotes[participant.identity]}
+                use3d={call.everyone.length <= 6}
               />
             ))}
           </ul>

@@ -817,3 +817,21 @@ export function fullBodySvg(o, view = "full", bgColors = FB_BACKGROUND_FALLBACK)
 }
 
 export const svgToUri = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+
+// Face features only (no head, hair or body) on a transparent background,
+// for wrapping onto the 3D head. viewBox is centred on the face (100, 90).
+// noEyes: leave the eyes out (the 3D head has real eyeballs).
+export function faceDecalSvg(o) {
+  paint = makePainter();
+  talking = false;
+  const g = geometry(o);
+  const body =
+    drawCheeks(o) +
+    drawFacialHair(o) +
+    drawMakeup(o) +
+    (o.noEyes ? "" : drawEyes(o, g, o.skin)) +
+    drawBrows(o, g) +
+    (o.noNose ? "" : drawNose(o, o.skin)) +
+    drawMouth(o);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="50 60 100 90" width="500" height="450">${paint.defs()}${body}</svg>`;
+}

@@ -8,6 +8,8 @@ import { LevelBadge, LevelProgress } from "./Level";
 import StaffTag from "./StaffTag";
 import { lastSeenText, useIsOnline } from "../lib/presence";
 import { fullBodySrc } from "../lib/avatarRender";
+import { parseDicebear } from "../data/avatarParts";
+import Avatar3D from "./Avatar3D";
 
 import "../styles/profile.css";
 
@@ -33,7 +35,13 @@ function ProfileCard({
   return (
     <article className={`profile-card profile-card-${size}`}>
       <ProfileBanner banner={equipped.banner} className={`profile-card-banner ${figure ? "has-figure" : ""}`}>
-        {figure && <img className="profile-card-figure" src={figure} alt="" draggable="false" />}
+        {figure && (
+          <Avatar3D
+            className="profile-card-figure is-3d"
+            options={parseDicebear(equipped.body).o}
+            fallback={figure}
+          />
+        )}
       </ProfileBanner>
 
       <div className="profile-card-body">

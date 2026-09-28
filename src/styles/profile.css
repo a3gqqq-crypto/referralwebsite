@@ -772,3 +772,21 @@
     overflow: visible;
   }
 }
+
+
+/* 3D character on the banner (drag to spin). */
+.profile-card-figure.is-3d {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 5 / 8;
+
+  right: 4%;
+  bottom: 0;
+
+  filter: none;
+  pointer-events: auto;
+}
+
+img.profile-card-figure.is-3d {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+}
