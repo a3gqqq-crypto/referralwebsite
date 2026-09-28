@@ -852,3 +852,79 @@
 .push-card-logo {
   background: linear-gradient(135deg, #3ddc84, #1fa463);
 }
+
+.avatar-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-top: 16px;
+  padding: 10px 16px 10px 10px;
+
+  border-color: rgba(255, 159, 61, 0.35);
+
+  background:
+    radial-gradient(420px 160px at 0% 60%, rgba(255, 159, 61, 0.16), transparent 70%),
+    var(--surface);
+}
+
+.avatar-card-crew {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.avatar-card-crew img {
+  height: 92px;
+  width: auto;
+
+  margin-left: -14px;
+
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+}
+
+.avatar-card-crew img:first-child {
+  margin-left: 0;
+}
+
+.avatar-card-crew img:nth-child(2) {
+  height: 104px;
+}
+
+.avatar-card-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.avatar-card-text strong {
+  font-size: 15.5px;
+}
+
+.avatar-card-text span {
+  color: var(--text-soft);
+
+  font-size: 13.5px;
+}
+
+@media (max-width: 560px) {
+  .avatar-card {
+    flex-wrap: wrap;
+  }
+
+  .avatar-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .avatar-card-crew img {
+    height: 76px;
+  }
+
+  .avatar-card-crew img:nth-child(2) {
+    height: 86px;
+  }
+}

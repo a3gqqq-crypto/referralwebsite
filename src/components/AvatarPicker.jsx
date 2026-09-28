@@ -295,8 +295,10 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
 function AvatarPicker({ username, frame, current, owned = new Set(), busy, onPick, onUpload }) {
   const fileRef = useRef(null);
   const hasUpload = current?.startsWith("upload:");
-  const [mode, setMode] = useState(
-    hasUpload ? "photo" : current?.startsWith("builtin:") ? "classic" : "maker"
+  const [mode, setMode] = useState(() =>
+    new URLSearchParams(window.location.search).get("avatar") === "make"
+      ? "maker"
+      : hasUpload ? "photo" : current?.startsWith("builtin:") ? "classic" : "maker"
   );
 
   return (
