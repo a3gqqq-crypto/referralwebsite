@@ -131,7 +131,7 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
   return (
     <div className="avm">
       <div className="avm-stage">
-        <img className="avm-body" src={drawFullBody(draft, "full")} alt="Your avatar" draggable="false" />
+        <img className="avm-body" src={drawFullBody(draft, "live")} alt="Your avatar" draggable="false" />
 
         <div className="avm-stage-side">
           <FramedAvatar name={username} frame={frame} avatar={encoded} size={64} />

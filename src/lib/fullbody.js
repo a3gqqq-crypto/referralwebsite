@@ -12,6 +12,59 @@ function shade(hex, amount) {
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1)}`;
 }
 
+/* ---------- Shading (the 3D look) ---------- */
+
+// Gradients lit from the upper left. Each picture is its own SVG document,
+// so ids only need to be unique within one drawing.
+function makePainter() {
+  const defs = [];
+  const ids = new Map();
+  const define = (key, build) => {
+    if (!ids.has(key)) {
+      const id = `p${ids.size}`;
+      ids.set(key, id);
+      defs.push(build(id));
+    }
+    return `url(#${ids.get(key)})`;
+  };
+
+  return {
+    flat: false,
+    // Cloth and limbs.
+    lin(c) {
+      if (this.flat || !c?.startsWith("#")) return c;
+      return define(`l${c}`, (id) =>
+        `<linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0.4"><stop offset="0" stop-color="${shade(c, -30)}"/><stop offset="0.45" stop-color="${c}"/><stop offset="1" stop-color="${shade(c, 38)}"/></linearGradient>`
+      );
+    },
+    // Round things: head, hands, shoes, curls.
+    rad(c) {
+      if (this.flat || !c?.startsWith("#")) return c;
+      return define(`r${c}`, (id) =>
+        `<radialGradient id="${id}" cx="0.36" cy="0.3" r="0.8"><stop offset="0" stop-color="${shade(c, -26)}"/><stop offset="0.5" stop-color="${c}"/><stop offset="1" stop-color="${shade(c, 34)}"/></radialGradient>`
+      );
+    },
+    // Hair: one gradient across the whole head (so curls and strands match),
+    // with a shine band near the crown.
+    hair(c) {
+      if (this.flat || !c?.startsWith("#")) return c;
+      return define(`h${c}`, (id) =>
+        `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="80" y1="14" x2="112" y2="210"><stop offset="0" stop-color="${shade(c, -22)}"/><stop offset="0.12" stop-color="${shade(c, -48)}"/><stop offset="0.2" stop-color="${c}"/><stop offset="0.55" stop-color="${shade(c, 16)}"/><stop offset="1" stop-color="${shade(c, 34)}"/></linearGradient>`
+      );
+    },
+    defs() {
+      return defs.length ? `<defs>${defs.join("")}</defs>` : "";
+    },
+  };
+}
+
+let paint = makePainter();
+
+// Highlight and shadow strokes that make an arm or leg look round.
+const tube = (d, width) =>
+  `<path d="${d}" transform="translate(-${(width * 0.18).toFixed(1)} 0)" stroke="rgba(255,255,255,0.13)" stroke-width="${(width * 0.34).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>` +
+  `<path d="${d}" transform="translate(${(width * 0.22).toFixed(1)} 0)" stroke="rgba(0,0,0,0.09)" stroke-width="${(width * 0.34).toFixed(1)}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+
 const lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 const pt = (p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`;
 
@@ -71,10 +124,12 @@ function drawArm(a, o, g, skin) {
   const w = g.arm + (o.top === "puffer" ? 3 : 0);
   let out = `<path d="M ${pt(a.S)} L ${pt(a.E)} L ${pt(a.H)}" stroke="${OUTLINE}" stroke-width="${g.arm + 2.4}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
   out += `<path d="M ${pt(a.S)} L ${pt(a.E)} L ${pt(a.H)}" stroke="${skin}" stroke-width="${g.arm}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  out += tube(`M ${pt(a.S)} L ${pt(a.E)} L ${pt(a.H)}`, g.arm);
 
   if (sleeve === "long") {
     const cuff = lerp(a.H, a.E, 0.22);
     out += `<path d="M ${pt(a.S)} L ${pt(a.E)} L ${pt(cuff)}" stroke="${top}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+    out += tube(`M ${pt(a.S)} L ${pt(a.E)} L ${pt(cuff)}`, w);
     if (o.top === "bomber" || o.top === "hoodie" || o.top === "sweater") {
       const band = lerp(a.H, a.E, 0.3);
       out += `<path d="M ${pt(band)} L ${pt(cuff)}" stroke="${o.top === "bomber" ? "#1d1d22" : shade(top, 22)}" stroke-width="${w}" stroke-linecap="butt" fill="none"/>`;
@@ -82,6 +137,7 @@ function drawArm(a, o, g, skin) {
   } else if (sleeve === "short") {
     const end = lerp(a.S, a.E, 0.7);
     out += `<path d="M ${pt(a.S)} L ${pt(end)}" stroke="${top}" stroke-width="${w + 3}" stroke-linecap="round" fill="none"/>`;
+    out += tube(`M ${pt(a.S)} L ${pt(end)}`, w + 3);
   }
 
   out += drawHand(a, skin);
@@ -91,7 +147,7 @@ function drawArm(a, o, g, skin) {
 function drawHand(a, skin) {
   const [x, y] = a.H;
   const edge = shade(skin, 40);
-  let out = `<circle cx="${x}" cy="${y}" r="8.5" fill="${skin}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
+  let out = `<circle cx="${x}" cy="${y}" r="8.5" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
 
   if (a.hand === "open") {
     out += [-6, -2, 2, 6]
@@ -116,16 +172,16 @@ function drawTop(o, g, skin) {
   let out = "";
 
   if (o.top === "crop") {
-    out += `<path d="${torsoPath(g)}" fill="${skin}" ${ol}/>`;
+    out += `<path d="${torsoPath(g)}" fill="${paint.lin(skin)}" ${ol}/>`;
     out += `<ellipse cx="100" cy="230" rx="2" ry="2.6" fill="${shade(skin, 45)}"/>`;
-    out += `<path d="${torsoPath(g, 220)}" fill="${c}" ${ol}/>`;
+    out += `<path d="${torsoPath(g, 220)}" fill="${paint.lin(c)}" ${ol}/>`;
     out += `<path d="M 90 153 Q 100 163 110 153" fill="${skin}"/>`;
     return out;
   }
 
   if (o.top === "dress") {
-    out += `<path d="${torsoPath(g, 212)}" fill="${c}" ${ol}/>`;
-    out += `<path d="M ${100 - g.wa - 1} 208 L ${100 + g.wa + 1} 208 L ${100 + g.hp + 20} 292 Q 100 302 ${100 - g.hp - 20} 292 Z" fill="${c}" ${ol}/>`;
+    out += `<path d="${torsoPath(g, 212)}" fill="${paint.lin(c)}" ${ol}/>`;
+    out += `<path d="M ${100 - g.wa - 1} 208 L ${100 + g.wa + 1} 208 L ${100 + g.hp + 20} 292 Q 100 302 ${100 - g.hp - 20} 292 Z" fill="${paint.lin(c)}" ${ol}/>`;
     out += `<path d="M ${100 - g.wa} 208 L ${100 + g.wa} 208" stroke="${d}" stroke-width="4"/>`;
     out += `<path d="M 88 153 Q 100 168 112 153" fill="${skin}"/>`;
     out += [-22, -8, 8, 22].map((x) => `<path d="M ${100 + x * 0.5} 214 L ${100 + x} 292" stroke="${d}" stroke-width="1.2" opacity="0.5"/>`).join("");
@@ -133,7 +189,7 @@ function drawTop(o, g, skin) {
   }
 
   const base = o.top === "leather" ? "#232326" : c;
-  out += `<path d="${torsoPath(g)}" fill="${base}" ${ol}/>`;
+  out += `<path d="${torsoPath(g)}" fill="${paint.lin(base)}" ${ol}/>`;
 
   switch (o.top) {
     case "tee":
@@ -173,7 +229,7 @@ function drawTop(o, g, skin) {
       out += `<circle cx="84" cy="214" r="1.6" fill="#bbb"/><circle cx="116" cy="214" r="1.6" fill="#bbb"/>`;
       break;
     case "puffer":
-      out += `<path d="${torsoPath({ ...g, sw: g.sw + 3, wa: g.wa + 4, hp: g.hp + 3 })}" fill="${c}" ${ol}/>`;
+      out += `<path d="${torsoPath({ ...g, sw: g.sw + 3, wa: g.wa + 4, hp: g.hp + 3 })}" fill="${paint.lin(c)}" ${ol}/>`;
       out += [176, 196, 216].map((y) => `<path d="M ${100 - g.sw - 2} ${y} Q 100 ${y + 5} ${100 + g.sw + 2} ${y}" stroke="${d}" stroke-width="1.8" fill="none"/>`).join("");
       out += `<path d="M 84 150 Q 100 162 116 150 L 116 158 Q 100 170 84 158 Z" fill="${d}"/>`;
       out += `<path d="M 100 162 L 100 240" stroke="${d}" stroke-width="2"/>`;
@@ -194,9 +250,9 @@ function drawLegs(o, g, skin) {
   const [lx, rx] = g.legs;
   const w = g.legW;
   const leg = (cx, fill, top = 232, bottom = 326) =>
-    `<path d="M ${cx - w / 2 - 1} ${top} L ${cx + w / 2 + 1} ${top} L ${cx + w / 2 - 1.5} ${bottom} Q ${cx} ${bottom + 3} ${cx - w / 2 + 1.5} ${bottom} Z" fill="${fill}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
+    `<path d="M ${cx - w / 2 - 1} ${top} L ${cx + w / 2 + 1} ${top} L ${cx + w / 2 - 1.5} ${bottom} Q ${cx} ${bottom + 3} ${cx - w / 2 + 1.5} ${bottom} Z" fill="${paint.lin(fill)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
   const hips = (fill, bottom = 262) =>
-    `<path d="M ${100 - g.hp} 232 L ${100 + g.hp} 232 L ${100 + g.hp - 2} ${bottom} L ${100 - g.hp + 2} ${bottom} Z" fill="${fill}"/>`;
+    `<path d="M ${100 - g.hp} 232 L ${100 + g.hp} 232 L ${100 + g.hp - 2} ${bottom} L ${100 - g.hp + 2} ${bottom} Z" fill="${paint.lin(fill)}"/>`;
 
   const bare = o.top === "dress" || o.bottom === "skirt" || o.bottom === "shorts";
   let out = "";
@@ -214,7 +270,7 @@ function drawLegs(o, g, skin) {
       out += `<path d="M 100 244 L 100 262" stroke="${d}" stroke-width="1.4"/>`;
       break;
     case "skirt":
-      out += `<path d="M ${100 - g.hp} 230 L ${100 + g.hp} 230 L ${100 + g.hp + 12} 286 Q 100 292 ${100 - g.hp - 12} 286 Z" fill="${c}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
+      out += `<path d="M ${100 - g.hp} 230 L ${100 + g.hp} 230 L ${100 + g.hp + 12} 286 Q 100 292 ${100 - g.hp - 12} 286 Z" fill="${paint.lin(c)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
       out += [-20, -7, 7, 20].map((x) => `<path d="M ${100 + x * 0.7} 236 L ${100 + x} 288" stroke="${d}" stroke-width="1.3" opacity="0.6"/>`).join("");
       break;
     case "joggers":
@@ -244,13 +300,13 @@ function drawShoes(o, g, skin) {
       const x = cx + s * 2;
       switch (o.shoes) {
         case "hightops":
-          return `<path d="M ${x - 11} 304 L ${x + 11} 304 L ${x + 12} 330 L ${x - 12} 330 Z" fill="${c}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="326" width="30" height="10" rx="5" fill="#f5f5f5" stroke="${OUTLINE}" stroke-width="1"/><path d="M ${x - 6} 310 L ${x + 6} 310 M ${x - 6} 316 L ${x + 6} 316" stroke="#fff" stroke-width="1.8"/><circle cx="${x + s * 8}" cy="318" r="3" fill="${d}"/>`;
+          return `<path d="M ${x - 11} 304 L ${x + 11} 304 L ${x + 12} 330 L ${x - 12} 330 Z" fill="${paint.lin(c)}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="326" width="30" height="10" rx="5" fill="#f5f5f5" stroke="${OUTLINE}" stroke-width="1"/><path d="M ${x - 6} 310 L ${x + 6} 310 M ${x - 6} 316 L ${x + 6} 316" stroke="#fff" stroke-width="1.8"/><circle cx="${x + s * 8}" cy="318" r="3" fill="${d}"/>`;
         case "boots":
-          return `<path d="M ${x - 11} 300 L ${x + 11} 300 L ${x + 13} 330 L ${x - 13} 330 Z" fill="${c}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="327" width="30" height="9" rx="4" fill="${d}"/><path d="M ${x - 11} 306 L ${x + 11} 306" stroke="${d}" stroke-width="3"/>`;
+          return `<path d="M ${x - 11} 300 L ${x + 11} 300 L ${x + 13} 330 L ${x - 13} 330 Z" fill="${paint.lin(c)}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="327" width="30" height="9" rx="4" fill="${d}"/><path d="M ${x - 11} 306 L ${x + 11} 306" stroke="${d}" stroke-width="3"/>`;
         case "slides":
-          return `<ellipse cx="${x}" cy="330" rx="12" ry="6" fill="${skin}" stroke="${OUTLINE}" stroke-width="1"/><rect x="${x - 15}" y="331" width="30" height="6" rx="3" fill="${d}"/><path d="M ${x - 12} 326 Q ${x} 318 ${x + 12} 326" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+          return `<ellipse cx="${x}" cy="330" rx="12" ry="6" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1"/><rect x="${x - 15}" y="331" width="30" height="6" rx="3" fill="${d}"/><path d="M ${x - 12} 326 Q ${x} 318 ${x + 12} 326" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
         default: // sneakers
-          return `<path d="M ${x - 13} 334 Q ${x - 14} 319 ${x - 3} 318 L ${x + 4} 318 Q ${x + 14} 320 ${x + 15} 334 Z" fill="${c}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="330" width="31" height="6.5" rx="3" fill="#fafafa" stroke="${OUTLINE}" stroke-width="1"/><path d="M ${x - 5} 322 L ${x + 5} 322 M ${x - 5} 326 L ${x + 5} 326" stroke="${d}" stroke-width="1.6"/>`;
+          return `<path d="M ${x - 13} 334 Q ${x - 14} 319 ${x - 3} 318 L ${x + 4} 318 Q ${x + 14} 320 ${x + 15} 334 Z" fill="${paint.rad(c)}" stroke="${OUTLINE}" stroke-width="1.2"/><rect x="${x - 15}" y="330" width="31" height="6.5" rx="3" fill="#fafafa" stroke="${OUTLINE}" stroke-width="1"/><path d="M ${x - 5} 322 L ${x + 5} 322 M ${x - 5} 326 L ${x + 5} 326" stroke="${d}" stroke-width="1.6"/>`;
       }
     })
     .join("");
@@ -260,28 +316,29 @@ function drawShoes(o, g, skin) {
 
 function hairBack(o) {
   const c = o.hairColor;
+  const H = paint.hair(c);
   switch (o.hair) {
     case "long":
-      return `<path d="M 56 88 Q 48 192 64 208 L 136 208 Q 152 192 144 88 Z" fill="${c}"/>`;
+      return `<path d="M 56 88 Q 48 192 64 208 L 136 208 Q 152 192 144 88 Z" fill="${H}"/>`;
     case "bob":
-      return `<path d="M 54 86 Q 46 146 66 150 L 134 150 Q 154 146 146 86 Z" fill="${c}"/>`;
+      return `<path d="M 54 86 Q 46 146 66 150 L 134 150 Q 154 146 146 86 Z" fill="${H}"/>`;
     case "bun":
-      return `<circle cx="100" cy="34" r="18" fill="${c}"/><path d="M 88 46 L 112 46" stroke="${shade(c, 30)}" stroke-width="3"/>`;
+      return `<circle cx="100" cy="34" r="18" fill="${H}"/><path d="M 88 46 L 112 46" stroke="${shade(c, 30)}" stroke-width="3"/>`;
     case "manbun":
-      return `<circle cx="100" cy="38" r="13" fill="${c}"/>`;
+      return `<circle cx="100" cy="38" r="13" fill="${H}"/>`;
     case "ponytail":
-      return `<path d="M 126 52 Q 176 64 162 158 Q 150 128 130 86 Z" fill="${c}"/>`;
+      return `<path d="M 126 52 Q 176 64 162 158 Q 150 128 130 86 Z" fill="${H}"/>`;
     case "pigtails":
-      return `<ellipse cx="46" cy="124" rx="13" ry="30" fill="${c}"/><ellipse cx="154" cy="124" rx="13" ry="30" fill="${c}"/><circle cx="52" cy="94" r="5" fill="#ff7aa5"/><circle cx="148" cy="94" r="5" fill="#ff7aa5"/>`;
+      return `<ellipse cx="46" cy="124" rx="13" ry="30" fill="${H}"/><ellipse cx="154" cy="124" rx="13" ry="30" fill="${H}"/><circle cx="52" cy="94" r="5" fill="#ff7aa5"/><circle cx="148" cy="94" r="5" fill="#ff7aa5"/>`;
     case "curlylong":
       return [[60, 70], [140, 70], [52, 104], [148, 104], [54, 140], [146, 140], [62, 172], [138, 172], [80, 184], [120, 184], [100, 188]]
-        .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="21" fill="${c}"/>`)
+        .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="21" fill="${H}"/>`)
         .join("");
     case "afro":
-      return `<circle cx="100" cy="74" r="60" fill="${c}"/>` +
+      return `<circle cx="100" cy="74" r="60" fill="${H}"/>` +
         Array.from({ length: 14 }, (_, i) => {
           const a = (Math.PI * 2 * i) / 14;
-          return `<circle cx="${(100 + Math.cos(a) * 56).toFixed(1)}" cy="${(74 + Math.sin(a) * 56).toFixed(1)}" r="12" fill="${c}"/>`;
+          return `<circle cx="${(100 + Math.cos(a) * 56).toFixed(1)}" cy="${(74 + Math.sin(a) * 56).toFixed(1)}" r="12" fill="${H}"/>`;
         }).join("");
     default:
       return "";
@@ -290,42 +347,43 @@ function hairBack(o) {
 
 function hairFront(o) {
   const c = o.hairColor;
+  const H = paint.hair(c);
   const d = shade(c, 25);
   switch (o.hair) {
     case "short":
-      return `<path d="M 56 92 Q 52 38 100 37 Q 148 38 144 92 Q 140 70 128 63 Q 110 72 88 63 Q 70 66 60 76 Q 57 82 56 92 Z" fill="${c}"/>`;
+      return `<path d="M 56 92 Q 52 38 100 37 Q 148 38 144 92 Q 140 70 128 63 Q 110 72 88 63 Q 70 66 60 76 Q 57 82 56 92 Z" fill="${H}"/>`;
     case "fade":
-      return `<path d="M 57 90 Q 50 72 58 86 Z" fill="${c}"/><path d="M 57 86 Q 58 41 100 40 Q 142 41 143 86 Q 136 60 100 58 Q 64 60 57 86 Z" fill="${c}"/><path d="M 56 84 L 58 104 M 144 84 L 142 104" stroke="${c}" stroke-width="5" opacity="0.4"/>`;
+      return `<path d="M 57 90 Q 50 72 58 86 Z" fill="${H}"/><path d="M 57 86 Q 58 41 100 40 Q 142 41 143 86 Q 136 60 100 58 Q 64 60 57 86 Z" fill="${H}"/><path d="M 56 84 L 58 104 M 144 84 L 142 104" stroke="${c}" stroke-width="5" opacity="0.4"/>`;
     case "buzz":
-      return `<path d="M 56 90 Q 56 42 100 42 Q 144 42 144 90 Q 136 60 100 58 Q 64 60 56 90 Z" fill="${c}" opacity="0.6"/>`;
+      return `<path d="M 56 90 Q 56 42 100 42 Q 144 42 144 90 Q 136 60 100 58 Q 64 60 56 90 Z" fill="${H}" opacity="0.6"/>`;
     case "spiky":
-      return `<path d="M 56 92 Q 53 54 68 45 L 64 28 L 80 39 L 86 20 L 100 36 L 114 20 L 120 39 L 136 28 L 132 45 Q 147 54 144 92 Q 138 66 100 62 Q 62 66 56 92 Z" fill="${c}"/>`;
+      return `<path d="M 56 92 Q 53 54 68 45 L 64 28 L 80 39 L 86 20 L 100 36 L 114 20 L 120 39 L 136 28 L 132 45 Q 147 54 144 92 Q 138 66 100 62 Q 62 66 56 92 Z" fill="${H}"/>`;
     case "sidepart":
-      return `<path d="M 56 94 Q 50 36 104 37 Q 150 40 144 94 Q 140 66 124 60 Q 96 78 62 72 Q 57 80 56 94 Z" fill="${c}"/><path d="M 118 42 Q 110 54 96 62" stroke="${d}" stroke-width="2" fill="none"/>`;
+      return `<path d="M 56 94 Q 50 36 104 37 Q 150 40 144 94 Q 140 66 124 60 Q 96 78 62 72 Q 57 80 56 94 Z" fill="${H}"/><path d="M 118 42 Q 110 54 96 62" stroke="${d}" stroke-width="2" fill="none"/>`;
     case "curly":
-      return `<path d="M 58 88 Q 58 44 100 42 Q 142 44 142 88 Q 130 64 100 62 Q 70 64 58 88 Z" fill="${c}"/>` +
+      return `<path d="M 58 88 Q 58 44 100 42 Q 142 44 142 88 Q 130 64 100 62 Q 70 64 58 88 Z" fill="${H}"/>` +
         [[60, 78], [64, 58], [78, 44], [96, 38], [114, 40], [130, 50], [140, 66], [142, 84]]
-          .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="12" fill="${c}"/>`)
+          .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="12" fill="${H}"/>`)
           .join("");
     case "mohawk":
-      return `<path d="M 56 90 Q 56 44 100 42 Q 144 44 144 90 Q 136 60 100 58 Q 64 60 56 90 Z" fill="${c}" opacity="0.3"/><path d="M 88 64 Q 84 22 100 12 Q 116 22 112 64 Q 100 58 88 64 Z" fill="${c}"/>`;
+      return `<path d="M 56 90 Q 56 44 100 42 Q 144 44 144 90 Q 136 60 100 58 Q 64 60 56 90 Z" fill="${H}" opacity="0.3"/><path d="M 88 64 Q 84 22 100 12 Q 116 22 112 64 Q 100 58 88 64 Z" fill="${H}"/>`;
     case "manbun":
-      return `<path d="M 56 90 Q 54 40 100 40 Q 146 40 144 90 Q 138 62 100 58 Q 62 62 56 90 Z" fill="${c}"/><path d="M 80 46 Q 100 56 120 46" stroke="${d}" stroke-width="1.6" fill="none"/>`;
+      return `<path d="M 56 90 Q 54 40 100 40 Q 146 40 144 90 Q 138 62 100 58 Q 62 62 56 90 Z" fill="${H}"/><path d="M 80 46 Q 100 56 120 46" stroke="${d}" stroke-width="1.6" fill="none"/>`;
     case "long":
     case "bun":
     case "ponytail":
     case "pigtails":
-      return `<path d="M 55 100 Q 48 36 100 35 Q 152 36 145 100 Q 140 66 118 58 Q 100 70 78 66 Q 62 72 55 100 Z" fill="${c}"/>` +
-        (o.hair === "long" ? `<path d="M 55 94 Q 51 140 60 160 L 68 158 Q 61 130 63 98 Z M 145 94 Q 149 140 140 160 L 132 158 Q 139 130 137 98 Z" fill="${c}"/>` : "");
+      return `<path d="M 55 100 Q 48 36 100 35 Q 152 36 145 100 Q 140 66 118 58 Q 100 70 78 66 Q 62 72 55 100 Z" fill="${H}"/>` +
+        (o.hair === "long" ? `<path d="M 55 94 Q 51 140 60 160 L 68 158 Q 61 130 63 98 Z M 145 94 Q 149 140 140 160 L 132 158 Q 139 130 137 98 Z" fill="${H}"/>` : "");
     case "bob":
-      return `<path d="M 56 96 Q 52 36 100 36 Q 148 36 144 96 L 141 76 Q 120 70 100 72 Q 80 70 59 76 Z" fill="${c}"/>`;
+      return `<path d="M 56 96 Q 52 36 100 36 Q 148 36 144 96 L 141 76 Q 120 70 100 72 Q 80 70 59 76 Z" fill="${H}"/>`;
     case "curlylong":
-      return `<path d="M 56 96 Q 52 38 100 38 Q 148 38 144 96 Q 136 64 100 62 Q 64 64 56 96 Z" fill="${c}"/>` +
-        [[62, 66], [76, 48], [96, 40], [116, 42], [134, 54], [142, 72]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" fill="${c}"/>`).join("");
+      return `<path d="M 56 96 Q 52 38 100 38 Q 148 38 144 96 Q 136 64 100 62 Q 64 64 56 96 Z" fill="${H}"/>` +
+        [[62, 66], [76, 48], [96, 40], [116, 42], [134, 54], [142, 72]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" fill="${H}"/>`).join("");
     case "afro":
-      return `<path d="M 58 86 Q 60 52 100 50 Q 140 52 142 86 Q 130 66 100 64 Q 70 66 58 86 Z" fill="${c}"/>`;
+      return `<path d="M 58 86 Q 60 52 100 50 Q 140 52 142 86 Q 130 66 100 64 Q 70 66 58 86 Z" fill="${H}"/>`;
     case "braids":
-      return `<path d="M 55 98 Q 48 36 100 35 Q 152 36 145 98 Q 138 64 100 60 Q 62 64 55 98 Z" fill="${c}"/><path d="M 100 36 L 100 60" stroke="${d}" stroke-width="2"/>`;
+      return `<path d="M 55 98 Q 48 36 100 35 Q 152 36 145 98 Q 138 64 100 60 Q 62 64 55 98 Z" fill="${H}"/><path d="M 100 36 L 100 60" stroke="${d}" stroke-width="2"/>`;
     default:
       return "";
   }
@@ -340,7 +398,7 @@ function braidsFront(o) {
     .map((x) => {
       let out = "";
       for (let i = 0; i < 8; i += 1) {
-        out += `<ellipse cx="${x + (x < 100 ? 2 : -2) * (i / 7)}" cy="${104 + i * 13}" rx="7" ry="8" fill="${c}" stroke="${d}" stroke-width="1"/>`;
+        out += `<ellipse cx="${x + (x < 100 ? 2 : -2) * (i / 7)}" cy="${104 + i * 13}" rx="7" ry="8" fill="${paint.rad(c)}" stroke="${d}" stroke-width="1"/>`;
       }
       return out + `<circle cx="${x + (x < 100 ? 2 : -2)}" cy="${104 + 8 * 13 - 2}" r="4" fill="#ff7aa5"/>`;
     })
@@ -363,7 +421,7 @@ function drawEyes(o, g, skin) {
         return `<path d="M ${x} ${y + 7} C ${x - 12} ${y - 1} ${x - 6} ${y - 10} ${x} ${y - 3} C ${x + 6} ${y - 10} ${x + 12} ${y - 1} ${x} ${y + 7} Z" fill="#ef3b5d"/>`;
       default: {
         let out = `<ellipse cx="${x}" cy="${y}" rx="8" ry="7.5" fill="#fff" stroke="${OUTLINE}" stroke-width="1"/>`;
-        out += `<circle cx="${x}" cy="${y + 0.6}" r="5.4" fill="${color}"/><circle cx="${x}" cy="${y + 0.6}" r="2.7" fill="${dark}"/><circle cx="${x + 2}" cy="${y - 1.6}" r="1.6" fill="#fff"/>`;
+        out += `<circle cx="${x}" cy="${y + 0.6}" r="5.4" fill="${paint.rad(color)}"/><circle cx="${x}" cy="${y + 0.6}" r="2.7" fill="${dark}"/><circle cx="${x + 2}" cy="${y - 1.6}" r="1.7" fill="#fff"/><circle cx="${x - 1.8}" cy="${y + 2.6}" r="0.8" fill="#fff" opacity="0.8"/>`;
         out += `<path d="M ${x - 9} ${y - 2} Q ${x} ${y - 10} ${x + 9} ${y - 2}" stroke="${dark}" stroke-width="${g.girl ? 2.6 : 2}" fill="none" stroke-linecap="round"/>`;
         if (g.girl) {
           const s = x < 100 ? -1 : 1;
@@ -410,7 +468,7 @@ function drawMouth(o) {
 }
 
 function drawFacialHair(o) {
-  const c = o.hairColor;
+  const c = paint.hair(o.hairColor);
   const stache = `<path d="M 87 113 Q 94 107 100 111 Q 106 107 113 113 Q 106 116 100 114 Q 94 116 87 113 Z" fill="${c}"/>`;
   switch (o.facialHair) {
     case "stubble":
@@ -465,13 +523,13 @@ function drawHat(o) {
   const d = shade(c, 35);
   switch (o.hat) {
     case "cap":
-      return `<path d="M 54 80 Q 54 28 100 28 Q 146 28 146 80 Z" fill="${c}" stroke="${OUTLINE}" stroke-width="1.2"/><path d="M 54 76 Q 100 64 150 74 Q 166 80 152 88 Q 100 76 54 86 Z" fill="${d}"/><circle cx="100" cy="30" r="3" fill="${d}"/><path d="M 100 30 L 100 76" stroke="${d}" stroke-width="1.2" opacity="0.6"/>`;
+      return `<path d="M 54 80 Q 54 28 100 28 Q 146 28 146 80 Z" fill="${paint.rad(c)}" stroke="${OUTLINE}" stroke-width="1.2"/><path d="M 54 76 Q 100 64 150 74 Q 166 80 152 88 Q 100 76 54 86 Z" fill="${d}"/><circle cx="100" cy="30" r="3" fill="${d}"/><path d="M 100 30 L 100 76" stroke="${d}" stroke-width="1.2" opacity="0.6"/>`;
     case "beanie":
-      return `<path d="M 53 84 Q 52 24 100 24 Q 148 24 147 84 Z" fill="${c}"/><rect x="51" y="70" width="98" height="17" rx="7" fill="${d}"/>` +
+      return `<path d="M 53 84 Q 52 24 100 24 Q 148 24 147 84 Z" fill="${paint.rad(c)}"/><rect x="51" y="70" width="98" height="17" rx="7" fill="${d}"/>` +
         [60, 70, 80, 90, 100, 110, 120, 130, 140].map((x) => `<path d="M ${x} 72 L ${x} 85" stroke="${shade(c, 55)}" stroke-width="1.4"/>`).join("") +
-        `<circle cx="100" cy="22" r="10" fill="#f5f5f5"/>`;
+        `<circle cx="100" cy="22" r="10" fill="${paint.rad("#f5f5f5")}"/>`;
     case "crown":
-      return `<path d="M 66 58 L 64 26 L 80 42 L 100 18 L 120 42 L 136 26 L 134 58 Z" fill="#ffc933" stroke="#b7791f" stroke-width="2"/><circle cx="100" cy="44" r="4.5" fill="#e0344e"/><circle cx="80" cy="49" r="3.2" fill="#3a7bf0"/><circle cx="120" cy="49" r="3.2" fill="#3a7bf0"/>`;
+      return `<path d="M 66 58 L 64 26 L 80 42 L 100 18 L 120 42 L 136 26 L 134 58 Z" fill="${paint.lin("#ffc933")}" stroke="#b7791f" stroke-width="2"/><circle cx="100" cy="44" r="4.5" fill="#e0344e"/><circle cx="80" cy="49" r="3.2" fill="#3a7bf0"/><circle cx="120" cy="49" r="3.2" fill="#3a7bf0"/>`;
     case "headphones":
       return `<path d="M 52 98 Q 50 26 100 26 Q 150 26 148 98" stroke="#26262b" stroke-width="8" fill="none"/><rect x="42" y="84" width="16" height="30" rx="7" fill="#26262b"/><rect x="142" y="84" width="16" height="30" rx="7" fill="#26262b"/><rect x="45" y="89" width="4" height="20" rx="2" fill="#7cf0ff"/><rect x="151" y="89" width="4" height="20" rx="2" fill="#7cf0ff"/>`;
     case "catears":
@@ -514,16 +572,24 @@ function drawHead(o, g, skin) {
   const hides = o.hat === "beanie" || o.hat === "cap";
   let out = "";
 
-  out += `<rect x="91" y="128" width="18" height="30" rx="7" fill="${shade(skin, 18)}"/>`;
-  out += `<circle cx="57" cy="97" r="9" fill="${skin}" stroke="${OUTLINE}" stroke-width="1.2"/><circle cx="143" cy="97" r="9" fill="${skin}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
-  out += `<ellipse cx="100" cy="90" rx="44" ry="47" fill="${skin}" stroke="${OUTLINE}" stroke-width="1.4"/>`;
+  out += `<rect x="91" y="128" width="18" height="30" rx="7" fill="${paint.lin(shade(skin, 18))}"/>`;
+  out += `<ellipse cx="100" cy="134" rx="15" ry="7" fill="rgba(0,0,0,0.16)"/>`;
+  out += `<circle cx="57" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/><circle cx="143" cy="97" r="9" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.2"/>`;
+  out += `<ellipse cx="100" cy="90" rx="44" ry="47" fill="${paint.rad(skin)}" stroke="${OUTLINE}" stroke-width="1.4"/>`;
+  out += `<ellipse cx="84" cy="64" rx="16" ry="9" fill="#fff" opacity="0.13"/>`;
   out += drawCheeks(o);
   out += drawFacialHair(o);
-  out += drawEyes(o, g, skin);
+  out += `<g class="fb-eyes">${drawEyes(o, g, skin)}</g>`;
   out += drawBrows(o, g);
   out += `<path d="M 100 100 Q 104 107 98 109" stroke="${shade(skin, 45)}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
   out += drawMouth(o);
-  if (!(hides && ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun"].includes(o.hair))) out += hairFront(o);
+  if (!(hides && ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun"].includes(o.hair))) {
+    paint.flat = true;
+    const shadow = hairFront({ ...o, hairColor: "#000000" });
+    paint.flat = false;
+    if (shadow) out += `<g transform="translate(0 3.5)" opacity="0.14">${shadow}</g>`;
+    out += hairFront(o);
+  }
   else out += `<path d="M 56 94 Q 55 80 60 76 L 60 96 Z M 144 94 Q 145 80 140 76 L 140 96 Z" fill="${o.hairColor}"/>`;
   out += drawJewelry(o);
   out += drawGlasses(o);
@@ -535,43 +601,66 @@ function drawHead(o, g, skin) {
 
 export const FB_BACKGROUND_FALLBACK = ["b6e3f4"];
 
-// view: "full" (whole body, transparent) or "head" (square face crop with background).
+const LIVE_STYLE = `<style>
+.fb-all{transform-origin:100px 336px;animation:fbB 3.8s ease-in-out infinite}
+.fb-head{transform-origin:100px 140px;animation:fbH 6s ease-in-out infinite}
+.fb-eyes{transform-origin:100px 97px;animation:fbE 5s infinite}
+.fb-wave{animation:fbW 1.1s ease-in-out infinite}
+@keyframes fbB{50%{transform:scale(1.006,1.014)}}
+@keyframes fbH{25%{transform:rotate(1.5deg)}75%{transform:rotate(-1.5deg)}}
+@keyframes fbE{0%,93%,97%,100%{transform:scaleY(1)}95%{transform:scaleY(0.08)}}
+@keyframes fbW{50%{transform:rotate(-14deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>`;
+
+// view: "full" (whole body, transparent), "live" (full body that breathes,
+// blinks and waves) or "head" (square face crop with background).
 export function fullBodySvg(o, view = "full", bgColors = FB_BACKGROUND_FALLBACK) {
+  paint = makePainter();
+  const live = view === "live";
+  const full = view === "full" || live;
   const g = geometry(o);
   const skin = o.skin;
-  let body = "";
 
   const hideBackHair = o.hat === "beanie" && ["bun", "manbun", "ponytail"].includes(o.hair);
-  if (!hideBackHair) body += hairBack(o);
+  const back = hideBackHair ? "" : hairBack(o);
 
-  if (view === "full") {
-    body += `<ellipse cx="100" cy="338" rx="54" ry="7" fill="rgba(0,0,0,0.16)"/>`;
+  let body = `<g class="fb-head">${back}</g>`;
+
+  if (full) {
     body += drawLegs(o, g, skin);
     body += drawShoes(o, g, skin);
   }
 
   body += drawTop(o, g, skin);
   body += drawNecklace(o);
-
-  body += drawHead(o, g, skin);
+  body += `<g class="fb-head">${drawHead(o, g, skin)}</g>`;
 
   // After the head so a raised hand (wave, peace) sits in front of hair.
-  if (view === "full") {
-    for (const arm of arms(o, g)) body += drawArm(arm, o, g, skin);
+  if (full) {
+    for (const arm of arms(o, g)) {
+      const drawn = drawArm(arm, o, g, skin);
+      body += arm.hand === "open"
+        ? `<g class="fb-wave" style="transform-origin:${arm.S[0]}px ${arm.S[1]}px">${drawn}</g>`
+        : drawn;
+    }
   }
 
-  body += braidsFront(o);
+  body += `<g class="fb-head">${braidsFront(o)}</g>`;
+  const defs = paint.defs();
 
   if (view === "head") {
     const [a, b] = bgColors;
     const fill = b ? "url(#fbbg)" : `#${a}`;
-    const defs = b
-      ? `<defs><linearGradient id="fbbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#${a}"/><stop offset="1" stop-color="#${b}"/></linearGradient></defs>`
+    const bgDef = b
+      ? `<linearGradient id="fbbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#${a}"/><stop offset="1" stop-color="#${b}"/></linearGradient>`
       : "";
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 22 140 140">${defs}<rect x="30" y="22" width="140" height="140" fill="${fill}"/>${body}</svg>`;
+    const allDefs = defs ? defs.replace("<defs>", `<defs>${bgDef}`) : bgDef ? `<defs>${bgDef}</defs>` : "";
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="30 22 140 140">${allDefs}<rect x="30" y="22" width="140" height="140" fill="${fill}"/>${body}</svg>`;
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 6 200 342">${body}</svg>`;
+  const ground = `<ellipse cx="100" cy="338" rx="54" ry="7" fill="rgba(0,0,0,0.16)"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 6 200 342">${live ? LIVE_STYLE : ""}${defs}${ground}<g class="fb-all">${body}</g></svg>`;
 }
 
 export const svgToUri = (svg) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;

@@ -306,7 +306,8 @@ function ShopPage() {
                 name={displayNameOf(profile, username || "you")}
                 avatar={profile?.avatar}
                 frame={equipped.frame}
-                size={96}
+                size={90}
+                full
               />
             </div>
           )}

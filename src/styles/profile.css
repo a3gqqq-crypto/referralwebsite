@@ -745,3 +745,22 @@
 
   pointer-events: none;
 }
+
+/* Taller banner so the full-body avatar is big enough to see. */
+.profile-card-banner.has-figure {
+  height: 172px;
+}
+
+.profile-card-lg .profile-card-banner.has-figure {
+  height: 260px;
+}
+
+.profile-card-sm .profile-card-banner.has-figure {
+  height: 132px;
+}
+
+@media (max-width: 640px) {
+  .profile-card-lg .profile-card-banner.has-figure {
+    height: 200px;
+  }
+}

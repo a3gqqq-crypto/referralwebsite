@@ -22,7 +22,7 @@ export const COSMETICS = [
     name: "Gilded",
     description: "A clean ring of polished gold.",
     rarity: "rare",
-    price: 199,
+    price: 349,
   },
   {
     id: "frame-ember",
@@ -30,7 +30,7 @@ export const COSMETICS = [
     name: "Ember",
     description: "Warm, glowing, a little dangerous.",
     rarity: "rare",
-    price: 199,
+    price: 349,
   },
   {
     id: "frame-frost",
@@ -38,7 +38,7 @@ export const COSMETICS = [
     name: "Frost",
     description: "Ice-blue edge with a cold shimmer.",
     rarity: "rare",
-    price: 199,
+    price: 349,
   },
   {
     id: "frame-aurora",
@@ -46,7 +46,7 @@ export const COSMETICS = [
     name: "Aurora",
     description: "A slowly turning ring of northern lights.",
     rarity: "epic",
-    price: 299,
+    price: 449,
   },
   {
     id: "frame-crowned",
@@ -54,7 +54,7 @@ export const COSMETICS = [
     name: "Crowned",
     description: "Gold ring, and a crown on top. Subtle.",
     rarity: "legendary",
-    price: 499,
+    price: 699,
   },
   {
     id: "frame-sakura",
@@ -62,7 +62,7 @@ export const COSMETICS = [
     name: "Sakura",
     description: "Soft pink petals, all the way round.",
     rarity: "rare",
-    price: 199,
+    price: 349,
   },
   {
     id: "frame-neon",
@@ -70,7 +70,7 @@ export const COSMETICS = [
     name: "Neon",
     description: "Cyan and magenta tubes that hum a little.",
     rarity: "epic",
-    price: 299,
+    price: 449,
   },
   {
     id: "frame-galaxy",
@@ -78,7 +78,7 @@ export const COSMETICS = [
     name: "Galaxy",
     description: "Deep space swirling around your face.",
     rarity: "epic",
-    price: 349,
+    price: 499,
   },
   {
     id: "frame-inferno",
@@ -86,7 +86,7 @@ export const COSMETICS = [
     name: "Inferno",
     description: "A ring of living fire. Shop exclusive.",
     rarity: "legendary",
-    price: 599,
+    price: 799,
     exclusive: true,
   },
   {
@@ -106,7 +106,7 @@ export const COSMETICS = [
     name: "Gold leaf",
     description: "Your name, in gold.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "name-ember",
@@ -114,7 +114,7 @@ export const COSMETICS = [
     name: "Ember",
     description: "Hot gradient with a soft glow.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "name-frost",
@@ -122,7 +122,7 @@ export const COSMETICS = [
     name: "Frost",
     description: "Cool blue with an icy sheen.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "name-aurora",
@@ -130,7 +130,7 @@ export const COSMETICS = [
     name: "Aurora",
     description: "Colors that drift through your name.",
     rarity: "epic",
-    price: 249,
+    price: 399,
   },
   {
     id: "name-holo",
@@ -138,7 +138,7 @@ export const COSMETICS = [
     name: "Holographic",
     description: "A light sweep that catches every eye.",
     rarity: "legendary",
-    price: 399,
+    price: 599,
   },
 
   {
@@ -147,7 +147,7 @@ export const COSMETICS = [
     name: "Sakura",
     description: "Blossom pink with a soft glow.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "name-neon",
@@ -155,7 +155,7 @@ export const COSMETICS = [
     name: "Neon",
     description: "Buzzing cyan sign energy.",
     rarity: "epic",
-    price: 249,
+    price: 399,
   },
   {
     id: "name-rainbow",
@@ -163,7 +163,7 @@ export const COSMETICS = [
     name: "Prism",
     description: "Every colour, always moving. Shop exclusive.",
     rarity: "legendary",
-    price: 499,
+    price: 699,
     exclusive: true,
   },
 
@@ -174,7 +174,7 @@ export const COSMETICS = [
     name: "Dusk",
     description: "Last light over the city.",
     rarity: "common",
-    price: 99,
+    price: 249,
   },
   {
     id: "banner-rose",
@@ -182,7 +182,7 @@ export const COSMETICS = [
     name: "Rose quartz",
     description: "Soft pinks and warm haze.",
     rarity: "common",
-    price: 99,
+    price: 249,
   },
   {
     id: "banner-ocean",
@@ -190,7 +190,7 @@ export const COSMETICS = [
     name: "Deep sea",
     description: "Dark teal depths.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "banner-golddust",
@@ -198,7 +198,7 @@ export const COSMETICS = [
     name: "Gold dust",
     description: "Midnight scattered with gold.",
     rarity: "rare",
-    price: 199,
+    price: 349,
   },
   {
     id: "banner-aurora",
@@ -206,7 +206,7 @@ export const COSMETICS = [
     name: "Aurora",
     description: "Moving light across the whole header.",
     rarity: "epic",
-    price: 249,
+    price: 399,
   },
 
   {
@@ -215,7 +215,7 @@ export const COSMETICS = [
     name: "Sakura",
     description: "Pink sky and falling petals.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "banner-neon",
@@ -223,7 +223,7 @@ export const COSMETICS = [
     name: "Synthwave",
     description: "Retro grid under a neon sunset.",
     rarity: "epic",
-    price: 249,
+    price: 399,
   },
   {
     id: "banner-galaxy",
@@ -231,7 +231,7 @@ export const COSMETICS = [
     name: "Galaxy",
     description: "Stars and a purple nebula.",
     rarity: "epic",
-    price: 299,
+    price: 449,
   },
 
   /* ---------- Badges ---------- */
@@ -302,7 +302,7 @@ export const COSMETICS = [
     description: "Helped keep Suffrova running.",
     rarity: "rare",
     icon: "heart",
-    price: 99,
+    price: 249,
   },
   {
     id: "badge-flame",
@@ -311,7 +311,7 @@ export const COSMETICS = [
     description: "For when you're on a streak.",
     rarity: "common",
     icon: "flame",
-    price: 99,
+    price: 249,
   },
   {
     id: "badge-star",
@@ -320,7 +320,7 @@ export const COSMETICS = [
     description: "Main character energy.",
     rarity: "common",
     icon: "star",
-    price: 99,
+    price: 249,
   },
   {
     id: "badge-bolt",
@@ -329,7 +329,7 @@ export const COSMETICS = [
     description: "Fast hands, faster invites.",
     rarity: "rare",
     icon: "bolt",
-    price: 99,
+    price: 249,
   },
   {
     id: "badge-rocket",
@@ -338,7 +338,7 @@ export const COSMETICS = [
     description: "Only going up from here.",
     rarity: "epic",
     icon: "rocket",
-    price: 149,
+    price: 299,
   },
   {
     id: "badge-gem",
@@ -347,7 +347,7 @@ export const COSMETICS = [
     description: "Rare and a little flashy.",
     rarity: "epic",
     icon: "gem",
-    price: 149,
+    price: 299,
   },
 
   /* ---------- Avatar packs & emotes ---------- */
@@ -357,7 +357,7 @@ export const COSMETICS = [
     name: "Shades",
     description: "Sunglasses, aviators and heart glasses.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "avatar-winter",
@@ -365,7 +365,7 @@ export const COSMETICS = [
     name: "Winter fits",
     description: "Beanie, puffer jacket and boots.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "avatar-bling",
@@ -373,7 +373,7 @@ export const COSMETICS = [
     name: "Bling",
     description: "Gold hoops and a gold chain.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "avatar-drip",
@@ -381,7 +381,7 @@ export const COSMETICS = [
     name: "Drip",
     description: "Bomber, leather jacket, cargos and high-tops.",
     rarity: "rare",
-    price: 149,
+    price: 299,
   },
   {
     id: "avatar-kawaii",
@@ -389,7 +389,7 @@ export const COSMETICS = [
     name: "Kawaii",
     description: "Cat ears, heart eyes and star eyes.",
     rarity: "epic",
-    price: 149,
+    price: 299,
   },
   {
     id: "avatar-glowbot",
@@ -397,7 +397,7 @@ export const COSMETICS = [
     name: "Gamer",
     description: "Glowing headphones and a team jersey.",
     rarity: "epic",
-    price: 149,
+    price: 299,
   },
   {
     id: "avatar-villain",
@@ -405,7 +405,7 @@ export const COSMETICS = [
     name: "Villain",
     description: "Devil horns and an eyepatch.",
     rarity: "epic",
-    price: 199,
+    price: 349,
   },
   {
     id: "avatar-gradients",
@@ -413,7 +413,7 @@ export const COSMETICS = [
     name: "Gradient skies",
     description: "Six gradient backgrounds for your avatar.",
     rarity: "epic",
-    price: 199,
+    price: 349,
   },
   {
     id: "avatar-poses",
@@ -421,7 +421,7 @@ export const COSMETICS = [
     name: "Poses",
     description: "Peace sign and flex poses for your full-body avatar.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "avatar-royal",
@@ -429,7 +429,7 @@ export const COSMETICS = [
     name: "Royal",
     description: "A crown, a halo and a sharp suit.",
     rarity: "legendary",
-    price: 399,
+    price: 599,
   },
   {
     id: "emote-dance",
@@ -437,7 +437,7 @@ export const COSMETICS = [
     name: "Dance",
     description: "Your avatar busts a move in chat and calls.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "emote-love",
@@ -445,7 +445,7 @@ export const COSMETICS = [
     name: "Love",
     description: "Heart eyes, heart beat.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "emote-cry",
@@ -453,7 +453,7 @@ export const COSMETICS = [
     name: "Cry",
     description: "For when you drop to #2.",
     rarity: "rare",
-    price: 99,
+    price: 249,
   },
   {
     id: "emote-rage",
@@ -461,7 +461,7 @@ export const COSMETICS = [
     name: "Rage",
     description: "Shake the screen.",
     rarity: "epic",
-    price: 149,
+    price: 299,
   },
   {
     id: "emote-fire",
@@ -469,7 +469,7 @@ export const COSMETICS = [
     name: "On fire",
     description: "You're on a streak and everyone should know.",
     rarity: "epic",
-    price: 149,
+    price: 299,
   },
   {
     id: "emote-crown",
@@ -477,7 +477,55 @@ export const COSMETICS = [
     name: "Crowned",
     description: "Spin with a crown. Legends only.",
     rarity: "legendary",
-    price: 299,
+    price: 449,
+  },
+  {
+    id: "emote-shock",
+    type: "emote",
+    name: "Shook",
+    description: "When the leaderboard flips.",
+    rarity: "rare",
+    price: 249,
+  },
+  {
+    id: "emote-sleepy",
+    type: "emote",
+    name: "Sleepy",
+    description: "Zzz. Wake me up at #1.",
+    rarity: "rare",
+    price: 249,
+  },
+  {
+    id: "emote-clap",
+    type: "emote",
+    name: "Clap",
+    description: "Hype up your friends.",
+    rarity: "rare",
+    price: 249,
+  },
+  {
+    id: "emote-cool",
+    type: "emote",
+    name: "Too cool",
+    description: "Shades on, peace out.",
+    rarity: "epic",
+    price: 349,
+  },
+  {
+    id: "emote-money",
+    type: "emote",
+    name: "Rich",
+    description: "Star eyes and a spin.",
+    rarity: "epic",
+    price: 349,
+  },
+  {
+    id: "emote-skull",
+    type: "emote",
+    name: "Dead",
+    description: "I'm dead. Literally falls over.",
+    rarity: "epic",
+    price: 349,
   },
 ];
 

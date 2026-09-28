@@ -3,8 +3,8 @@ import { useState } from "react";
 import Icon from "./Icon";
 import { cosmeticById } from "../data/cosmetics";
 import { avatarSrc } from "../data/avatars";
-import { useAvatarDicebear } from "../lib/avatarRender";
-import { emoteById, packPreviewAvatar } from "../data/avatarParts";
+import { drawFullBody, useAvatarDicebear } from "../lib/avatarRender";
+import { emoteAvatar, emoteById, packPreviewAvatar } from "../data/avatarParts";
 import { useIsOnline } from "../lib/presence";
 
 import "../styles/cosmetics.css";
@@ -50,18 +50,27 @@ export function FramedAvatar({ name, frame, avatar, size = 40, className = "", u
 }
 
 // A player's avatar doing an emote: animated face + big emoji.
-export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true }) {
+// A player's avatar doing an emote. Full-body avatars act it out (pose and
+// face change); pass `full` to show the whole body instead of the head.
+export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true, full = false }) {
   if (!emote) return null;
+
+  const acted = emoteAvatar(avatar, emote);
+  const whole = full && acted;
 
   return (
     <span
-      className={`emote emote-${emote.anim} ${loop ? "is-loop" : ""}`}
+      className={`emote emote-${emote.anim} ${loop ? "is-loop" : ""} ${whole ? "is-full" : ""}`}
       style={{ "--emote-size": `${size}px` }}
       role="img"
       aria-label={`${name || "Someone"}: ${emote.name}`}
     >
       <span className="emote-face">
-        <FramedAvatar name={name} avatar={avatar} frame={frame} size={size} />
+        {whole ? (
+          <img className="emote-body" src={drawFullBody(acted.o, "live")} alt="" draggable="false" />
+        ) : (
+          <FramedAvatar name={name} avatar={acted?.avatar || avatar} frame={frame} size={size} />
+        )}
       </span>
       <span className="emote-emoji" aria-hidden="true">
         {emote.emoji}

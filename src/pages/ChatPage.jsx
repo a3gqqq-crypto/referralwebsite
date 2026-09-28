@@ -188,8 +188,9 @@ function MessageRow({
               name={name}
               avatar={equipped.avatar}
               frame={equipped.frame}
-              size={72}
+              size={64}
               loop={false}
+              full
             />
           </div>
         ) : (

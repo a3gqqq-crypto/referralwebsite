@@ -291,16 +291,23 @@ export function dicebearOptions(style, stored) {
 }
 
 // Emotes: free ones for everyone, the rest are shop items (cosmetic id "emote-<id>").
+// look: what a full-body avatar changes into while doing the emote.
 export const EMOTES = [
-  { id: "wave", emoji: "👋", name: "Wave", anim: "wave" },
-  { id: "laugh", emoji: "😂", name: "Laugh", anim: "bounce" },
-  { id: "gg", emoji: "🎉", name: "GG", anim: "pop" },
-  { id: "dance", emoji: "💃", name: "Dance", anim: "dance", premium: "emote-dance" },
-  { id: "love", emoji: "😍", name: "Love", anim: "pulse", premium: "emote-love" },
-  { id: "cry", emoji: "😭", name: "Cry", anim: "shake", premium: "emote-cry" },
-  { id: "rage", emoji: "😡", name: "Rage", anim: "rage", premium: "emote-rage" },
-  { id: "fire", emoji: "🔥", name: "On fire", anim: "pulse", premium: "emote-fire" },
-  { id: "crown", emoji: "👑", name: "Crowned", anim: "spin", premium: "emote-crown" },
+  { id: "wave", emoji: "👋", name: "Wave", anim: "wave", look: { pose: "wave", mouth: "grin" } },
+  { id: "laugh", emoji: "😂", name: "Laugh", anim: "bounce", look: { eyes: "happy", mouth: "open" } },
+  { id: "gg", emoji: "🎉", name: "GG", anim: "pop", look: { pose: "peace", eyes: "happy", mouth: "grin" } },
+  { id: "dance", emoji: "💃", name: "Dance", anim: "dance", premium: "emote-dance", look: { pose: "flex", eyes: "happy", mouth: "smile" } },
+  { id: "love", emoji: "😍", name: "Love", anim: "pulse", premium: "emote-love", look: { eyes: "hearts", mouth: "grin" } },
+  { id: "cry", emoji: "😭", name: "Cry", anim: "shake", premium: "emote-cry", look: { eyes: "sleepy", brows: "sad", mouth: "open" } },
+  { id: "rage", emoji: "😡", name: "Rage", anim: "rage", premium: "emote-rage", look: { brows: "angry", mouth: "flat", pose: "hips" } },
+  { id: "fire", emoji: "🔥", name: "On fire", anim: "pulse", premium: "emote-fire", look: { pose: "flex", brows: "raised", mouth: "grin" } },
+  { id: "crown", emoji: "👑", name: "Crowned", anim: "spin", premium: "emote-crown", look: { hat: "crown", pose: "hips", mouth: "smirk" } },
+  { id: "shock", emoji: "😱", name: "Shook", anim: "jump", premium: "emote-shock", look: { brows: "raised", mouth: "open", pose: "flex" } },
+  { id: "sleepy", emoji: "😴", name: "Sleepy", anim: "sway", premium: "emote-sleepy", look: { eyes: "sleepy", mouth: "flat" } },
+  { id: "clap", emoji: "👏", name: "Clap", anim: "bounce", premium: "emote-clap", look: { pose: "flex", eyes: "happy", mouth: "open" } },
+  { id: "cool", emoji: "😎", name: "Too cool", anim: "pop", premium: "emote-cool", look: { glasses: "sunglasses", pose: "peace", mouth: "smirk" } },
+  { id: "money", emoji: "💸", name: "Rich", anim: "spin", premium: "emote-money", look: { eyes: "star", pose: "hips", mouth: "grin" } },
+  { id: "skull", emoji: "💀", name: "Dead", anim: "fall", premium: "emote-skull", look: { eyes: "sleepy", mouth: "tongue" } },
 ];
 
 export const emoteById = (id) => EMOTES.find((emote) => emote.id === id) || null;
@@ -311,5 +318,12 @@ export const emoteFromBody = (body) => {
   const match = EMOTE_RE.exec(body || "");
   return match ? emoteById(match[1]) : null;
 };
+
+// A full-body avatar string changed into an emote's look (null for other avatars).
+export function emoteAvatar(avatar, emote) {
+  const parsed = parseDicebear(avatar);
+  if (parsed?.s !== "fb" || !emote?.look) return null;
+  return { o: { ...parsed.o, ...emote.look }, avatar: `db:${JSON.stringify({ s: "fb", o: { ...parsed.o, ...emote.look } })}` };
+}
 
 export const canUseEmote = (emote, owned) => !emote.premium || owned?.has(emote.premium);

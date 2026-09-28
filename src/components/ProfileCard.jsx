@@ -32,7 +32,7 @@ function ProfileCard({
 
   return (
     <article className={`profile-card profile-card-${size}`}>
-      <ProfileBanner banner={equipped.banner} className="profile-card-banner">
+      <ProfileBanner banner={equipped.banner} className={`profile-card-banner ${figure ? "has-figure" : ""}`}>
         {figure && <img className="profile-card-figure" src={figure} alt="" draggable="false" />}
       </ProfileBanner>
 
