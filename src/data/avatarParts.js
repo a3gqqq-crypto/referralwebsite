@@ -363,4 +363,29 @@ export function emoteAvatar(avatar, emote) {
   return { o: { ...parsed.o, ...emote.look }, avatar: `db:${JSON.stringify({ s: "fb", o: { ...parsed.o, ...emote.look } })}` };
 }
 
+// Stickers: your 3D avatar with a caption (free for everyone with an avatar).
+export const STICKERS = [
+  { id: "gg", text: "GG", color: "#ffd166", look: { pose: "peace", eyes: "happy", mouth: "grin" } },
+  { id: "lol", text: "LOL", color: "#ff7ab8", look: { eyes: "happy", mouth: "open" } },
+  { id: "hi", text: "hiii", color: "#7cf0c4", look: { pose: "wave", mouth: "grin" } },
+  { id: "bruh", text: "bruh", color: "#9ad0ff", look: { eyes: "sleepy", mouth: "flat", brows: "flat" } },
+  { id: "w", text: "W", color: "#7cf0c4", look: { pose: "flex", mouth: "grin", brows: "raised" } },
+  { id: "l", text: "L", color: "#ff8a8a", look: { brows: "sad", mouth: "open", eyes: "sleepy" } },
+  { id: "letsgo", text: "LET'S GO", color: "#ffd166", look: { pose: "flex", eyes: "happy", mouth: "open" } },
+  { id: "noway", text: "no way", color: "#c7a6ff", look: { brows: "raised", mouth: "open" } },
+  { id: "sus", text: "sus", color: "#ff8a8a", look: { brows: "angry", mouth: "smirk", pose: "hips" } },
+  { id: "omw", text: "omw", color: "#9ad0ff", look: { pose: "wave", eyes: "wink", mouth: "grin" } },
+  { id: "ty", text: "ty <3", color: "#ff7ab8", look: { eyes: "hearts", mouth: "grin" } },
+  { id: "gn", text: "gn", color: "#c7a6ff", look: { eyes: "sleepy", mouth: "smile" } },
+];
+
+export const stickerById = (id) => STICKERS.find((sticker) => sticker.id === id) || null;
+
+const STICKER_RE = /^::sticker:([a-z]+)::$/;
+
+export const stickerFromBody = (body) => {
+  const match = STICKER_RE.exec(body || "");
+  return match ? stickerById(match[1]) : null;
+};
+
 export const canUseEmote = (emote, owned) => !emote.premium || owned?.has(emote.premium);

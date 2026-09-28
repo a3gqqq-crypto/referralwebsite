@@ -16,8 +16,8 @@ import { useInCallCount, useOnlineUsers } from "../lib/presence";
 import { useCall } from "../context/CallContext";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip, { PLAYER_COLUMNS } from "../components/PlayerChip";
-import { BadgeRow, EmoteAvatar, FramedAvatar, StyledName } from "../components/Cosmetics";
-import { EMOTES, canUseEmote, emoteFromBody } from "../data/avatarParts";
+import { BadgeRow, EmoteAvatar, FramedAvatar, Sticker, StyledName } from "../components/Cosmetics";
+import { EMOTES, STICKERS, canUseEmote, emoteFromBody, stickerFromBody } from "../data/avatarParts";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
 import { useMyProfile } from "../context/ProfileContext";
@@ -62,20 +62,65 @@ function ChatPhoto({ path, onOpen, onLoad }) {
 function previewText(message) {
   const emote = emoteFromBody(message?.body);
   if (emote) return `${emote.emoji} ${emote.name}`;
+  const sticker = stickerFromBody(message?.body);
+  if (sticker) return `💬 ${sticker.text}`;
   return message?.body || (message?.image ? "📷 Photo" : "");
 }
 
-function EmoteTray({ owned, disabled, onSend, onClose }) {
+function EmoteTray({ owned, body, disabled, onSend, onSendSticker, onClose }) {
+  const [tab, setTab] = useState(body ? "stickers" : "emotes");
+
   return (
-    <div className="chat-emotes" role="dialog" aria-label="Emotes">
+    <div className="chat-emotes" role="dialog" aria-label="Emotes and stickers">
       <div className="chat-emotes-head">
-        <strong>Emotes</strong>
-        <Link to="/shop?type=emote" className="chat-emotes-shop">Get more</Link>
+        <div className="chat-emotes-tabs" role="tablist">
+          {[
+            ["stickers", "Stickers"],
+            ["emotes", "Emotes"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={tab === key}
+              className={tab === key ? "active" : ""}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {tab === "emotes" && <Link to="/shop?type=emote" className="chat-emotes-shop">Get more</Link>}
         <button type="button" onClick={onClose} aria-label="Close emotes">
           <Icon name="close" size={14} strokeWidth={2.6} />
         </button>
       </div>
 
+      {tab === "stickers" ? (
+        body ? (
+          <div className="chat-stickers-grid">
+            {STICKERS.map((sticker) => (
+              <button
+                key={sticker.id}
+                type="button"
+                className="chat-sticker-pick"
+                onClick={() => onSendSticker(sticker)}
+                disabled={disabled}
+                aria-label={`Sticker: ${sticker.text}`}
+              >
+                <Sticker sticker={sticker} body={body} size={74} />
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="chat-stickers-empty">
+            <p>Stickers use your 3D avatar.</p>
+            <Link to="/profile?avatar=make" className="btn btn-sm btn-primary">
+              Make my avatar
+            </Link>
+          </div>
+        )
+      ) : (
       <div className="chat-emotes-grid">
         {EMOTES.map((emote) => {
           const usable = canUseEmote(emote, owned);
@@ -102,6 +147,7 @@ function EmoteTray({ owned, disabled, onSend, onClose }) {
           );
         })}
       </div>
+      )}
     </div>
   );
 }
@@ -144,6 +190,7 @@ function MessageRow({
   // A reply always shows who sent it, even in a run of messages from one person.
   const compact = grouped && !message.reply_to;
   const emote = emoteFromBody(message.body);
+  const sticker = emote ? null : stickerFromBody(message.body);
 
   return (
     <li
@@ -181,7 +228,17 @@ function MessageRow({
           <ChatPhoto path={message.image} onOpen={onOpenPhoto} onLoad={onPhotoLoad} />
         )}
 
-        {emote ? (
+        {sticker ? (
+          <div className="chat-msg-emote">
+            <Sticker
+              sticker={sticker}
+              body={equipped.body}
+              avatar={equipped.avatar}
+              name={name}
+              frame={equipped.frame}
+            />
+          </div>
+        ) : emote ? (
           <div className="chat-msg-emote">
             <EmoteAvatar
               emote={emote}
@@ -710,10 +767,10 @@ function ChatPage() {
     }
   };
 
-  const send = async (event, emote = null) => {
+  const send = async (event, emote = null, sticker = null) => {
     event?.preventDefault();
 
-    const body = emote ? `::emote:${emote.id}::` : draft.trim();
+    const body = sticker ? `::sticker:${sticker.id}::` : emote ? `::emote:${emote.id}::` : draft.trim();
 
     if ((!body && !photo) || sending || !canSend) return;
 
@@ -722,7 +779,7 @@ function ChatPage() {
 
     let imagePath = null;
 
-    if (photo && !emote) {
+    if (photo && !emote && !sticker) {
       try {
         imagePath = await uploadChatImage(me, await prepareChatImage(photo.file));
       } catch (uploadError) {
@@ -753,7 +810,7 @@ function ChatPage() {
       return;
     }
 
-    if (emote) {
+    if (emote || sticker) {
       setEmotesOpen(false);
     } else {
       clearPhoto();
@@ -1126,8 +1183,10 @@ function ChatPage() {
             {emotesOpen && (
               <EmoteTray
                 owned={owned}
+                body={equippedFrom(myProfile).body}
                 disabled={sending}
                 onSend={(emote) => send(null, emote)}
+                onSendSticker={(sticker) => send(null, null, sticker)}
                 onClose={() => setEmotesOpen(false)}
               />
             )}

@@ -1316,3 +1316,82 @@ button.chat-quote {
     font-size: 22px;
   }
 }
+
+
+.chat-emotes-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.chat-emotes-head .chat-emotes-tabs button {
+  display: inline-block;
+
+  width: auto;
+  height: auto;
+
+  padding: 5px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--text-soft);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chat-emotes-head .chat-emotes-tabs button.active {
+  border-color: var(--line-gold);
+
+  background: var(--gold-wash);
+  color: var(--text);
+}
+
+.chat-emotes-head .chat-emotes-shop + button,
+.chat-emotes-tabs + button {
+  margin-left: auto;
+}
+
+.chat-stickers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+
+  max-height: 260px;
+
+  overflow-y: auto;
+}
+
+.chat-sticker-pick {
+  display: grid;
+  place-items: center;
+
+  padding: 6px 4px 2px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--surface);
+}
+
+.chat-sticker-pick:hover:not(:disabled) {
+  border-color: var(--line-gold);
+}
+
+.chat-stickers-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+
+  padding: 14px;
+
+  color: var(--text-soft);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .chat-stickers-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

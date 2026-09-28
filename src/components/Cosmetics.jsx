@@ -111,6 +111,25 @@ export function EmoteAvatar({ emote, name, avatar, body = null, frame, size = 64
   );
 }
 
+// A chat sticker: the sender's 3D avatar acting it out, with a caption.
+// Falls back to their profile picture if they don't have a 3D avatar.
+export function Sticker({ sticker, body, avatar, name, frame, size = 118 }) {
+  if (!sticker) return null;
+
+  const acted = emoteAvatar(body, { look: sticker.look });
+
+  return (
+    <span className="sticker" style={{ "--sticker-size": `${size}px`, "--sticker-color": sticker.color }}>
+      {acted ? (
+        <img className="sticker-body" src={drawFullBody(acted.o, "full")} alt="" draggable="false" />
+      ) : (
+        <FramedAvatar name={name} avatar={avatar} frame={frame} size={Math.round(size * 0.55)} />
+      )}
+      <span className="sticker-caption">{sticker.text}</span>
+    </span>
+  );
+}
+
 export function StyledName({ name, effect, className = "" }) {
   return (
     <span
