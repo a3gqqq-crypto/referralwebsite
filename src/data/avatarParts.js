@@ -86,6 +86,73 @@ export const AVATAR_STYLES = {
 
 export const STYLE_IDS = Object.keys(AVATAR_STYLES);
 
+/* ---------- Full-body avatar (the main avatar maker) ---------- */
+
+const SKINS = ["ffe0cc", "f9cfae", "eeb892", "d99c6f", "b97a4f", "915a37", "6b3f26", "4a2a18"];
+const HAIR_COLORS = ["1f1612", "3b2417", "6b4226", "8f3b1b", "c98b3c", "e0b965", "efe3c2", "9a9a9a", "f07ca8", "d63b3b", "8a5cf0", "4f7cf0", "3fb37f"];
+const EYE_COLORS = ["5b3a22", "2a1d1a", "8a6d3b", "3b6fb6", "3f8f5a", "7b5cc4"];
+const CLOTHES = ["f4f4f4", "1f1f24", "8a8f98", "1f2433", "3f5f95", "4f9cf0", "2a9d8f", "3c6e4f", "7a7a3a", "f2b84b", "f08a4b", "e24b4a", "e2537f", "f7a8c4", "8a5cf0", "d8c3a5", "6b4226"];
+const WITH_BOTTOMS = ["hoodie", "tee", "sweater", "shirt", "crop", "puffer", "bomber", "leather", "jersey", "suit"];
+
+// group: which tab it sits in. view: "full" shows the whole body in option tiles.
+export const FB_PARTS = [
+  { key: "body", label: "Body", group: "body", view: "full", values: ["guy", "girl"] },
+  { key: "skin", label: "Skin", group: "body", color: true, values: SKINS },
+  { key: "pose", label: "Pose", group: "body", view: "full", values: ["stand", "wave", "hips", "peace", "flex"] },
+  { key: "hair", label: "Hair", group: "hair", values: ["short", "fade", "buzz", "spiky", "sidepart", "curly", "mohawk", "manbun", "afro", "long", "bob", "bun", "ponytail", "pigtails", "braids", "curlylong", "bald"] },
+  { key: "hairColor", label: "Colour", group: "hair", color: true, values: HAIR_COLORS },
+  { key: "facialHair", label: "Beard", group: "hair", optional: true, values: ["stubble", "mustache", "goatee", "beard"] },
+  { key: "eyes", label: "Eyes", group: "face", values: ["normal", "happy", "wink", "sleepy", "star", "hearts"] },
+  { key: "eyeColor", label: "Eye colour", group: "face", color: true, values: EYE_COLORS },
+  { key: "brows", label: "Brows", group: "face", values: ["normal", "raised", "flat", "angry", "sad"] },
+  { key: "mouth", label: "Mouth", group: "face", values: ["smile", "grin", "open", "smirk", "tongue", "flat"] },
+  { key: "cheeks", label: "Cheeks", group: "face", optional: true, values: ["blush", "freckles"] },
+  { key: "hat", label: "Hats", group: "extras", optional: true, values: ["cap", "bandana", "beanie", "catears", "headphones", "horns", "crown", "halo"] },
+  { key: "hatColor", label: "Hat colour", group: "extras", color: true, values: CLOTHES, showIf: { hat: ["cap", "bandana", "beanie", "catears"] } },
+  { key: "glasses", label: "Glasses", group: "extras", optional: true, values: ["round", "square", "sunglasses", "aviators", "heart", "eyepatch"] },
+  { key: "earrings", label: "Earrings", group: "extras", optional: true, values: ["studs", "hoops"] },
+  { key: "necklace", label: "Necklace", group: "extras", optional: true, values: ["pearls", "chain"] },
+  { key: "top", label: "Top", group: "outfit", view: "full", values: ["hoodie", "tee", "sweater", "shirt", "crop", "dress", "puffer", "bomber", "leather", "jersey", "suit"] },
+  { key: "topColor", label: "Top colour", group: "outfit", color: true, values: CLOTHES },
+  { key: "bottom", label: "Bottoms", group: "outfit", view: "full", values: ["jeans", "joggers", "shorts", "skirt", "cargo"], showIf: { top: WITH_BOTTOMS } },
+  { key: "bottomColor", label: "Bottoms colour", group: "outfit", color: true, values: CLOTHES, showIf: { top: WITH_BOTTOMS } },
+  { key: "shoes", label: "Shoes", group: "outfit", view: "full", values: ["sneakers", "slides", "boots", "hightops"] },
+  { key: "shoeColor", label: "Shoe colour", group: "outfit", color: true, values: CLOTHES },
+];
+
+export const FB_GROUPS = [
+  { id: "body", label: "Body" },
+  { id: "hair", label: "Hair" },
+  { id: "face", label: "Face" },
+  { id: "extras", label: "Extras" },
+  { id: "outfit", label: "Outfit" },
+  { id: "bg", label: "Background" },
+];
+
+export const FB_DEFAULTS = {
+  guy: { body: "guy", skin: "eeb892", pose: "stand", hair: "short", hairColor: "3b2417", facialHair: "", eyes: "normal", eyeColor: "5b3a22", brows: "normal", mouth: "smile", cheeks: "", hat: "", hatColor: "e24b4a", glasses: "", earrings: "", necklace: "", top: "hoodie", topColor: "e2537f", bottom: "jeans", bottomColor: "3f5f95", shoes: "sneakers", shoeColor: "f4f4f4", bg: "sky" },
+  girl: { body: "girl", skin: "f9cfae", pose: "stand", hair: "long", hairColor: "3b2417", facialHair: "", eyes: "normal", eyeColor: "5b3a22", brows: "normal", mouth: "smile", cheeks: "blush", hat: "", hatColor: "f7a8c4", glasses: "", earrings: "studs", necklace: "", top: "tee", topColor: "f4f4f4", bottom: "skirt", bottomColor: "1f1f24", shoes: "sneakers", shoeColor: "f4f4f4", bg: "peach" },
+};
+
+const FB_STYLE = { label: "Suffrova", parts: FB_PARTS, defaults: FB_DEFAULTS.guy };
+
+const styleDef = (style) => (style === "fb" ? FB_STYLE : AVATAR_STYLES[style]);
+
+// Stored values -> what the drawing code wants (valid ids, "#" colours).
+export function fullBodyOptions(stored) {
+  const merged = { ...FB_DEFAULTS.guy, ...stored };
+  const out = {};
+  for (const part of FB_PARTS) {
+    let value = merged[part.key];
+    if (value && !part.values.includes(value)) value = FB_DEFAULTS.guy[part.key];
+    if (!value && !part.optional) value = FB_DEFAULTS.guy[part.key];
+    out[part.key] = part.color ? `#${value}` : value || "";
+  }
+  if (out.hair === "bald") out.hair = "";
+  const bg = BACKGROUNDS.find((item) => item.id === merged.bg) || BACKGROUNDS[0];
+  return { options: out, bg: bg.colors };
+}
+
 // "style.part.value" -> cosmetic id. Mirror of the avatar_premium table.
 export const PREMIUM_PARTS = {
   "avataaars.accessories.sunglasses": "avatar-shades",
@@ -114,6 +181,31 @@ export const PREMIUM_PARTS = {
   "bottts.texture.camo02": "avatar-villain",
   "bigSmile.accessories.faceMask": "avatar-villain",
   "bigSmile.accessories.clownNose": "avatar-villain",
+
+  "fb.glasses.sunglasses": "avatar-shades",
+  "fb.glasses.aviators": "avatar-shades",
+  "fb.glasses.heart": "avatar-shades",
+  "fb.hat.beanie": "avatar-winter",
+  "fb.top.puffer": "avatar-winter",
+  "fb.shoes.boots": "avatar-winter",
+  "fb.earrings.hoops": "avatar-bling",
+  "fb.necklace.chain": "avatar-bling",
+  "fb.top.bomber": "avatar-drip",
+  "fb.top.leather": "avatar-drip",
+  "fb.bottom.cargo": "avatar-drip",
+  "fb.shoes.hightops": "avatar-drip",
+  "fb.hat.catears": "avatar-kawaii",
+  "fb.eyes.star": "avatar-kawaii",
+  "fb.eyes.hearts": "avatar-kawaii",
+  "fb.hat.headphones": "avatar-glowbot",
+  "fb.top.jersey": "avatar-glowbot",
+  "fb.hat.horns": "avatar-villain",
+  "fb.glasses.eyepatch": "avatar-villain",
+  "fb.hat.crown": "avatar-royal",
+  "fb.hat.halo": "avatar-royal",
+  "fb.top.suit": "avatar-royal",
+  "fb.pose.peace": "avatar-poses",
+  "fb.pose.flex": "avatar-poses",
 };
 
 export function premiumFor(style, key, value) {
@@ -123,15 +215,20 @@ export function premiumFor(style, key, value) {
 }
 
 // What each avatar pack unlocks, for shop previews.
+const fbPreview = (o) => ({ s: "fb", o });
+
+// What each avatar pack unlocks, for shop previews.
 export const PACK_PREVIEW = {
-  "avatar-shades": { s: "avataaars", o: { accessories: "wayfarers", top: "shortWaved", bg: "sand" } },
-  "avatar-winter": { s: "avataaars", o: { top: "winterHat02", clothesColor: "ff5c5c", bg: "sky" } },
-  "avatar-kawaii": { s: "bigSmile", o: { accessories: "catEars", mouth: "kawaii", hairColor: "605de4", bg: "peach" } },
-  "avatar-bling": { s: "adventurer", o: { earrings: "variant03", hair: "long05", bg: "lilac" } },
-  "avatar-drip": { s: "avataaars", o: { clothing: "graphicShirt", clothingGraphic: "skull", clothesColor: "262e33", accessories: "round", bg: "night" } },
-  "avatar-glowbot": { s: "bottts", o: { top: "glowingBulb01", eyes: "glow", baseColor: "5e35b1", bg: "night" } },
-  "avatar-villain": { s: "bottts", o: { top: "horns", texture: "camo01", baseColor: "e53935", eyes: "robocop", bg: "night" } },
-  "avatar-gradients": { s: "avataaars", o: { bg: "sunset" } },
+  "avatar-shades": fbPreview({ glasses: "aviators", hair: "sidepart", bg: "sand" }),
+  "avatar-winter": fbPreview({ hat: "beanie", hatColor: "f7a8c4", top: "puffer", topColor: "4f9cf0", shoes: "boots", shoeColor: "6b4226", bg: "sky" }),
+  "avatar-bling": fbPreview({ ...FB_DEFAULTS.girl, earrings: "hoops", necklace: "chain", top: "crop", topColor: "1f1f24", bg: "gold" }),
+  "avatar-drip": fbPreview({ top: "bomber", topColor: "3c6e4f", bottom: "cargo", bottomColor: "8a8f98", shoes: "hightops", shoeColor: "e24b4a", bg: "night" }),
+  "avatar-kawaii": fbPreview({ ...FB_DEFAULTS.girl, hat: "catears", hatColor: "f4f4f4", eyes: "hearts", hair: "pigtails", hairColor: "f07ca8", bg: "candy" }),
+  "avatar-glowbot": fbPreview({ hat: "headphones", top: "jersey", topColor: "8a5cf0", hair: "spiky", hairColor: "4f7cf0", pose: "flex", bg: "night" }),
+  "avatar-villain": fbPreview({ hat: "horns", glasses: "eyepatch", top: "leather", topColor: "1f1f24", brows: "angry", mouth: "smirk", bg: "night" }),
+  "avatar-gradients": fbPreview({ bg: "sunset" }),
+  "avatar-royal": fbPreview({ hat: "crown", top: "suit", topColor: "1f2433", bottomColor: "1f2433", shoes: "boots", shoeColor: "1f1f24", bg: "gold" }),
+  "avatar-poses": fbPreview({ pose: "peace", bg: "mint" }),
 };
 
 export const packPreviewAvatar = (id) =>
@@ -142,8 +239,9 @@ export function parseDicebear(avatar) {
 
   try {
     const data = JSON.parse(avatar.slice(3));
-    if (!AVATAR_STYLES[data?.s]) return null;
-    return { s: data.s, o: { ...AVATAR_STYLES[data.s].defaults, ...(data.o || {}) } };
+    const def = styleDef(data?.s);
+    if (!def) return null;
+    return { s: data.s, o: { ...def.defaults, ...(data.o || {}) } };
   } catch {
     return null;
   }
@@ -151,7 +249,7 @@ export function parseDicebear(avatar) {
 
 // Only keeps values that differ from the style defaults, so the string stays short.
 export function encodeDicebear(style, options) {
-  const defaults = AVATAR_STYLES[style].defaults;
+  const defaults = styleDef(style).defaults;
   const o = {};
   for (const [key, value] of Object.entries(options)) {
     if (key in defaults && value !== defaults[key]) o[key] = value;

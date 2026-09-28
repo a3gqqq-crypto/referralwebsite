@@ -7,6 +7,7 @@ import {
 import { LevelBadge, LevelProgress } from "./Level";
 import StaffTag from "./StaffTag";
 import { lastSeenText, useIsOnline } from "../lib/presence";
+import { fullBodySrc } from "../lib/avatarRender";
 
 import "../styles/profile.css";
 
@@ -27,10 +28,13 @@ function ProfileCard({
 }) {
   const avatarSize = size === "lg" ? 116 : size === "sm" ? 64 : 84;
   const online = useIsOnline(userId);
+  const figure = fullBodySrc(equipped.avatar);
 
   return (
     <article className={`profile-card profile-card-${size}`}>
-      <ProfileBanner banner={equipped.banner} className="profile-card-banner" />
+      <ProfileBanner banner={equipped.banner} className="profile-card-banner">
+        {figure && <img className="profile-card-figure" src={figure} alt="" draggable="false" />}
+      </ProfileBanner>
 
       <div className="profile-card-body">
         <div className="profile-card-avatar">

@@ -1,19 +1,20 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Icon from "./Icon";
 import { FramedAvatar } from "./Cosmetics";
 import { BUILTIN_AVATARS } from "../data/avatars";
 import {
-  AVATAR_STYLES,
   BACKGROUNDS,
-  STYLE_IDS,
+  FB_DEFAULTS,
+  FB_GROUPS,
+  FB_PARTS,
   encodeDicebear,
   parseDicebear,
   premiumFor,
 } from "../data/avatarParts";
 import { cosmeticById, formatPrice } from "../data/cosmetics";
-import { useDicebear } from "../lib/avatarRender";
+import { drawFullBody } from "../lib/avatarRender";
 
 import "../styles/avatar-maker.css";
 
@@ -39,73 +40,83 @@ function Tile({ selected, busy, onClick, label, meta, children }) {
   );
 }
 
-function Drawn({ style, options, size, className = "" }) {
-  const uri = useDicebear(style, options);
-
-  return (
-    <span className={`avm-drawn ${className}`} style={{ width: size, height: size }}>
-      {uri ? <img src={uri} alt="" draggable="false" /> : <span className="avm-drawn-wait" />}
-    </span>
-  );
-}
+const NAMES = {
+  guy: "Guy", girl: "Girl", stand: "Chill", wave: "Wave", hips: "Hands on hips", peace: "Peace", flex: "Flex",
+  sidepart: "Side part", manbun: "Man bun", curlylong: "Long curls", catears: "Cat ears", hightops: "High-tops",
+  crop: "Crop top", leather: "Leather", puffer: "Puffer", bomber: "Bomber", jersey: "Jersey", tee: "Tee",
+};
+const nameOf = (value) => NAMES[value] || value.charAt(0).toUpperCase() + value.slice(1);
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
-function randomDraft(style, owned) {
-  const def = AVATAR_STYLES[style];
-  const draft = { ...def.defaults };
-  const free = (key, values) => values.filter((value) => {
-    const pack = premiumFor(style, key, value);
-    return !pack || owned.has(pack);
-  });
+const visible = (part, draft) =>
+  Object.entries(part.showIf || {}).every(([key, allowed]) => allowed.includes(draft[key]));
 
-  for (const part of def.parts) {
+function randomDraft(draft, owned) {
+  const next = { ...FB_DEFAULTS[draft.body], body: draft.body };
+  const free = (key, values) =>
+    values.filter((value) => {
+      const pack = premiumFor("fb", key, value);
+      return !pack || owned.has(pack);
+    });
+
+  for (const part of FB_PARTS) {
+    if (part.key === "body" || part.key === "pose") continue;
     const values = free(part.key, part.values);
-    draft[part.key] = part.optional && Math.random() < 0.55 ? "" : pick(values.length ? values : part.values);
+    const chance = { facialHair: 0.7, hat: 0.6, glasses: 0.6, necklace: 0.7, earrings: 0.5, cheeks: 0.5 }[part.key] ?? 0.3;
+    next[part.key] = part.optional && Math.random() < chance ? "" : pick(values.length ? values : part.values);
   }
 
-  draft.bg = pick(free("bg", BACKGROUNDS.map((bg) => bg.id)));
-  return draft;
+  if (draft.body === "guy" && Math.random() < 0.85) {
+    next.hair = pick(["short", "fade", "buzz", "spiky", "sidepart", "curly", "manbun", "afro"]);
+    if (["skirt"].includes(next.bottom)) next.bottom = "jeans";
+    if (["dress", "crop"].includes(next.top)) next.top = "hoodie";
+  }
+  if (draft.body === "girl") next.facialHair = "";
+
+  next.bg = pick(free("bg", BACKGROUNDS.map((bg) => bg.id)));
+  return next;
 }
 
 function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
   const saved = parseDicebear(current);
-  const [style, setStyle] = useState(saved?.s || "avataaars");
-  const [draft, setDraft] = useState(saved?.o || AVATAR_STYLES.avataaars.defaults);
-  const [partKey, setPartKey] = useState(AVATAR_STYLES[saved?.s || "avataaars"].parts[0].key);
+  const [draft, setDraft] = useState(() => (saved?.s === "fb" ? saved.o : FB_DEFAULTS.guy));
+  const [group, setGroup] = useState("body");
+  const [partKey, setPartKey] = useState("body");
 
-  const def = AVATAR_STYLES[style];
-  const parts = useMemo(
-    () => [
-      ...def.parts.filter((part) =>
-        Object.entries(part.showIf || {}).every(([key, value]) => draft[key] === value)
-      ),
-      { key: "bg", label: "Background", background: true },
-    ],
-    [def, draft]
-  );
-  const part = parts.find((item) => item.key === partKey) || parts[0];
+  const parts = FB_PARTS.filter((part) => part.group === group && visible(part, draft));
+  const part = group === "bg" ? null : parts.find((item) => item.key === partKey) || parts[0];
 
-  const encoded = encodeDicebear(style, draft);
+  // Hidden parts (e.g. bottoms under a dress) go back to defaults before saving.
+  const clean = { ...draft };
+  for (const item of FB_PARTS) if (!visible(item, draft)) clean[item.key] = FB_DEFAULTS.guy[item.key];
+  const encoded = encodeDicebear("fb", clean);
   const unchanged = encoded === current;
 
   // Premium bits in the draft you don't own yet (try-on is free, saving isn't).
   const needed = [
     ...new Set(
-      Object.entries(draft)
-        .map(([key, value]) => premiumFor(style, key, value))
+      FB_PARTS.filter((item) => visible(item, draft))
+        .map((item) => premiumFor("fb", item.key, draft[item.key]))
+        .concat(premiumFor("fb", "bg", draft.bg))
         .filter((pack) => pack && !owned.has(pack))
     ),
   ];
 
-  const switchStyle = (next) => {
-    if (next === style) return;
-    setStyle(next);
-    setDraft({ ...AVATAR_STYLES[next].defaults, bg: draft.bg });
-    setPartKey(AVATAR_STYLES[next].parts[0].key);
-  };
+  const set = (key, value) =>
+    setDraft((old) => {
+      if (key !== "body" || old.body === value) return { ...old, [key]: value };
 
-  const set = (key, value) => setDraft((old) => ({ ...old, [key]: value }));
+      // Switching guy/girl: swap the other body's default bits for this one's.
+      const from = FB_DEFAULTS[old.body];
+      const to = FB_DEFAULTS[value];
+      const next = { ...old, body: value };
+      for (const item of ["hair", "top", "bottom", "bottomColor", "topColor", "cheeks", "earrings"]) {
+        if (old[item] === from[item]) next[item] = to[item];
+      }
+      if (value === "girl") next.facialHair = "";
+      return next;
+    });
 
   const lockBadge = (pack) => {
     const item = cosmeticById(pack);
@@ -120,15 +131,15 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
   return (
     <div className="avm">
       <div className="avm-stage">
-        <div className="avm-stage-art">
-          <FramedAvatar name={username} frame={frame} avatar={encoded} size={132} />
-        </div>
+        <img className="avm-body" src={drawFullBody(draft, "full")} alt="Your avatar" draggable="false" />
 
-        <div className="avm-stage-actions">
+        <div className="avm-stage-side">
+          <FramedAvatar name={username} frame={frame} avatar={encoded} size={64} />
+
           <button
             type="button"
             className="btn btn-sm"
-            onClick={() => setDraft(randomDraft(style, owned))}
+            onClick={() => setDraft(randomDraft(draft, owned))}
             disabled={busy}
           >
             <Icon name="sparkles" size={15} />
@@ -138,7 +149,7 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
           {needed.length ? (
             <Link to={`/shop?type=avatar&item=${needed[0]}`} className="btn btn-sm btn-sun">
               <Icon name="lock" size={15} />
-              Get {cosmeticById(needed[0])?.name} to save
+              Get {cosmeticById(needed[0])?.name}
             </Link>
           ) : (
             <button
@@ -148,48 +159,48 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
               disabled={busy || unchanged}
             >
               <Icon name="check" size={15} />
-              {busy ? "Saving…" : unchanged ? "Saved" : "Save avatar"}
+              {busy ? "Saving…" : unchanged ? "Saved" : "Save"}
             </button>
           )}
         </div>
       </div>
 
-      <div className="avm-styles" role="tablist" aria-label="Avatar style">
-        {STYLE_IDS.map((id) => (
+      <div className="avm-styles" role="tablist" aria-label="Avatar sections">
+        {FB_GROUPS.map((item) => (
           <button
-            key={id}
+            key={item.id}
             type="button"
             role="tab"
-            aria-selected={style === id}
-            className={style === id ? "active" : ""}
-            onClick={() => switchStyle(id)}
-          >
-            <Drawn
-              style={id}
-              options={style === id ? draft : { ...AVATAR_STYLES[id].defaults, bg: draft.bg }}
-              size={40}
-            />
-            <span>{AVATAR_STYLES[id].label}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="avm-parts" role="tablist" aria-label="Part">
-        {parts.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={part.key === item.key}
-            className={part.key === item.key ? "active" : ""}
-            onClick={() => setPartKey(item.key)}
+            aria-selected={group === item.id}
+            className={group === item.id ? "active" : ""}
+            onClick={() => {
+              setGroup(item.id);
+              setPartKey(FB_PARTS.find((entry) => entry.group === item.id)?.key || "bg");
+            }}
           >
             {item.label}
           </button>
         ))}
       </div>
 
-      {part.background ? (
+      {part && parts.length > 1 && (
+        <div className="avm-parts" role="tablist" aria-label="Part">
+          {parts.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              aria-selected={part.key === item.key}
+              className={part.key === item.key ? "active" : ""}
+              onClick={() => setPartKey(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!part ? (
         <div className="avm-swatches">
           {BACKGROUNDS.map((bg) => {
             const pack = bg.premium && !owned.has(bg.premium) ? bg.premium : null;
@@ -228,7 +239,7 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
           ))}
         </div>
       ) : (
-        <div className="avm-options">
+        <div className={`avm-options ${part.view === "full" ? "is-full" : ""}`}>
           {part.optional && (
             <button
               type="button"
@@ -244,8 +255,10 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
           )}
 
           {part.values.map((value) => {
-            const pack = premiumFor(style, part.key, value);
+            const pack = premiumFor("fb", part.key, value);
             const locked = pack && !owned.has(pack);
+            const preview = { ...draft, [part.key]: value };
+            if (part.key === "body") Object.assign(preview, FB_DEFAULTS[value], { skin: draft.skin, bg: draft.bg });
 
             return (
               <button
@@ -254,9 +267,16 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
                 className={`avm-option ${draft[part.key] === value ? "selected" : ""} ${locked ? "is-locked" : ""}`}
                 onClick={() => set(part.key, value)}
                 aria-pressed={draft[part.key] === value}
-                aria-label={`${part.label}: ${value}${locked ? " (locked)" : ""}`}
+                aria-label={`${part.label}: ${nameOf(value)}${locked ? " (locked)" : ""}`}
               >
-                <Drawn style={style} options={{ ...draft, [part.key]: value }} size={58} />
+                <img
+                  className={part.view === "full" ? "avm-full" : "avm-head"}
+                  src={drawFullBody(preview, part.view === "full" ? "full" : "head")}
+                  alt=""
+                  draggable="false"
+                  loading="lazy"
+                />
+                {part.view === "full" && <span className="avm-option-name">{nameOf(value)}</span>}
                 {locked && lockBadge(pack)}
               </button>
             );
@@ -265,7 +285,7 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
       )}
 
       <p className="avm-hint">
-        Locked bits are free to try on. <Link to="/shop?type=avatar">Avatar packs</Link> unlock them.
+        Locked items are free to try on. Get them in the <Link to="/shop?type=avatar">shop</Link>.
       </p>
     </div>
   );
