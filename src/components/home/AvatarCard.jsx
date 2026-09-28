@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import Icon from "../Icon";
 import { useMyProfile } from "../../context/ProfileContext";
-import { parseDicebear } from "../../data/avatarParts";
+import { equippedFrom } from "../../data/cosmetics";
 import { drawFullBody } from "../../lib/avatarRender";
 
 const SAMPLES = [
@@ -15,7 +15,7 @@ const SAMPLES = [
 function AvatarCard() {
   const { profile, loading } = useMyProfile();
 
-  if (loading || !profile || parseDicebear(profile.avatar)?.s === "fb") return null;
+  if (loading || !profile || equippedFrom(profile).body) return null;
 
   return (
     <section className="avatar-card card">

@@ -6,7 +6,7 @@ import StaffTag from "./StaffTag";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
-  "id, username, display_name, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar";
+  "id, username, display_name, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar, body_avatar";
 
 function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
   const equipped = equippedFrom(player);

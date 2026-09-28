@@ -581,11 +581,15 @@ export function equippedFrom(profile) {
       .filter((id) => cosmeticById(id)?.type === "badge")
       .slice(0, MAX_BADGES),
     avatar: profile?.avatar || null,
+    // 3D full-body avatar (profile banner, calls, emotes). Older saves kept it in `avatar`.
+    body:
+      profile?.body_avatar ||
+      (profile?.avatar?.startsWith('db:{"s":"fb"') ? profile.avatar : null),
   };
 }
 
 export const PROFILE_COLUMNS =
-  "id, username, display_name, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak, avatar, last_seen_at";
+  "id, username, display_name, referral_count, created_at, bio, equipped_frame, equipped_name, equipped_banner, equipped_badges, xp, checkin_streak, avatar, body_avatar, last_seen_at";
 
 // The name people see: their display name if they set one, else the username.
 // Links, invites and logins always use the username.

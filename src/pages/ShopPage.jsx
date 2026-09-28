@@ -64,7 +64,7 @@ function ShopPage() {
 
   if (selected) {
     if (selected.type === "avatar") {
-      tryOn.avatar = packPreviewAvatar(selected.id);
+      tryOn.body = packPreviewAvatar(selected.id);
     } else if (selected.type === "emote") {
       // Previewed in the item tile.
     } else if (selected.type === "badge") {
@@ -253,7 +253,7 @@ function ShopPage() {
                   {item.exclusive && <span className="shop-exclusive">Exclusive</span>}
 
                   <span className="shop-item-preview">
-                    <CosmeticPreview item={item} username={username || "you"} avatar={profile?.avatar} />
+                    <CosmeticPreview item={item} username={username || "you"} avatar={profile?.avatar} body={equipped.body} />
                   </span>
 
                   <span className="shop-item-info">
@@ -305,6 +305,7 @@ function ShopPage() {
                 emote={emoteById(selected.id.slice(6))}
                 name={displayNameOf(profile, username || "you")}
                 avatar={profile?.avatar}
+                body={equipped.body}
                 frame={equipped.frame}
                 size={90}
                 full

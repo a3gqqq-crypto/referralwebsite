@@ -119,7 +119,8 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
   const weak = [ConnectionQuality.Poor, ConnectionQuality.Lost].includes(participant.connectionQuality);
 
   // Full-body avatars stand in the tile and move their mouth while talking.
-  const body = !cameraOn && parseDicebear(meta.avatar)?.s === "fb";
+  const bodyAvatar = meta.body || (parseDicebear(meta.avatar)?.s === "fb" ? meta.avatar : null);
+  const body = !cameraOn && Boolean(bodyAvatar);
   const talking = participant.isSpeaking && !mutedForMe && participant.isMicrophoneEnabled;
 
   return (
@@ -137,6 +138,7 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
             name={name}
             frame={meta.frame}
             avatar={meta.avatar}
+            body={bodyAvatar}
             size={76}
             loop={false}
             full={body}
@@ -146,7 +148,7 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
         <span className="call-figure">
           <img
             className="call-body"
-            src={fullBodySrc(meta.avatar, talking ? "talk" : "live")}
+            src={fullBodySrc(bodyAvatar, talking ? "talk" : "live")}
             alt=""
             draggable="false"
           />

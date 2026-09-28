@@ -187,6 +187,7 @@ function MessageRow({
               emote={emote}
               name={name}
               avatar={equipped.avatar}
+              body={equipped.body}
               frame={equipped.frame}
               size={64}
               loop={false}

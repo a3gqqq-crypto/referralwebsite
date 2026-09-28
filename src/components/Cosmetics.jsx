@@ -83,11 +83,12 @@ function EmoteFrames({ emote, base, loop }) {
 
 // A player's avatar doing an emote. Full-body avatars act it out (pose and
 // face change); pass `full` to show the whole body instead of the head.
-export function EmoteAvatar({ emote, name, avatar, frame, size = 64, loop = true, full = false }) {
+export function EmoteAvatar({ emote, name, avatar, body = null, frame, size = 64, loop = true, full = false }) {
   if (!emote) return null;
 
-  const acted = emoteAvatar(avatar, emote);
-  const whole = full && acted;
+  const actedBody = full ? emoteAvatar(body || avatar, emote) : null;
+  const acted = actedBody || emoteAvatar(avatar, emote);
+  const whole = Boolean(actedBody);
 
   return (
     <span
@@ -159,13 +160,13 @@ export function ProfileBanner({ banner, className = "", children }) {
   );
 }
 
-export function CosmeticPreview({ item, username = "you", avatar = null }) {
+export function CosmeticPreview({ item, username = "you", avatar = null, body = null }) {
   if (item.type === "avatar") {
     return <FramedAvatar name={username} avatar={packPreviewAvatar(item.id)} size={76} />;
   }
 
   if (item.type === "emote") {
-    return <EmoteAvatar emote={emoteById(item.id.slice(6))} name={username} avatar={avatar} size={58} />;
+    return <EmoteAvatar emote={emoteById(item.id.slice(6))} name={username} avatar={body || avatar} size={58} />;
   }
 
   if (item.type === "frame") {

@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   const [{ data: me }, { data: staffRow }] = await Promise.all([
     admin
       .from("profiles")
-      .select("username, display_name, avatar, equipped_frame, chat_banned, chat_muted_until")
+      .select("username, display_name, avatar, body_avatar, equipped_frame, chat_banned, chat_muted_until")
       .eq("id", userId)
       .maybeSingle(),
     admin.from("admins").select("role").eq("user_id", userId).maybeSingle(),
@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
   const token = await signToken(apiKey, apiSecret, {
     sub: userId,
     name: me.display_name || me.username,
-    metadata: JSON.stringify({ username: me.username, avatar: me.avatar, frame: me.equipped_frame }),
+    metadata: JSON.stringify({ username: me.username, avatar: me.avatar, body: me.body_avatar, frame: me.equipped_frame }),
     video: { room: livekitRoom, roomJoin: true, canPublish: true, canSubscribe: true, canPublishData: true },
   });
 

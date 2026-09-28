@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import Icon from "../components/Icon";
 import ProfileCard from "../components/ProfileCard";
-import AvatarPicker from "../components/AvatarPicker";
+import AvatarPicker, { AvatarMaker } from "../components/AvatarPicker";
 import StaffTagToggle from "../components/StaffTagToggle";
 import { CosmeticPreview } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
@@ -20,8 +20,8 @@ import { TIERS, XP_RULES, levelInfo } from "../data/levels";
 
 import "../styles/profile.css";
 
-const TABS = ["picture", "frame", "name", "banner", "badge", "bio"];
-const TAB_LABEL = { picture: "Picture", bio: "Name & bio" };
+const TABS = ["avatar", "picture", "frame", "name", "banner", "badge", "bio"];
+const TAB_LABEL = { avatar: "3D avatar", picture: "Profile picture", bio: "Name & bio" };
 const BIO_LIMIT = 160;
 const NAME_LIMIT = 30;
 
@@ -47,10 +47,11 @@ function LockerPage() {
     saveBio,
     setDisplayName,
     setAvatar,
+    setBodyAvatar,
     uploadAvatar,
   } = useMyProfile();
 
-  const [tab, setTab] = useState("picture");
+  const [tab, setTab] = useState("avatar");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
   const [bio, setBio] = useState("");
@@ -244,12 +245,23 @@ function LockerPage() {
           <div className="locker-panel" role="tabpanel">
             {loading ? (
               <p className="muted">Loading your locker…</p>
+            ) : tab === "avatar" ? (
+              <AvatarMaker
+                username={username}
+                frame={equipped.frame}
+                current={equipped.body}
+                picture={profile?.avatar || null}
+                owned={owned}
+                busy={busy}
+                onSave={(avatar) => run(() => setBodyAvatar(avatar), "Avatar saved.")}
+                onUseAsPicture={(avatar) => run(() => setAvatar(avatar), "Profile picture updated.")}
+              />
             ) : tab === "picture" ? (
               <AvatarPicker
                 username={username}
                 frame={equipped.frame}
                 current={profile?.avatar || null}
-                owned={owned}
+                body={equipped.body}
                 busy={busy}
                 onPick={(avatar) => run(() => setAvatar(avatar), "Picture updated.")}
                 onUpload={(file) => run(() => uploadAvatar(file), "Photo uploaded.")}

@@ -28,7 +28,7 @@ function ProfileCard({
 }) {
   const avatarSize = size === "lg" ? 116 : size === "sm" ? 64 : 84;
   const online = useIsOnline(userId);
-  const figure = fullBodySrc(equipped.avatar);
+  const figure = fullBodySrc(equipped.body);
 
   return (
     <article className={`profile-card profile-card-${size}`}>

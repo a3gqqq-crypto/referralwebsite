@@ -192,6 +192,7 @@ export function ProfileProvider({ user, children }) {
       callAndRefresh("set_equipped_badges", { p_badges: badgeIds }),
     saveBio: (bio) =>
       callAndRefresh("update_profile_bio", { p_bio: bio }),
+    setBodyAvatar: (avatar) => callAndRefresh("set_body_avatar", { p_avatar: avatar }),
     setAvatar: async (avatar) => {
       const result = await callAndRefresh("set_avatar", { p_avatar: avatar });
       if (result.ok) removeOldUploads(userId, avatar);

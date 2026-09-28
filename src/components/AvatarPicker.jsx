@@ -79,7 +79,7 @@ function randomDraft(draft, owned) {
   return next;
 }
 
-function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
+export function AvatarMaker({ username, frame, current, picture, owned, busy, onSave, onUseAsPicture }) {
   const saved = parseDicebear(current);
   const [draft, setDraft] = useState(() => (saved?.s === "fb" ? saved.o : FB_DEFAULTS.guy));
   const [group, setGroup] = useState("body");
@@ -146,6 +146,13 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
             <Icon name="sparkles" size={15} />
             Surprise me
           </button>
+
+          {unchanged && current && picture !== current && (
+            <button type="button" className="btn btn-sm" onClick={() => onUseAsPicture(current)} disabled={busy}>
+              <Icon name="user" size={15} />
+              Use as picture
+            </button>
+          )}
 
           {needed.length ? (
             <Link to={`/shop?type=avatar&item=${needed[0]}`} className="btn btn-sm btn-sun">
@@ -292,22 +299,18 @@ function AvatarMaker({ username, frame, current, owned, busy, onSave }) {
   );
 }
 
-function AvatarPicker({ username, frame, current, owned = new Set(), busy, onPick, onUpload }) {
+// Profile picture: your own photo, a classic picture, or your 3D avatar's face.
+function AvatarPicker({ username, frame, current, body = null, busy, onPick, onUpload }) {
   const fileRef = useRef(null);
   const hasUpload = current?.startsWith("upload:");
-  const [mode, setMode] = useState(() =>
-    new URLSearchParams(window.location.search).get("avatar") === "make"
-      ? "maker"
-      : hasUpload ? "photo" : current?.startsWith("builtin:") ? "classic" : "maker"
-  );
+  const [mode, setMode] = useState(hasUpload ? "photo" : "classic");
 
   return (
     <div className="avatar-picker">
       <div className="avm-modes" role="tablist" aria-label="Picture type">
         {[
-          ["maker", "Avatar maker"],
           ["photo", "Photo"],
-          ["classic", "Classic"],
+          ["classic", "Pick one"],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -321,17 +324,6 @@ function AvatarPicker({ username, frame, current, owned = new Set(), busy, onPic
           </button>
         ))}
       </div>
-
-      {mode === "maker" && (
-        <AvatarMaker
-          username={username}
-          frame={frame}
-          current={current}
-          owned={owned}
-          busy={busy}
-          onSave={onPick}
-        />
-      )}
 
       {mode === "photo" && (
         <div className="avatar-upload">
@@ -377,6 +369,18 @@ function AvatarPicker({ username, frame, current, owned = new Set(), busy, onPic
           >
             <FramedAvatar name={username} frame={frame} size={60} />
           </Tile>
+
+          {body && (
+            <Tile
+              selected={current === body}
+              busy={busy}
+              onClick={() => current !== body && onPick(body)}
+              label="My 3D avatar"
+              meta="Face"
+            >
+              <FramedAvatar name={username} frame={frame} avatar={body} size={60} />
+            </Tile>
+          )}
 
           {BUILTIN_AVATARS.map((avatar) => {
             const value = `builtin:${avatar.id}`;
