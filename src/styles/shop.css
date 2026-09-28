@@ -380,3 +380,14 @@
   padding: 18px 12px;
   margin-top: 12px;
 }
+
+/* Computers can't swipe sideways, so the categories wrap instead of scrolling. */
+@media (min-width: 641px) {
+  .shop-filters {
+    flex-wrap: wrap;
+
+    border-radius: 22px;
+
+    overflow: visible;
+  }
+}

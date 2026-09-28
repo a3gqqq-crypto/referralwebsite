@@ -764,3 +764,11 @@
     height: 200px;
   }
 }
+
+@media (min-width: 641px) {
+  .locker-tabs {
+    flex-wrap: wrap;
+
+    overflow: visible;
+  }
+}

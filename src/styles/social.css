@@ -6,9 +6,16 @@
 }
 
 .friend-state {
-  cursor: default;
+  cursor: pointer;
 
   color: var(--mint);
+}
+
+.friend-button .btn-danger {
+  border-color: rgba(255, 92, 110, 0.5);
+
+  background: rgba(255, 92, 110, 0.14);
+  color: #ff8a98;
 }
 
 .friend-button-error {

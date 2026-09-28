@@ -10,6 +10,7 @@ function FriendButton({ profile, size = "", showMessage = true }) {
   const social = useSocial();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [confirmUnfriend, setConfirmUnfriend] = useState(false);
 
   const relation = social.relationWith(profile?.id);
   const btn = `btn ${size === "sm" ? "btn-sm" : ""}`;
@@ -44,10 +45,32 @@ function FriendButton({ profile, size = "", showMessage = true }) {
             Message
           </Link>
         )}
-        <span className={`${btn} friend-state`} aria-label="You're friends">
-          <Icon name="check" size={15} />
-          Friends
-        </span>
+        {confirmUnfriend ? (
+          <>
+            <button
+              type="button"
+              className={`${btn} btn-danger`}
+              disabled={busy}
+              onClick={() => run(() => social.removeFriend(profile.id)).then(() => setConfirmUnfriend(false))}
+            >
+              {busy ? "Removing…" : "Unfriend"}
+            </button>
+            <button type="button" className={btn} disabled={busy} onClick={() => setConfirmUnfriend(false)}>
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            className={`${btn} friend-state`}
+            onClick={() => setConfirmUnfriend(true)}
+            title="Tap to unfriend"
+            aria-label="Friends. Tap to unfriend"
+          >
+            <Icon name="check" size={15} />
+            Friends
+          </button>
+        )}
       </>
     );
   } else if (relation === "outgoing") {
