@@ -928,3 +928,27 @@
     height: 86px;
   }
 }
+
+/* Your 3D avatar waving on the Home greeting. */
+.dash-greet-avatar.has-body {
+  flex-shrink: 0;
+
+  border-radius: 0;
+}
+
+.dash-greet-avatar.has-body img {
+  display: block;
+
+  height: 104px;
+  width: auto;
+
+  margin: -14px 0 -8px;
+
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+}
+
+@media (max-width: 560px) {
+  .dash-greet-avatar.has-body img {
+    height: 88px;
+  }
+}

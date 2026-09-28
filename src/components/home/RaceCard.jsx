@@ -72,7 +72,7 @@ function raceLine(event, standings, userId) {
   };
 }
 
-export function RaceCard({ event, standings, loading, userId, username, avatar, referralLink, onJoined, now }) {
+export function RaceCard({ event, standings, loading, userId, username, avatar, body, referralLink, onJoined, now }) {
   const [copied, copy] = useCopy();
   const { joinEvent } = useEvents();
   const [joining, setJoining] = useState(false);
@@ -95,6 +95,7 @@ export function RaceCard({ event, standings, loading, userId, username, avatar, 
     const details = {
       username,
       avatar,
+      body,
       rank: line.rank,
       count: me?.referral_count || 0,
       eventTitle: event.title,

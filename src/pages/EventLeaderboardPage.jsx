@@ -15,6 +15,7 @@ import { useNow, getEventStatus } from "../hooks/useCountdown";
 import { referralLinkFor } from "../hooks/useCopy";
 import { bragShareText, renderBragImage } from "../lib/bragImage";
 import { useStoryShare } from "../components/StoryShare";
+import { useMyProfile } from "../context/ProfileContext";
 import { parseDicebear } from "../data/avatarParts";
 import { drawFullBody } from "../lib/avatarRender";
 
@@ -107,6 +108,7 @@ function EventLeaderboardPage({ user }) {
   }, [event]);
 
   const bodies = usePodiumBodies(players.slice(0, 3).map((player) => player.id));
+  const myBody = equippedFrom(useMyProfile().profile).body;
 
   if (!event && loadingEvents) return <PageLoading />;
 
@@ -133,6 +135,7 @@ function EventLeaderboardPage({ user }) {
     const details = {
       username: displayNameOf(me),
       avatar: me.avatar,
+      body: myBody || bodies[me.id] || null,
       rank: me.rank,
       count: kind.score(me),
       countLabel: isStreak ? "day streak" : null,

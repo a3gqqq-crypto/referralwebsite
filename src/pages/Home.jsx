@@ -19,6 +19,8 @@ import { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { useMyProfile } from "../context/ProfileContext";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { levelInfo } from "../data/levels";
+import { parseDicebear } from "../data/avatarParts";
+import { drawFullBody } from "../lib/avatarRender";
 import { useNow, getEventStatus, formatCountdown } from "../hooks/useCountdown";
 import { referralLinkFor } from "../hooks/useCopy";
 
@@ -132,12 +134,25 @@ function Home({ user }) {
     <main className="page home-page home-dash">
 
       <header className="dash-greet">
-        <Link to="/profile" className="dash-greet-avatar" aria-label="Your profile">
-          <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={52} />
+        <Link
+          to="/profile"
+          className={`dash-greet-avatar ${equipped.body ? "has-body" : ""}`}
+          aria-label="Your profile"
+        >
+          {equipped.body ? (
+            // Your 3D avatar waves hello.
+            <img
+              src={drawFullBody({ ...parseDicebear(equipped.body).o, pose: "wave", mouth: "grin" }, "live")}
+              alt=""
+              draggable="false"
+            />
+          ) : (
+            <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={52} />
+          )}
         </Link>
 
         <div className="dash-greet-text">
-          <span className="eyebrow">Hey {username} 👋</span>
+          <span className="eyebrow">Hey {displayNameOf(profile, username)} 👋</span>
           <div className="dash-greet-level">
             <LevelBadge xp={profile?.xp} />
             <span className="dash-greet-bar" aria-hidden="true">
@@ -169,6 +184,7 @@ function Home({ user }) {
           userId={user?.id}
           username={username}
           avatar={profile?.avatar}
+          body={equipped.body}
           referralLink={referralLink}
           onJoined={loadStandings}
           now={now}

@@ -1,5 +1,6 @@
 import { avatarSrc } from "../data/avatars";
-import { dicebearSrc } from "./avatarRender";
+import { dicebearSrc, drawFullBody } from "./avatarRender";
+import { parseDicebear } from "../data/avatarParts";
 import { fitText, roundedRect } from "./momentImage";
 
 // "I'm #2 in Round 2 — beat me" story image (1080x1920) with the player's invite link.
@@ -29,7 +30,10 @@ function accentGradient(ctx, x0, x1) {
   return gradient;
 }
 
-export async function renderBragImage({ username, avatar, rank, count, countLabel, eventTitle, daysLeft, prize, link }) {
+// Pose for the 3D avatar on the story, by rank.
+const BRAG_POSE = { 1: "flex", 2: "peace", 3: "wave" };
+
+export async function renderBragImage({ username, avatar, body, rank, count, countLabel, eventTitle, daysLeft, prize, link }) {
   try {
     await Promise.all([
       document.fonts.load(`800 100px ${DISPLAY}`),
@@ -78,6 +82,27 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   const cy = 480;
   const radius = 150;
 
+  // A 3D avatar stands in the top half instead of the round picture.
+  const bodyOptions = parseDicebear(body)?.s === "fb" ? parseDicebear(body).o : null;
+  const bodyImage = bodyOptions
+    ? await loadImage(
+        drawFullBody({ ...bodyOptions, pose: BRAG_POSE[rank] || "hips", eyes: rank === 1 ? "star" : bodyOptions.eyes }, "full")
+      )
+    : null;
+
+  if (bodyImage) {
+    const glow = ctx.createRadialGradient(cx, 520, 20, cx, 520, 330);
+    glow.addColorStop(0, "rgba(255, 159, 61, 0.35)");
+    glow.addColorStop(1, "rgba(255, 159, 61, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(cx - 360, 180, 720, 560);
+
+    const height = 500;
+    const width = height * (200 / 342);
+    ctx.drawImage(bodyImage, cx - width / 2, 196, width, height);
+  }
+
+  if (!bodyImage) {
   ctx.beginPath();
   ctx.arc(cx, cy, radius + 14, 0, Math.PI * 2);
   ctx.fillStyle = accentGradient(ctx, cx - radius, cx + radius);
@@ -102,6 +127,7 @@ export async function renderBragImage({ username, avatar, rank, count, countLabe
   }
 
   ctx.restore();
+  }
 
   // Name + rank
   ctx.textAlign = "center";
