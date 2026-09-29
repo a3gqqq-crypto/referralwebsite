@@ -8,6 +8,7 @@ import PageLoading from "../components/PageLoading";
 import SkeletonRows from "../components/SkeletonRows";
 import PlayerChip from "../components/PlayerChip";
 import StaffTag from "../components/StaffTag";
+import VerifiedTick from "../components/VerifiedTick";
 import { BadgeRow, FramedAvatar, StyledName } from "../components/Cosmetics";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import NotFound from "./NotFound";
@@ -279,6 +280,7 @@ function EventLeaderboardPage({ user }) {
                   </strong>
                 </Link>
 
+                <VerifiedTick userId={player.id} size={20} />
                 <StaffTag userId={player.id} />
 
                 <BadgeRow ids={equippedFrom(player).badges} size={18} />

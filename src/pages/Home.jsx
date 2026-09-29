@@ -19,6 +19,7 @@ import { PLAYER_COLUMNS } from "../components/PlayerChip";
 import { useMyProfile } from "../context/ProfileContext";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { levelInfo } from "../data/levels";
+import VerifiedTick from "../components/VerifiedTick";
 import { parseDicebear } from "../data/avatarParts";
 import { drawFullBody } from "../lib/avatarRender";
 import { useNow, getEventStatus, formatCountdown } from "../hooks/useCountdown";
@@ -152,7 +153,9 @@ function Home({ user }) {
         </Link>
 
         <div className="dash-greet-text">
-          <span className="eyebrow">Hey {displayNameOf(profile, username)} 👋</span>
+          <span className="eyebrow dash-greet-hey">
+            Hey {displayNameOf(profile, username)} <VerifiedTick player={profile} size={16} /> 👋
+          </span>
           <div className="dash-greet-level">
             <LevelBadge xp={profile?.xp} />
             <span className="dash-greet-bar" aria-hidden="true">

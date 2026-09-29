@@ -71,6 +71,12 @@
   gap: 6px;
 }
 
+.dash-greet-hey {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .dash-greet-level {
   display: flex;
   align-items: center;

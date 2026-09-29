@@ -1,6 +1,6 @@
 import { useId } from "react";
 
-import { VERIFIED_TIERS, verifiedTier } from "../data/verified";
+import { VERIFIED_TIERS, useVerifiedMembers, verifiedTier } from "../data/verified";
 
 // Scalloped seal around the centre.
 function sealPath(bumps, outer = 11.4, inner = 9.5) {
@@ -79,11 +79,16 @@ function Shape({ shape, fill }) {
   }
 }
 
-// Pass `player` (with verified_until / verified_since) or a `tier` id.
-function VerifiedTick({ player = null, tier: tierId = null, size = 16, title = true }) {
+// Pass `userId` (looked up in the shared list of verified members), a
+// `player` row (uses its verified_* fields if it has them, else its id), or
+// a `tier` id to draw a specific badge.
+function VerifiedTick({ userId = null, player = null, tier: tierId = null, size = 16, title = true }) {
   // React ids contain characters that break url(#…) in some browsers.
   const gradientId = `vt${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  const tier = tierId ? VERIFIED_TIERS.find((item) => item.id === tierId) : verifiedTier(player);
+  const members = useVerifiedMembers();
+
+  const row = player && "verified_until" in player ? player : members.get(userId || player?.id);
+  const tier = tierId ? VERIFIED_TIERS.find((item) => item.id === tierId) : verifiedTier(row);
 
   if (!tier) return null;
 

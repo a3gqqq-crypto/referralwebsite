@@ -14,6 +14,7 @@ import {
 } from "../components/Cosmetics";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
+import VerifiedTick from "../components/VerifiedTick";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
 
@@ -48,6 +49,7 @@ function PersonCard({ person }) {
           <div className="person-card-name">
             <StyledName name={name} effect={equipped.name} />
             <span className="person-card-tags">
+              <VerifiedTick player={person} size={16} />
               <StaffTag userId={person.id} />
               <LevelBadge xp={person.xp} />
               <BadgeRow ids={equipped.badges} size={18} />

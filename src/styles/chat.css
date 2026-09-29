@@ -924,6 +924,14 @@ button.chat-quote {
   font-size: 15px;
 }
 
+.chat-friend-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  min-width: 0;
+}
+
 /* Lounge locked until Level 3 */
 .chat-locked.lounge-locked {
   flex-direction: column;

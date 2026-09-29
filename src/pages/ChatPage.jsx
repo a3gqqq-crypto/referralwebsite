@@ -1011,7 +1011,10 @@ function ChatPage() {
                     />
 
                     <span className="chat-friend-text">
-                      <StyledName name={displayNameOf(profile)} effect={equipped.name} />
+                      <span className="chat-friend-name">
+                        <StyledName name={displayNameOf(profile)} effect={equipped.name} />
+                        <VerifiedTick player={profile} size={14} />
+                      </span>
                       <small>
                         {last
                           ? `${last.sender_id === me ? "You: " : ""}${previewText(last)}`

@@ -1,6 +1,10 @@
 // Verified membership: $7 per 30 days. Like Discord Nitro, the badge evolves
 // with real time subscribed (not months bought at once): verified_since is
 // when the current unbroken subscription started.
+import { useEffect, useSyncExternalStore } from "react";
+
+import { supabase } from "../lib/supabaseClient";
+
 export const VERIFIED_ITEM_ID = "verified-month";
 
 const DAY = 86400000;
@@ -46,6 +50,54 @@ export function daysUntilTier(player, next) {
   if (!next || !player?.verified_since) return null;
   const at = new Date(player.verified_since).getTime() + next.months * MONTH_DAYS * DAY;
   return Math.max(0, Math.ceil((at - Date.now()) / DAY));
+}
+
+/* ---------- Who is verified (shared, like the staff list) ---------- */
+
+// Lists like leaderboards come from queries that don't include membership
+// info, so badges look people up here by id. Loaded once, refreshed every
+// few minutes, and right after someone buys.
+let verified = new Map();
+let pending = null;
+let loadedAt = 0;
+const listeners = new Set();
+
+export function loadVerified({ force = false } = {}) {
+  if (pending) return pending;
+  if (!force && Date.now() - loadedAt < 5 * 60 * 1000) return Promise.resolve(verified);
+
+  pending = supabase
+    .from("profiles")
+    .select("id, verified_until, verified_since")
+    .gt("verified_until", new Date().toISOString())
+    .then(({ data, error }) => {
+      pending = null;
+      if (error) {
+        console.error("Could not load verified members:", error);
+        return verified;
+      }
+      loadedAt = Date.now();
+      verified = new Map((data || []).map((row) => [row.id, row]));
+      listeners.forEach((listener) => listener());
+      return verified;
+    });
+
+  return pending;
+}
+
+const subscribe = (listener) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+export function useVerifiedMembers() {
+  const current = useSyncExternalStore(subscribe, () => verified);
+
+  useEffect(() => {
+    loadVerified();
+  }, []);
+
+  return current;
 }
 
 export function verifiedDaysLeft(player) {

@@ -7,6 +7,7 @@ import { EmoteAvatar, FramedAvatar } from "../components/Cosmetics";
 import { useMyProfile } from "../context/ProfileContext";
 import { EMOTES, canUseEmote, parseDicebear } from "../data/avatarParts";
 import Avatar3D from "../components/Avatar3D";
+import VerifiedTick from "../components/VerifiedTick";
 import { fullBodySrc } from "../lib/avatarRender";
 import { supabase } from "../lib/supabaseClient";
 import { REACTIONS, useCall } from "../context/CallContext";
@@ -185,6 +186,7 @@ function Tile({ participant, isLocal, canModerate, mutedForMe, onToggleMute, onK
         {!participant.isMicrophoneEnabled && <Icon name="micOff" size={13} />}
         {mutedForMe && <span title="Muted for you">🔇</span>}
         {name}
+        <VerifiedTick userId={participant.identity} size={13} />
         {isLocal && <small> (you)</small>}
       </span>
 

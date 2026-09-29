@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import Icon from "./Icon";
 import { FramedAvatar } from "./Cosmetics";
+import VerifiedTick from "./VerifiedTick";
 import { useCall } from "../context/CallContext";
 import { displayNameOf } from "../data/cosmetics";
 
@@ -100,7 +101,9 @@ export function IncomingCall() {
           />
         </span>
 
-        <strong>{name}</strong>
+        <strong>
+          {name} <VerifiedTick userId={ring.caller?.id} size={18} />
+        </strong>
         <span>is calling you…</span>
 
         <div className="incoming-actions">

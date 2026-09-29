@@ -5,6 +5,7 @@ import Icon from "./Icon";
 import { FramedAvatar, StyledName } from "./Cosmetics";
 import { LevelBadge } from "./Level";
 import NotificationBell from "./NotificationBell";
+import VerifiedTick from "./VerifiedTick";
 import { useMyProfile } from "../context/ProfileContext";
 import { useSocial } from "../context/SocialContext";
 import { equippedFrom } from "../data/cosmetics";
@@ -117,6 +118,7 @@ function Navbar({ user, onLogout }) {
           >
             <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={32} />
             <StyledName name={username} effect={equipped.name} className="navbar-me-name" />
+            <VerifiedTick player={profile} size={16} />
             <LevelBadge xp={profile?.xp} />
           </Link>
 
@@ -185,6 +187,7 @@ function Navbar({ user, onLogout }) {
           <Link to="/profile" className="navbar-me" onClick={playClick}>
             <FramedAvatar name={username} frame={equipped.frame} avatar={equipped.avatar} size={36} />
             <StyledName name={username} effect={equipped.name} className="navbar-me-name" />
+            <VerifiedTick player={profile} size={17} />
           </Link>
 
           <button type="button" className="btn btn-sm" onClick={logout}>

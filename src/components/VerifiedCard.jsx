@@ -8,6 +8,7 @@ import {
   VERIFIED_ITEM_ID,
   VERIFIED_TIERS,
   daysUntilTier,
+  loadVerified,
   nextVerifiedTier,
   verifiedDaysLeft,
   verifiedMonths,
@@ -50,13 +51,23 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
     const { error } = await supabase.rpc("owner_grant_verified", { p_months: 1 });
     setBusy(false);
     if (error) setNotice(error.message || "Couldn't add it.");
-    else onChanged?.();
+    else {
+      loadVerified({ force: true });
+      onChanged?.();
+    }
   };
 
   return (
     <section className="verified-card card">
       {checkout && (
-        <CryptoCheckout item={ITEM} onClose={() => setCheckout(false)} onPaid={() => onChanged?.()} />
+        <CryptoCheckout
+          item={ITEM}
+          onClose={() => setCheckout(false)}
+          onPaid={() => {
+            loadVerified({ force: true });
+            onChanged?.();
+          }}
+        />
       )}
 
       <div className="verified-card-hero">
