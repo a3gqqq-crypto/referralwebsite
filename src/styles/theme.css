@@ -51,6 +51,7 @@
   --rarity-rare: #7cc4ff;
   --rarity-epic: #c7a6ff;
   --rarity-legendary: #ffb347;
+  --rarity-mythic: #ff5ce1;
 
   /* Type */
   --font-display: "Bricolage Grotesque", "Geist", system-ui, sans-serif;

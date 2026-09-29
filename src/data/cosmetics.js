@@ -324,7 +324,7 @@ export const COSMETICS = [
     type: "badge",
     name: "Early Supporter",
     description: "Got Verified before 2028. Yours forever.",
-    rarity: "legendary",
+    rarity: "mythic",
     icon: "medal",
     price: null,
     earn: { manual: true, label: "Get Verified before 2028" },
@@ -626,6 +626,7 @@ export const RARITY_LABEL = {
   rare: "Rare",
   epic: "Epic",
   legendary: "Legendary",
+  mythic: "Mythic",
 };
 
 const BY_ID = new Map(COSMETICS.map((item) => [item.id, item]));

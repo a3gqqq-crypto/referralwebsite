@@ -375,6 +375,37 @@
   box-shadow: 0 0 14px -3px rgba(255, 179, 71, 0.7);
 }
 
+/* Mythic: above legendary; a slowly shifting magenta-violet-gold shine. */
+.badge-icon.rarity-mythic {
+  --badge-color: var(--rarity-mythic);
+
+  border-color: transparent;
+
+  background: linear-gradient(135deg, #ffd166, #ff5ce1 40%, #7c5cff 75%, #35e0ff);
+  background-size: 220% 220%;
+  color: #fff;
+
+  box-shadow: 0 0 16px -2px rgba(255, 92, 225, 0.85);
+
+  animation: mythic-shine 4s ease-in-out infinite alternate;
+}
+
+@keyframes mythic-shine {
+  from {
+    background-position: 0% 50%;
+  }
+
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-icon.rarity-mythic {
+    animation: none;
+  }
+}
+
 
 /* =========================================
    BANNERS
@@ -539,6 +570,15 @@ a.player-chip:hover .player-chip-name {
 
 .rarity-text-legendary {
   color: var(--rarity-legendary);
+}
+
+.rarity-text-mythic {
+  background: linear-gradient(90deg, #ffd166, #ff5ce1, #7c5cff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+
+  font-weight: 800;
 }
 
 
