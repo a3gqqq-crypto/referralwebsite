@@ -733,6 +733,54 @@ a.player-chip:hover .player-chip-name {
   transform: rotate(-7deg);
 }
 
+/* ---------- Verified tick ---------- */
+
+.verified-tick {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+
+  width: var(--tick-size);
+  height: var(--tick-size);
+
+  vertical-align: -0.12em;
+}
+
+.verified-tick svg {
+  display: block;
+  overflow: visible;
+}
+
+.verified-tick.tick-gold svg,
+.verified-tick.tick-platinum svg {
+  filter: drop-shadow(0 0 3px rgba(255, 214, 102, 0.45));
+}
+
+.verified-tick.tick-diamond svg {
+  filter: drop-shadow(0 0 4px rgba(120, 180, 255, 0.8));
+}
+
+.verified-tick.tick-legend svg {
+  filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(0deg);
+  animation: tick-legend 3s linear infinite;
+}
+
+@keyframes tick-legend {
+  from {
+    filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(0deg);
+  }
+
+  to {
+    filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verified-tick.tick-legend svg {
+    animation: none;
+  }
+}
+
 
 /* Scene banners: your 3D avatar stands in them on your profile. */
 

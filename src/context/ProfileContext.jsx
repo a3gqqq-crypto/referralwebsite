@@ -179,6 +179,7 @@ export function ProfileProvider({ user, children }) {
     refresh,
     isAdmin,
     isOwner: staffRole === "owner",
+    isStaff: Boolean(staffRole),
     username: profile?.username || user?.user_metadata?.username || "",
     displayName: profile?.display_name || profile?.username || user?.user_metadata?.username || "",
     setDisplayName: (name) =>

@@ -6,6 +6,7 @@ import {
 } from "./Cosmetics";
 import { LevelBadge, LevelProgress } from "./Level";
 import StaffTag from "./StaffTag";
+import VerifiedTick from "./VerifiedTick";
 import { lastSeenText, useIsOnline } from "../lib/presence";
 import { fullBodySrc } from "../lib/avatarRender";
 import { parseDicebear } from "../data/avatarParts";
@@ -26,6 +27,8 @@ function ProfileCard({
   lastSeen = null,
   stats = [],
   size = "md",
+  // The profile row (verified_until / verified_months) for the Verified tick.
+  verified = null,
   children,
 }) {
   const avatarSize = size === "lg" ? 116 : size === "sm" ? 64 : 84;
@@ -59,6 +62,8 @@ function ProfileCard({
           <h2 className="profile-card-name">
             <StyledName name={displayName || username || "you"} effect={equipped.name} />
           </h2>
+
+          <VerifiedTick player={verified} size={size === "lg" ? 34 : size === "sm" ? 22 : 28} />
 
           {displayName && username && displayName !== username && (
             <span className="profile-card-handle">@{username}</span>

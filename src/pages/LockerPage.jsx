@@ -182,6 +182,7 @@ function LockerPage() {
       <div className="locker-layout">
         <aside className="locker-preview">
           <ProfileCard
+            verified={profile}
             userId={profile?.id}
             username={username}
             displayName={profile?.display_name}

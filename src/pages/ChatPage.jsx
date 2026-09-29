@@ -20,6 +20,7 @@ import { BadgeRow, EmoteAvatar, FramedAvatar, Sticker, StyledName } from "../com
 import { EMOTES, STICKERS, canUseEmote, canUseSticker, emoteFromBody, stickerFromBody } from "../data/avatarParts";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
+import VerifiedTick from "../components/VerifiedTick";
 import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
 import { cosmeticById, displayNameOf, equippedFrom, formatPrice } from "../data/cosmetics";
@@ -59,6 +60,28 @@ function ChatPhoto({ path, onOpen, onLoad }) {
 
 // What a reply shows of the message it answers.
 // One-line text for previews (replies, recent chats).
+const LOUNGE_CHAT_XP = 200; // Level 3
+const LOUNGE_PHOTO_XP = 800; // Level 5
+
+function LoungeLock({ xp }) {
+  const progress = Math.min(1, xp / LOUNGE_CHAT_XP);
+  return (
+    <div className="chat-locked lounge-locked">
+      <strong>🔒 Reach Level 3 to chat in the Lounge</strong>
+      <span>
+        This keeps the Lounge safe for everyone. You're {LOUNGE_CHAT_XP - xp} XP away. You can still read along.
+      </span>
+      <span className="lounge-locked-bar" aria-hidden="true">
+        <span style={{ width: `${Math.round(progress * 100)}%` }} />
+      </span>
+      <span className="lounge-locked-ways">Earn XP: daily check-in, daily quests, invite friends, make friends.</span>
+      <Link to="/" className="btn btn-sm btn-primary">
+        Earn XP
+      </Link>
+    </div>
+  );
+}
+
 function previewText(message) {
   const emote = emoteFromBody(message?.body);
   if (emote) return `${emote.emoji} ${emote.name}`;
@@ -229,6 +252,7 @@ function MessageRow({
             <Link to={href} className="chat-msg-name">
               <StyledName name={name} effect={equipped.name} />
             </Link>
+            <VerifiedTick player={sender} size={15} />
             <StaffTag userId={message.sender_id} />
             <LevelBadge xp={sender?.xp} />
             <BadgeRow ids={equipped.badges} size={16} />
@@ -355,9 +379,12 @@ function ChatPage() {
   const quotedRef = useRef({});
   const photoInputRef = useRef(null);
 
-  const { profile: myProfile, isOwner, owned } = useMyProfile();
+  const { profile: myProfile, isOwner, isStaff, owned } = useMyProfile();
   const [emotesOpen, setEmotesOpen] = useState(false);
-  const canPostLoungePhoto = (myProfile?.xp || 0) >= 200;
+  // Kid-safe Lounge: talking needs Level 3 (200 XP), photos Level 5 (800 XP).
+  const myXp = myProfile?.xp || 0;
+  const loungeLocked = !isStaff && myXp < LOUNGE_CHAT_XP;
+  const canPostLoungePhoto = isStaff || myXp >= LOUNGE_PHOTO_XP;
 
   const [recent, setRecent] = useState({});
   const [listOpen, setListOpen] = useState(false);
@@ -753,7 +780,7 @@ function ChatPage() {
     }
 
     if (!isDm && !canPostLoungePhoto) {
-      setError("Reach level 3 to post photos in the lounge.");
+      setError("Reach Level 5 to post photos in the lounge.");
       return;
     }
 
@@ -1082,10 +1109,17 @@ function ChatPage() {
                 <small>Be kind · no links · reports go to the Suffrova team</small>
               </div>
             
-              <Link to="/call/lounge" className="btn btn-sm chat-voice-btn">
-                <Icon name="phone" size={15} />
-                <span>Voice{inVoice > 0 ? ` · ${inVoice}` : ""}</span>
-              </Link>
+              {loungeLocked ? (
+                <button type="button" className="btn btn-sm chat-voice-btn" disabled title="Reach Level 3 to use Lounge voice">
+                  <Icon name="lock" size={15} />
+                  <span>Voice</span>
+                </button>
+              ) : (
+                <Link to="/call/lounge" className="btn btn-sm chat-voice-btn">
+                  <Icon name="phone" size={15} />
+                  <span>Voice{inVoice > 0 ? ` · ${inVoice}` : ""}</span>
+                </Link>
+              )}
             </div>
           )}
         </header>
@@ -1172,7 +1206,9 @@ function ChatPage() {
           )}
         </div>
 
-        {canSend ? (
+        {!isDm && loungeLocked ? (
+          <LoungeLock xp={myXp} />
+        ) : canSend ? (
           <form className="chat-composer" onSubmit={send}>
             {error && <div className="notice notice-error chat-error">{error}</div>}
 
@@ -1220,12 +1256,12 @@ function ChatPage() {
                 className="chat-attach"
                 onClick={() =>
                   !isDm && !canPostLoungePhoto
-                    ? setError("Reach level 3 to post photos in the lounge.")
+                    ? setError("Reach Level 5 to post photos in the lounge.")
                     : photoInputRef.current?.click()
                 }
                 disabled={sending}
                 aria-label="Add a photo"
-                title={!isDm && !canPostLoungePhoto ? "Reach level 3 to post photos in the lounge" : "Add a photo"}
+                title={!isDm && !canPostLoungePhoto ? "Reach Level 5 to post photos in the lounge" : "Add a photo"}
               >
                 <Icon name="image" size={20} />
               </button>

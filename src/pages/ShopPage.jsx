@@ -9,6 +9,7 @@ import { supabase } from "../lib/supabaseClient";
 import { emoteById, packPreviewAvatar, stickersInPack } from "../data/avatarParts";
 import CryptoCheckout from "../components/CryptoCheckout";
 import SpendBoard from "../components/SpendBoard";
+import VerifiedCard from "../components/VerifiedCard";
 import {
   COSMETICS,
   MAX_BADGES,
@@ -219,6 +220,8 @@ function ShopPage() {
         </div>
       )}
 
+      <VerifiedCard profile={profile} cryptoReady={cryptoReady} isOwner={isOwner} onChanged={refresh} />
+
       <div className="shop-layout">
         <section className="shop-catalog">
           <div className="shop-filters" role="tablist" aria-label="Categories">
@@ -290,6 +293,7 @@ function ShopPage() {
 
           <ProfileCard
             size="sm"
+            verified={profile}
             userId={profile?.id}
             username={username || "you"}
             displayName={profile?.display_name}

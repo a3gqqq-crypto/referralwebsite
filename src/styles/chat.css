@@ -924,6 +924,46 @@ button.chat-quote {
   font-size: 15px;
 }
 
+/* Lounge locked until Level 3 */
+.chat-locked.lounge-locked {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.lounge-locked strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.lounge-locked-bar {
+  width: 100%;
+  max-width: 320px;
+  height: 7px;
+
+  border-radius: 999px;
+
+  background: var(--surface-3);
+
+  overflow: hidden;
+}
+
+.lounge-locked-bar span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--accent-grad);
+}
+
+.lounge-locked-ways {
+  color: var(--text-mute);
+  font-size: 12.5px;
+}
+
 
 /* =========================================
    MOBILE

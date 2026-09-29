@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   const [{ data: me }, { data: staffRow }] = await Promise.all([
     admin
       .from("profiles")
-      .select("username, display_name, avatar, body_avatar, equipped_frame, chat_banned, chat_muted_until")
+      .select("username, display_name, avatar, body_avatar, equipped_frame, chat_banned, chat_muted_until, xp")
       .eq("id", userId)
       .maybeSingle(),
     admin.from("admins").select("role").eq("user_id", userId).maybeSingle(),
@@ -100,6 +100,10 @@ Deno.serve(async (req) => {
     if (me.chat_banned) return reply({ status: "error", message: "Your chat access has been turned off." });
     if (me.chat_muted_until && new Date(me.chat_muted_until) > new Date()) {
       return reply({ status: "error", message: "You're muted right now, so you can't join voice." });
+    }
+    // Kid-safe Lounge: voice needs Level 3 (200 XP), like text chat. Staff skip it.
+    if (!isStaff && (me.xp ?? 0) < 200) {
+      return reply({ status: "error", message: "Reach Level 3 to use Lounge voice. Check in daily and do quests to level up." });
     }
   } else {
     const { data: call } = await admin.from("calls").select("host_id, created_at, ended_at").eq("id", roomKey).maybeSingle();
