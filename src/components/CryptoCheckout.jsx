@@ -27,8 +27,9 @@ function formatLeft(ms) {
 // so after "I paid" the server can find the payment on chain by itself; pasting
 // the transaction ID is only a fallback.
 // Pass either `item` (a cosmetic) or `donation` ({ dollars, showPublicly }).
-function CryptoCheckout({ item, donation, onClose, onPaid }) {
-  const title = item ? item.name : `Donate $${donation.dollars}`;
+// giftTo: { id, name } to buy the item for a friend instead.
+function CryptoCheckout({ item, donation, giftTo = null, onClose, onPaid }) {
+  const title = item ? (giftTo ? `Gift ${item.name} to ${giftTo.name}` : item.name) : `Donate $${donation.dollars}`;
 
   const [option, setOption] = useState(null);
   const [order, setOrder] = useState(null);
@@ -79,6 +80,7 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
           p_network: choice.network,
           p_token: choice.token,
           p_public: showPublicly,
+          p_gift_to: giftTo?.id ?? null,
         })
       : await supabase.rpc("create_crypto_donation", {
           p_dollars: donation.dollars,
@@ -173,7 +175,12 @@ function CryptoCheckout({ item, donation, onClose, onPaid }) {
             <span className="checkout-done-icon" aria-hidden="true">
               <Icon name="check" size={28} strokeWidth={2.8} />
             </span>
-            {item ? (
+            {item && giftTo ? (
+              <>
+                <strong>Sent! {giftTo.name} got {item.name} 🎁</strong>
+                <p>They'll get a notification saying it's from you. Thanks for supporting Suffrova 💛</p>
+              </>
+            ) : item ? (
               <>
                 <strong>Paid! {item.name} is yours.</strong>
                 <p>Close this and tap Equip to wear it. Thanks for supporting Suffrova 💛</p>

@@ -381,6 +381,10 @@
   vertical-align: middle;
 }
 
+.shop-gift-btn {
+  margin-top: 8px;
+}
+
 .shop-emote-stage {
   display: grid;
   place-items: center;

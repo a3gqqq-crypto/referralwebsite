@@ -4,6 +4,7 @@ import Icon from "./Icon";
 import VerifiedTick from "./VerifiedTick";
 import { BadgeIcon } from "./Cosmetics";
 import CryptoCheckout from "./CryptoCheckout";
+import GiftPicker from "./GiftPicker";
 import { supabase } from "../lib/supabaseClient";
 import {
   VERIFIED_ITEM_ID,
@@ -29,6 +30,31 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
   const [checkout, setCheckout] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [picking, setPicking] = useState(false);
+  const [giftTo, setGiftTo] = useState(null);
+
+  // Gift a month of Verified: free for the owner, paid for everyone else.
+  const sendGift = async (friend) => {
+    setNotice(null);
+
+    if (isOwner) {
+      setBusy(true);
+      const { error } = await supabase.rpc("owner_gift_verified", { p_user: friend.id, p_months: 1 });
+      setBusy(false);
+      setPicking(false);
+      setNotice(error ? error.message || "Couldn't send the gift." : `Sent a month of Verified to ${friend.name} 🎁`);
+      if (!error) loadVerified({ force: true });
+      return;
+    }
+
+    setPicking(false);
+    if (!cryptoReady) {
+      setNotice("Checkout isn't open yet. It's coming soon.");
+      return;
+    }
+    setGiftTo(friend);
+    setCheckout(true);
+  };
 
   const tier = verifiedTier(profile);
   const next = nextVerifiedTier(tier);
@@ -63,7 +89,11 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
       {checkout && (
         <CryptoCheckout
           item={ITEM}
-          onClose={() => setCheckout(false)}
+          giftTo={giftTo}
+          onClose={() => {
+            setCheckout(false);
+            setGiftTo(null);
+          }}
           onPaid={() => {
             loadVerified({ force: true });
             onChanged?.();
@@ -121,6 +151,11 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
           )}
         </span>
 
+        <button type="button" className="btn" onClick={() => setPicking(true)} disabled={busy}>
+          <span aria-hidden="true">🎁</span>
+          {isOwner ? "Gift Verified · free" : "Gift Verified · $7"}
+        </button>
+
         {isOwner ? (
           <button type="button" className="btn btn-sun" onClick={getFree} disabled={busy}>
             <Icon name="crown" size={16} />
@@ -133,6 +168,10 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
           </button>
         )}
       </div>
+
+      {picking && (
+        <GiftPicker itemName="Verified (30 days)" busy={busy} onPick={sendGift} onClose={() => setPicking(false)} />
+      )}
 
       {notice && <div className="notice notice-gold">{notice}</div>}
     </section>

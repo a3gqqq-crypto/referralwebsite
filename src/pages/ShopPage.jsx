@@ -10,6 +10,7 @@ import { emoteById, packPreviewAvatar, stickersInPack } from "../data/avatarPart
 import CryptoCheckout from "../components/CryptoCheckout";
 import SpendBoard from "../components/SpendBoard";
 import VerifiedCard from "../components/VerifiedCard";
+import GiftPicker from "../components/GiftPicker";
 import {
   COSMETICS,
   MAX_BADGES,
@@ -44,6 +45,39 @@ function ShopPage() {
   const [busy, setBusy] = useState(false);
   const tryOnRef = useRef(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  // Gifting: pick a friend, then the owner sends free and everyone else pays.
+  const [picking, setPicking] = useState(false);
+  const [giftTo, setGiftTo] = useState(null);
+
+  const sendGift = async (friend) => {
+    setNotice(null);
+
+    if (isOwner) {
+      setBusy(true);
+      const { error: giftError } = await supabase.rpc("admin_grant_cosmetic", {
+        p_user: friend.id,
+        p_cosmetic: selected.id,
+      });
+      setBusy(false);
+      setPicking(false);
+      setNotice(
+        giftError
+          ? { type: "error", text: giftError.message || "Couldn't send the gift." }
+          : { type: "success", text: `Sent ${selected.name} to ${friend.name} 🎁` }
+      );
+      return;
+    }
+
+    if (!cryptoReady) {
+      setPicking(false);
+      setNotice({ type: "gold", text: "Checkout isn't open yet. It's coming soon." });
+      return;
+    }
+
+    setPicking(false);
+    setGiftTo(friend);
+    setCheckoutOpen(true);
+  };
   const [boardKey, setBoardKey] = useState(0);
   // Crypto checkout opens once the owner has set a wallet address.
   const [cryptoReady, setCryptoReady] = useState(false);
@@ -182,12 +216,20 @@ function ShopPage() {
       {checkoutOpen && selected && (
         <CryptoCheckout
           item={selected}
-          onClose={() => setCheckoutOpen(false)}
+          giftTo={giftTo}
+          onClose={() => {
+            setCheckoutOpen(false);
+            setGiftTo(null);
+          }}
           onPaid={() => {
             refresh();
             setBoardKey((key) => key + 1);
           }}
         />
+      )}
+
+      {picking && selected && (
+        <GiftPicker itemName={selected.name} busy={busy} onPick={sendGift} onClose={() => setPicking(false)} />
       )}
 
       <header className="page-header shop-header">
@@ -409,6 +451,13 @@ function ShopPage() {
                     </>
                   )}
                 </div>
+              )}
+
+              {selected.price != null && (
+                <button type="button" className="btn btn-block btn-sm shop-gift-btn" onClick={() => setPicking(true)}>
+                  <span aria-hidden="true">🎁</span>
+                  {isOwner ? "Gift to a friend · free" : `Gift to a friend · ${formatPrice(selected.price)}`}
+                </button>
               )}
 
               {notice && (
