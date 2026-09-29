@@ -760,23 +760,32 @@ a.player-chip:hover .player-chip-name {
   filter: drop-shadow(0 0 4px rgba(120, 180, 255, 0.8));
 }
 
-.verified-tick.tick-legend svg {
-  filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(0deg);
-  animation: tick-legend 3s linear infinite;
+.verified-tick.tick-emerald svg {
+  filter: drop-shadow(0 0 4px rgba(60, 220, 150, 0.75));
 }
 
-@keyframes tick-legend {
+.verified-tick.tick-ruby svg {
+  filter: drop-shadow(0 0 5px rgba(255, 60, 90, 0.8));
+}
+
+/* Opal shimmers through the colours. */
+.verified-tick.tick-opal svg {
+  filter: drop-shadow(0 0 5px rgba(200, 170, 255, 0.85)) hue-rotate(0deg);
+  animation: tick-opal 4s linear infinite;
+}
+
+@keyframes tick-opal {
   from {
-    filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(0deg);
+    filter: drop-shadow(0 0 5px rgba(200, 170, 255, 0.85)) hue-rotate(0deg);
   }
 
   to {
-    filter: drop-shadow(0 0 5px rgba(255, 92, 141, 0.8)) hue-rotate(360deg);
+    filter: drop-shadow(0 0 5px rgba(200, 170, 255, 0.85)) hue-rotate(360deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .verified-tick.tick-legend svg {
+  .verified-tick.tick-opal svg {
     animation: none;
   }
 }

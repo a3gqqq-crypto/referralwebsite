@@ -7,8 +7,10 @@ import { supabase } from "../lib/supabaseClient";
 import {
   VERIFIED_ITEM_ID,
   VERIFIED_TIERS,
+  daysUntilTier,
   nextVerifiedTier,
   verifiedDaysLeft,
+  verifiedMonths,
   verifiedTier,
 } from "../data/verified";
 
@@ -16,8 +18,11 @@ import "../styles/verified.css";
 
 const ITEM = { id: VERIFIED_ITEM_ID, name: "Verified (30 days)", price: 700, type: "membership" };
 
-// Shop banner for the Verified membership: the tick ladder, your status and
-// a way to buy (or, for the owner, get it free).
+const ladderLabel = (months) =>
+  months === 1 ? "Start" : months % 12 === 0 ? `${months / 12} ${months === 12 ? "year" : "years"}` : `${months} months`;
+
+// Shop banner for the Verified membership: the evolving badge ladder, your
+// status and a way to buy (or, for the owner, get it free).
 function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
   const [checkout, setCheckout] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -25,8 +30,10 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
 
   const tier = verifiedTier(profile);
   const next = nextVerifiedTier(tier);
-  const months = tier ? profile.verified_months : 0;
+  const months = verifiedMonths(profile);
   const daysLeft = verifiedDaysLeft(profile);
+  const untilNext = daysUntilTier(profile, next);
+  const reachedIndex = VERIFIED_TIERS.findIndex((item) => item.id === tier?.id);
 
   const buy = () => {
     setNotice(null);
@@ -49,11 +56,7 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
   return (
     <section className="verified-card card">
       {checkout && (
-        <CryptoCheckout
-          item={ITEM}
-          onClose={() => setCheckout(false)}
-          onPaid={() => onChanged?.()}
-        />
+        <CryptoCheckout item={ITEM} onClose={() => setCheckout(false)} onPaid={() => onChanged?.()} />
       )}
 
       <div className="verified-card-hero">
@@ -64,24 +67,23 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
             Get Verified <span className="verified-card-price">$7 / month</span>
           </h2>
           <p className="muted">
-            A tick next to your name everywhere. Stay verified and it evolves, from Bronze all the way to Legend.
+            A badge next to your name everywhere. It evolves the longer you stay verified, from Bronze all the way to Opal.
+            Buying lots of months at once doesn't skip ahead: time does.
           </p>
         </div>
       </div>
 
-      <ol className="verified-ladder" aria-label="How the tick evolves">
-        {VERIFIED_TIERS.map((item) => {
-          const reached = tier && months >= item.months;
-          return (
-            <li key={item.id} className={`${reached ? "is-reached" : ""} ${tier?.id === item.id ? "is-current" : ""}`}>
-              <VerifiedTick tier={item.id} size={30} title={false} />
-              <strong>{item.name}</strong>
-              <small>
-                {item.months} {item.months === 1 ? "month" : "months"}
-              </small>
-            </li>
-          );
-        })}
+      <ol className="verified-ladder" aria-label="How the badge evolves">
+        {VERIFIED_TIERS.map((item, index) => (
+          <li
+            key={item.id}
+            className={`${tier && index <= reachedIndex ? "is-reached" : ""} ${tier?.id === item.id ? "is-current" : ""}`}
+          >
+            <VerifiedTick tier={item.id} size={30} title={false} />
+            <strong>{item.name}</strong>
+            <small>{ladderLabel(item.months)}</small>
+          </li>
+        ))}
       </ol>
 
       <div className="verified-card-foot">
@@ -89,11 +91,11 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
           {tier ? (
             <>
               <strong>
-                You're {tier.name} · {months} {months === 1 ? "month" : "months"}
+                {tier.name} badge · verified {months < 1 ? "this month" : `${months} ${months === 1 ? "month" : "months"}`}
               </strong>
               <span>
-                {daysLeft} {daysLeft === 1 ? "day" : "days"} left
-                {next ? ` · ${next.months - months} more to ${next.name}` : " · max level"}
+                {daysLeft} {daysLeft === 1 ? "day" : "days"} paid
+                {next ? ` · evolves to ${next.name} in ${untilNext} ${untilNext === 1 ? "day" : "days"}` : " · max badge"}
               </span>
             </>
           ) : (
