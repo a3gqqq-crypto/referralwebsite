@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Icon from "./Icon";
 import VerifiedTick from "./VerifiedTick";
+import { BadgeIcon } from "./Cosmetics";
 import CryptoCheckout from "./CryptoCheckout";
 import { supabase } from "../lib/supabaseClient";
 import {
@@ -80,6 +81,12 @@ function VerifiedCard({ profile, cryptoReady, isOwner, onChanged }) {
           <p className="muted">
             A badge next to your name everywhere. It evolves the longer you stay verified, from Bronze all the way to Opal.
             Buying lots of months at once doesn't skip ahead: time does.
+          </p>
+          <p className="verified-card-perk">
+            <BadgeIcon id="badge-early-supporter" size={20} showTitle={false} />
+            <span>
+              Get Verified before 2028 and keep the <strong>Early Supporter</strong> badge forever.
+            </span>
           </p>
         </div>
       </div>

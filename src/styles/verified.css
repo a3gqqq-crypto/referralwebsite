@@ -42,6 +42,27 @@
   margin-top: 4px;
 }
 
+.verified-card-perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 8px;
+  padding: 6px 12px 6px 6px;
+
+  border: 1px solid var(--line-gold);
+  border-radius: 999px;
+
+  background: var(--gold-wash);
+  color: var(--text-soft);
+
+  font-size: 13px;
+}
+
+.verified-card-perk strong {
+  color: var(--sun);
+}
+
 .verified-ladder {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));

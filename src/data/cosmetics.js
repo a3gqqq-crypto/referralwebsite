@@ -320,6 +320,16 @@ export const COSMETICS = [
     earn: { manual: true, label: "Finish top 3 in an event" },
   },
   {
+    id: "badge-early-supporter",
+    type: "badge",
+    name: "Early Supporter",
+    description: "Got Verified before 2028. Yours forever.",
+    rarity: "legendary",
+    icon: "medal",
+    price: null,
+    earn: { manual: true, label: "Get Verified before 2028" },
+  },
+  {
     id: "badge-insta",
     type: "badge",
     name: "Insta Fam",
