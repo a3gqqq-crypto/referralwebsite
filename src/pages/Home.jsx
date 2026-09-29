@@ -9,6 +9,7 @@ import StreakCard from "../components/StreakCard";
 import QuestsCard from "../components/QuestsCard";
 import InstaCard from "../components/home/InstaCard";
 import AvatarCard from "../components/home/AvatarCard";
+import VerifiedReminder from "../components/home/VerifiedReminder";
 import PushCard from "../components/home/PushCard";
 import SpendBoard from "../components/SpendBoard";
 import ActivityFeed from "../components/home/ActivityFeed";
@@ -178,6 +179,8 @@ function Home({ user }) {
           </Link>
         </div>
       </header>
+
+      <VerifiedReminder />
 
       <div className="dash-top">
         <RaceCard

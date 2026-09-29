@@ -14,6 +14,7 @@ const KIND_ICON = {
   payout: "gem",
   announcement: "megaphone",
   call: "phone",
+  membership: "gem",
 };
 
 const COLUMNS = "id, kind, title, body, link, created_at, read_at";
