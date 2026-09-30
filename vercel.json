@@ -5,6 +5,28 @@
       "destination": "/api/moment-preview?momentId=:momentId"
     },
     {
+      "source": "/",
+      "has": [{ "type": "query", "key": "ref" }],
+      "destination": "/api/preview?kind=invite"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "query", "key": "squad" }],
+      "destination": "/api/preview?kind=invite"
+    },
+    {
+      "source": "/u/:username",
+      "destination": "/api/preview?kind=profile&username=:username"
+    },
+    {
+      "source": "/squads/:tag",
+      "destination": "/api/preview?kind=squad&tag=:tag"
+    },
+    {
+      "source": "/events/:eventId",
+      "destination": "/api/preview?kind=event&id=:eventId"
+    },
+    {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
