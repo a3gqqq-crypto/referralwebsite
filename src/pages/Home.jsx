@@ -11,6 +11,7 @@ import InstaCard from "../components/home/InstaCard";
 import AvatarCard from "../components/home/AvatarCard";
 import VerifiedReminder from "../components/home/VerifiedReminder";
 import WelcomeCard from "../components/home/WelcomeCard";
+import PeopleToAdd from "../components/home/PeopleToAdd";
 import PushCard from "../components/home/PushCard";
 import InstallCard from "../components/home/InstallCard";
 import SpendBoard from "../components/SpendBoard";
@@ -186,6 +187,8 @@ function Home({ user }) {
       <VerifiedReminder />
 
       <WelcomeCard />
+
+      <PeopleToAdd />
 
       <div className="dash-top">
         <RaceCard

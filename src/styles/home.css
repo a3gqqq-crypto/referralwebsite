@@ -930,6 +930,119 @@
   }
 }
 
+/* People to add (few friends) */
+
+.people-add {
+  margin-top: 16px;
+  padding: 18px;
+}
+
+.people-add .dash-section-head h2 {
+  margin-top: 4px;
+
+  font-size: 22px;
+}
+
+.people-add-sub {
+  margin: 4px 0 12px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+}
+
+.people-add-list {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.people-add-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 8px;
+
+  border: 1px solid var(--line);
+  border-radius: 16px;
+
+  background: rgba(255, 255, 255, 0.02);
+
+  min-width: 0;
+}
+
+.people-add-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+
+  max-width: 100%;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.people-add-avatar {
+  position: relative;
+}
+
+.people-add-online {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+
+  width: 13px;
+  height: 13px;
+
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+
+  background: var(--mint);
+}
+
+.people-add-name {
+  max-width: 100%;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.people-add-item .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 760px) {
+  .people-add-list {
+    display: flex;
+
+    margin: 0 -18px;
+    padding: 0 18px 4px;
+
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .people-add-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .people-add-item {
+    flex: 0 0 128px;
+
+    scroll-snap-align: start;
+  }
+}
+
 /* Starter checklist */
 
 .welcome-card {
