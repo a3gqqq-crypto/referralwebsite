@@ -146,6 +146,69 @@
   color: var(--text-mute);
 }
 
+.chat-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-right: 6px;
+}
+
+.chat-side-head h2 {
+  margin-bottom: 6px;
+}
+
+.chat-new-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-bottom: 6px;
+  padding: 5px 10px;
+
+  border: 1px solid var(--line-gold);
+  border-radius: 999px;
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+
+  font-size: 12.5px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.chat-new-group:hover {
+  background: rgba(255, 92, 141, 0.2);
+}
+
+.chat-group-icon {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 12px;
+
+  background: var(--accent-grad);
+  color: #fff;
+
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.chat-group .chat-friend-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-weight: 600;
+}
+
 .chat-side-empty {
   padding: 6px 10px;
 
@@ -1235,6 +1298,18 @@ button.chat-quote {
 .chat-head-lounge {
   flex: 1;
   min-width: 0;
+}
+
+.chat-head-group > div {
+  min-width: 0;
+}
+
+.chat-head-group .chat-head-title {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chat-voice-btn {

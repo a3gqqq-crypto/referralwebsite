@@ -124,6 +124,7 @@ function AuthenticatedApp({ session, onLogout }) {
                 <Route path="/people" element={<PeoplePage />} />
                 <Route path="/chat" element={<ChatPage />} />
                 <Route path="/chat/:username" element={<ChatPage />} />
+                <Route path="/chat/g/:groupId" element={<ChatPage />} />
                 <Route path="/call/:roomId" element={<CallPage />} />
                 <Route path="/donations" element={<DonationsPage />} />
                 <Route path="/admin" element={<AdminPage />} />

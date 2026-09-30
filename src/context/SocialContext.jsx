@@ -20,9 +20,24 @@ export function SocialProvider({ user, children }) {
   const [profilesById, setProfilesById] = useState({});
   const [blocked, setBlocked] = useState(() => new Set());
   const [unread, setUnread] = useState({});
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const dmListeners = useRef(new Set());
+  const groupListeners = useRef(new Set());
+  const openGroup = useRef(null);
+  const groupsRef = useRef(groups);
+
+  useEffect(() => {
+    groupsRef.current = groups;
+  }, [groups]);
+
+  // Group chats I'm in, newest activity first, with unread counts.
+  const loadGroups = useCallback(async () => {
+    if (!me) return;
+    const { data, error } = await supabase.rpc("my_groups");
+    if (!error) setGroups(data || []);
+  }, [me]);
 
   const load = useCallback(async () => {
     if (!me) return;
@@ -65,9 +80,10 @@ export function SocialProvider({ user, children }) {
       counts[row.sender_id] = (counts[row.sender_id] || 0) + 1;
     });
     setUnread(counts);
+    await loadGroups();
 
     setLoading(false);
-  }, [me]);
+  }, [me, loadGroups]);
 
   useEffect(() => {
     load();
@@ -141,6 +157,48 @@ export function SocialProvider({ user, children }) {
     return () => dmListeners.current.delete(listener);
   }, []);
 
+  // Group messages (the database only sends ones from my groups) and being
+  // added to / removed from groups.
+  useEffect(() => {
+    if (!me) return;
+
+    const channel = supabase
+      .channel(`groups-${me}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "group_messages" }, (payload) => {
+        const message = payload.new;
+        const known = groupsRef.current.some((group) => group.id === message.group_id);
+
+        setGroups((current) => {
+          const index = current.findIndex((group) => group.id === message.group_id);
+          if (index === -1) return current;
+          const reading = openGroup.current === message.group_id;
+          const updated = {
+            ...current[index],
+            last_body: message.body,
+            last_image: message.image,
+            last_sender: message.sender_id,
+            last_at: message.created_at,
+            unread: message.sender_id === me || reading ? current[index].unread : current[index].unread + 1,
+          };
+          return [updated, ...current.filter((_, i) => i !== index)];
+        });
+
+        if (!known) loadGroups();
+        groupListeners.current.forEach((listener) => listener(message));
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_group_members" }, () => loadGroups())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [me, loadGroups]);
+
+  const onGroupMessage = useCallback((listener) => {
+    groupListeners.current.add(listener);
+    return () => groupListeners.current.delete(listener);
+  }, []);
+
   const rpc = useCallback(
     async (fn, args, { reload = true } = {}) => {
       const { data, error } = await supabase.rpc(fn, args);
@@ -190,7 +248,8 @@ export function SocialProvider({ user, children }) {
       return row.requested_by === me ? "outgoing" : "incoming";
     };
 
-    const unreadTotal = Object.values(unread).reduce((sum, n) => sum + n, 0);
+    const groupUnread = groups.reduce((sum, group) => sum + (group.unread || 0), 0);
+    const unreadTotal = Object.values(unread).reduce((sum, n) => sum + n, 0) + groupUnread;
 
     return {
       me,
@@ -205,6 +264,17 @@ export function SocialProvider({ user, children }) {
       relationWith,
       refresh: load,
       onDirectMessage,
+      groups,
+      refreshGroups: loadGroups,
+      onGroupMessage,
+      // The chat screen says which group is open, so its messages don't count as unread.
+      setOpenGroup: (id) => {
+        openGroup.current = id;
+      },
+      markGroupRead: async (id) => {
+        setGroups((current) => current.map((group) => (group.id === id ? { ...group, unread: 0 } : group)));
+        await supabase.rpc("mark_group_read", { p_group: id });
+      },
       sendRequest: (id) => rpc("send_friend_request", { p_target: id }),
       respond: (id, accept) =>
         rpc("respond_friend_request", { p_other: id, p_accept: accept }),
@@ -233,7 +303,7 @@ export function SocialProvider({ user, children }) {
         await supabase.rpc("mark_dms_read", { p_other: id });
       },
     };
-  }, [me, loading, friendships, profilesById, blocked, unread, load, onDirectMessage, rpc]);
+  }, [me, loading, friendships, profilesById, blocked, unread, groups, load, loadGroups, onDirectMessage, onGroupMessage, rpc]);
 
   return (
     <SocialContext.Provider value={value}>{children}</SocialContext.Provider>

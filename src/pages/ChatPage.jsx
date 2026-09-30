@@ -25,6 +25,7 @@ import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
 import { cosmeticById, displayNameOf, equippedFrom, formatPrice } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
+import { CreateGroupModal, GroupInfoModal } from "../components/GroupModals";
 
 import "../styles/chat.css";
 
@@ -350,11 +351,19 @@ function MessageRow({
 }
 
 function ChatPage() {
-  const { username } = useParams();
+  const { username, groupId } = useParams();
   const isDm = Boolean(username);
+  const isGroup = Boolean(groupId);
+  const isLounge = !isDm && !isGroup;
 
   const social = useSocial();
   const { me, friends, incoming, unread, blocked, relationWith, onDirectMessage, markRead } = social;
+  const { groups, onGroupMessage, markGroupRead, setOpenGroup } = social;
+  const group = isGroup ? groups.find((item) => item.id === groupId) || null : null;
+  const [creatingGroup, setCreatingGroup] = useState(false);
+  const [groupInfo, setGroupInfo] = useState(false);
+  // "l" lounge, "d" DM, "g" group: keys for quoted messages.
+  const room = isGroup ? "g" : isDm ? "d" : "l";
 
   const [profiles, setProfiles] = useState({});
   const profilesRef = useRef({});
@@ -391,7 +400,7 @@ function ChatPage() {
   // the Lounge only opens when you tap it.
   const location = useLocation();
   const showListFirst = () =>
-    !isDm && !location.state?.lounge && window.matchMedia("(max-width: 860px)").matches;
+    isLounge && !location.state?.lounge && window.matchMedia("(max-width: 860px)").matches;
   const [listOpen, setListOpen] = useState(showListFirst);
   const [listFor, setListFor] = useState(location.key);
   if (listFor !== location.key) {
@@ -536,7 +545,12 @@ function ChatPage() {
 
   const fetchPage = useCallback(
     async (before) => {
-      let query = isDm
+      let query = isGroup
+        ? supabase
+            .from("group_messages")
+            .select("id, group_id, sender_id, body, image, created_at, reply_to")
+            .eq("group_id", groupId)
+        : isDm
         ? supabase
             .from("direct_messages")
             .select("id, sender_id, recipient_id, body, image, created_at, reply_to")
@@ -561,11 +575,15 @@ function ChatPage() {
 
       return rows;
     },
-    [isDm, me, target, ensureProfiles]
+    [isDm, isGroup, groupId, me, target, ensureProfiles]
   );
 
   useEffect(() => {
     if (isDm && targetState !== "ready") return;
+    if (isGroup) {
+      setOpenGroup(groupId);
+      markGroupRead(groupId);
+    }
 
     let cancelled = false;
     setLoading(true);
@@ -584,8 +602,11 @@ function ChatPage() {
 
     return () => {
       cancelled = true;
+      setOpenGroup(null);
     };
-  }, [fetchPage, isDm, targetState, target]);
+    // markGroupRead/setOpenGroup change identity with the group list; only the open chat matters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchPage, isDm, isGroup, groupId, targetState, target]);
 
   const loadOlder = async () => {
     if (!messages.length || loadingOlder) return;
@@ -621,7 +642,7 @@ function ChatPage() {
   /* ---------- Pinned announcement (Lounge) ---------- */
 
   useEffect(() => {
-    if (isDm) return;
+    if (!isLounge) return;
 
     let cancelled = false;
 
@@ -638,7 +659,7 @@ function ChatPage() {
     return () => {
       cancelled = true;
     };
-  }, [isDm]);
+  }, [isLounge]);
 
   const dismissPin = () => {
     setDismissedPin(String(pinned.id));
@@ -653,7 +674,7 @@ function ChatPage() {
 
   useEffect(() => {
     const loaded = new Set(messages.map((message) => message.id));
-    const prefix = isDm ? "d" : "l";
+    const prefix = room;
     const missing = [
       ...new Set(
         messages
@@ -670,7 +691,7 @@ function ChatPage() {
     });
 
     supabase
-      .from(isDm ? "direct_messages" : "lounge_messages")
+      .from(isGroup ? "group_messages" : isDm ? "direct_messages" : "lounge_messages")
       .select("id, sender_id, body, image, created_at")
       .in("id", missing)
       .then(async ({ data }) => {
@@ -683,7 +704,7 @@ function ChatPage() {
         quotedRef.current = next;
         setQuoted(next);
       });
-  }, [messages, isDm, ensureProfiles]);
+  }, [messages, room, isDm, isGroup, ensureProfiles]);
 
   const jumpTo = (id) => {
     const row = document.getElementById(`msg-${id}`);
@@ -704,7 +725,7 @@ function ChatPage() {
   /* ---------- Live updates ---------- */
 
   useEffect(() => {
-    if (isDm) return;
+    if (!isLounge) return;
 
     const channel = supabase
       .channel("lounge-feed")
@@ -732,7 +753,23 @@ function ChatPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isDm, ensureProfiles]);
+  }, [isLounge, ensureProfiles]);
+
+  // New messages in the open group (the shared inbox listens for all groups).
+  useEffect(() => {
+    if (!isGroup) return undefined;
+
+    return onGroupMessage(async (message) => {
+      if (message.group_id !== groupId) return;
+      await ensureProfiles([message.sender_id]);
+      setMessages((current) =>
+        current.some((item) => item.id === message.id) ? current : [...current, message]
+      );
+      if (message.sender_id !== me) markGroupRead(groupId);
+    });
+    // markGroupRead changes identity with the group list; the subscription only depends on the open group.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGroup, groupId, onGroupMessage, ensureProfiles, me]);
 
   useEffect(
     () =>
@@ -788,7 +825,7 @@ function ChatPage() {
       return;
     }
 
-    if (!isDm && !canPostLoungePhoto) {
+    if (isLounge && !canPostLoungePhoto) {
       setError("Reach Level 5 to post photos in the lounge.");
       return;
     }
@@ -839,7 +876,14 @@ function ChatPage() {
       }
     }
 
-    const { data, error: sendError } = isDm
+    const { data, error: sendError } = isGroup
+      ? await supabase.rpc("send_group_message", {
+          p_group: groupId,
+          p_body: body,
+          p_image: imagePath,
+          p_reply_to: replyTo?.id ?? null,
+        })
+      : isDm
       ? await supabase.rpc("send_direct_message", {
           p_recipient: target.id,
           p_body: body,
@@ -909,7 +953,7 @@ function ChatPage() {
   const quoteFor = (message) => {
     if (!message.reply_to) return undefined;
 
-    const original = byId.get(message.reply_to) ?? quoted[`${isDm ? "d" : "l"}:${message.reply_to}`];
+    const original = byId.get(message.reply_to) ?? quoted[`${room}:${message.reply_to}`];
 
     if (original === undefined) return undefined;
     if (original === null) return null;
@@ -924,7 +968,7 @@ function ChatPage() {
   });
 
   const totalBadge = social.badgeCount;
-  const limit = isDm ? 1000 : 500;
+  const limit = isLounge ? 500 : 1000;
 
   return (
     <main className="chat-page">
@@ -941,7 +985,7 @@ function ChatPage() {
           <Link
             to="/chat"
             state={{ lounge: true }}
-            className={`chat-room ${!isDm ? "active" : ""}`}
+            className={`chat-room ${isLounge ? "active" : ""}`}
             onClick={() => setListOpen(false)}
           >
             <span className="chat-room-icon" aria-hidden="true">#</span>
@@ -986,6 +1030,43 @@ function ChatPage() {
               ))}
             </section>
           )}
+
+          <section className="chat-side-section">
+            <div className="chat-side-head">
+              <h2>Groups</h2>
+              <button type="button" className="chat-new-group" onClick={() => setCreatingGroup(true)}>
+                <Icon name="users" size={14} />
+                New group
+              </button>
+            </div>
+
+            {groups.length === 0 ? (
+              <p className="chat-side-empty">Make a group chat with your friends.</p>
+            ) : (
+              groups.map((item) => {
+                const last = item.last_body || item.last_image
+                  ? `${item.last_sender === me ? "You: " : ""}${previewText({ body: item.last_body, image: item.last_image })}`
+                  : `${item.member_count} members`;
+                return (
+                  <Link
+                    key={item.id}
+                    to={`/chat/g/${item.id}`}
+                    className={`chat-friend chat-group ${isGroup && groupId === item.id ? "active" : ""} ${item.unread ? "has-unread" : ""}`}
+                    onClick={() => setListOpen(false)}
+                  >
+                    <span className="chat-group-icon" aria-hidden="true">
+                      {item.name.trim().charAt(0).toUpperCase()}
+                    </span>
+                    <span className="chat-friend-text">
+                      <span className="chat-friend-name">{item.name}</span>
+                      <small>{last}</small>
+                    </span>
+                    {item.unread > 0 && <span className="chat-unread">{item.unread}</span>}
+                  </Link>
+                );
+              })
+            )}
+          </section>
 
           <section className="chat-side-section">
             <h2>Friends</h2>
@@ -1055,7 +1136,27 @@ function ChatPage() {
             {totalBadge > 0 && !listOpen && <span className="chat-unread">{totalBadge}</span>}
           </button>
 
-          {isDm ? (
+          {isGroup ? (
+            group ? (
+              <div className="chat-head-lounge chat-head-group">
+                <span className="chat-group-icon" aria-hidden="true">
+                  {group.name.trim().charAt(0).toUpperCase()}
+                </span>
+                <div>
+                  <strong className="chat-head-title">{group.name}</strong>
+                  <small>
+                    {group.member_count} members · friends only
+                  </small>
+                </div>
+                <button type="button" className="btn btn-sm chat-voice-btn" onClick={() => setGroupInfo(true)}>
+                  <Icon name="users" size={15} />
+                  <span>Info</span>
+                </button>
+              </div>
+            ) : (
+              <strong className="chat-head-title">{social.loading ? "Loading…" : "Group not found"}</strong>
+            )
+          ) : isDm ? (
             target ? (
               <>
                 <PlayerChip player={target} size={38} />
@@ -1137,7 +1238,7 @@ function ChatPage() {
           )}
         </header>
 
-        {!isDm && pinned && String(pinned.id) !== dismissedPin && (
+        {isLounge && pinned && String(pinned.id) !== dismissedPin && (
           <div className="chat-pinned" role="note">
             <Icon name="megaphone" size={17} />
             <div className="chat-pinned-text">
@@ -1170,7 +1271,12 @@ function ChatPage() {
 
               {visible.length === 0 && (
                 <div className="chat-empty">
-                  {isDm ? (
+                  {isGroup ? (
+                    <>
+                      <strong>This is the start of {group ? group.name : "the group"}.</strong>
+                      <span>Say hi to everyone 👋</span>
+                    </>
+                  ) : isDm ? (
                     <>
                       <strong>This is the start of your chat{target ? ` with ${displayNameOf(target)}` : ""}.</strong>
                       <span>Say something nice.</span>
@@ -1205,10 +1311,10 @@ function ChatPage() {
                       onReply={startReply}
                       onJump={jumpTo}
                       onReport={(sender, messageId) =>
-                        setReporting({ target: sender, kind: isDm ? "dm" : "lounge", messageId })
+                        setReporting({ target: sender, kind: isGroup ? "group" : isDm ? "dm" : "lounge", messageId })
                       }
-                      onDelete={isOwner && !isDm ? deleteLoungeMessage : undefined}
-                      onMute={isOwner && !isDm ? setMuting : undefined}
+                      onDelete={isOwner && isLounge ? deleteLoungeMessage : undefined}
+                      onMute={isOwner && isLounge ? setMuting : undefined}
                       onOpenPhoto={setViewing}
                       onPhotoLoad={keepAtBottom}
                     />
@@ -1219,9 +1325,9 @@ function ChatPage() {
           )}
         </div>
 
-        {!isDm && loungeLocked ? (
+        {isLounge && loungeLocked ? (
           <LoungeLock xp={myXp} />
-        ) : canSend ? (
+        ) : isGroup && !group ? null : canSend ? (
           <form className="chat-composer" onSubmit={send}>
             {error && <div className="notice notice-error chat-error">{error}</div>}
 
@@ -1268,13 +1374,13 @@ function ChatPage() {
                 type="button"
                 className="chat-attach"
                 onClick={() =>
-                  !isDm && !canPostLoungePhoto
+                  isLounge && !canPostLoungePhoto
                     ? setError("Reach Level 5 to post photos in the lounge.")
                     : photoInputRef.current?.click()
                 }
                 disabled={sending}
                 aria-label="Add a photo"
-                title={!isDm && !canPostLoungePhoto ? "Reach Level 5 to post photos in the lounge" : "Add a photo"}
+                title={isLounge && !canPostLoungePhoto ? "Reach Level 5 to post photos in the lounge" : "Add a photo"}
               >
                 <Icon name="image" size={20} />
               </button>
@@ -1313,7 +1419,13 @@ function ChatPage() {
                 onKeyDown={onKeyDown}
                 onPaste={onPaste}
                 maxLength={limit}
-                placeholder={isDm && target ? `Message ${displayNameOf(target)}` : "Message the lounge"}
+                placeholder={
+                  isGroup && group
+                    ? `Message ${group.name}`
+                    : isDm && target
+                      ? `Message ${displayNameOf(target)}`
+                      : "Message the lounge"
+                }
                 aria-label="Message"
               />
 
@@ -1361,6 +1473,9 @@ function ChatPage() {
           </button>
         </div>
       )}
+
+      {creatingGroup && <CreateGroupModal onClose={() => setCreatingGroup(false)} />}
+      {groupInfo && group && <GroupInfoModal group={group} onClose={() => setGroupInfo(false)} />}
 
       {muting && <MuteModal target={muting} onClose={() => setMuting(null)} />}
 

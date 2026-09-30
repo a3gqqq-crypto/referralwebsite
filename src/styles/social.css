@@ -109,6 +109,183 @@
   gap: 10px;
 }
 
+/* =========================================
+   GROUP CHATS
+========================================= */
+
+.group-modal .report-modal-body {
+  max-height: min(86vh, 720px);
+
+  overflow-y: auto;
+}
+
+.group-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: -6px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+}
+
+.group-search {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+.group-pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  max-height: 320px;
+  margin: 0;
+  padding: 0;
+
+  overflow-y: auto;
+
+  list-style: none;
+}
+
+.group-pick,
+.group-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.group-pick {
+  cursor: pointer;
+}
+
+.group-pick input {
+  position: absolute;
+
+  opacity: 0;
+  pointer-events: none;
+}
+
+.group-pick.is-on {
+  border-color: var(--gold);
+
+  background: var(--gold-wash);
+}
+
+.group-pick:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.group-pick:has(input:focus-visible) {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.group-pick .sname,
+.group-member-link .sname {
+  flex: 1;
+  min-width: 0;
+
+  font-weight: 600;
+}
+
+.group-pick-check {
+  display: grid;
+  place-items: center;
+
+  width: 24px;
+  height: 24px;
+
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+
+  color: #fff;
+}
+
+.group-pick.is-on .group-pick-check {
+  border-color: transparent;
+
+  background: var(--accent-grad);
+}
+
+.group-member-link {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.group-owner-chip {
+  font-size: 11px;
+}
+
+.group-you {
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
+
+.group-rename {
+  display: flex;
+  gap: 8px;
+}
+
+.group-rename input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  background: var(--bg-raised);
+  color: var(--text);
+
+  font-weight: 600;
+}
+
+.group-title {
+  color: var(--text) !important;
+
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.group-empty a {
+  color: var(--gold-soft);
+}
+
+.group-actions {
+  flex-wrap: wrap;
+}
+
+.group-leave {
+  margin-right: auto;
+
+  color: var(--rose);
+}
+
 
 /* =========================================
    STORY SHARE SHEET
