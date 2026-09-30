@@ -44,6 +44,8 @@ const ChatPage = lazyPage(() => import("./pages/ChatPage"));
 const AdminPage = lazyPage(() => import("./pages/AdminPage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
 const AboutPage = lazyPage(() => import("./pages/AboutPage"));
+const SquadsPage = lazyPage(() => import("./pages/SquadsPage"));
+const SquadPage = lazyPage(() => import("./pages/SquadPage"));
 const LegalPage = lazyPage(() => import("./pages/LegalPage"));
 const CallPage = lazyPage(() => import("./pages/CallPage"));
 
@@ -132,6 +134,8 @@ function AuthenticatedApp({ session, onLogout }) {
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/rules" element={<RulesPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/squads" element={<SquadsPage />} />
+                <Route path="/squads/:tag" element={<SquadPage />} />
                 {LEGAL_DOCS.map((doc) => (
                   <Route key={doc} path={`/${doc}`} element={<LegalPage doc={doc} />} />
                 ))}

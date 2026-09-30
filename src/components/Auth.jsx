@@ -266,6 +266,17 @@ function Auth({ onAuthenticated }) {
         setMode("signup");
       }
     }
+
+    // Squad invite links (?squad=TAG): remembered so Home can offer to join
+    // after sign-up, even when they come back through the confirmation email.
+    const squad = params.get("squad");
+    if (squad && /^[A-Za-z0-9]{2,4}$/.test(squad)) {
+      try {
+        localStorage.setItem("suffrova_pending_squad", squad.toUpperCase());
+      } catch {
+        // Private mode: they can still find the squad on the Squads page.
+      }
+    }
   }, []);
 
 

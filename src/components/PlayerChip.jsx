@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { BadgeRow, FramedAvatar, StyledName } from "./Cosmetics";
 import { LevelBadge } from "./Level";
 import StaffTag from "./StaffTag";
+import SquadTag from "./SquadTag";
 import VerifiedTick from "./VerifiedTick";
 import { displayNameOf, equippedFrom } from "../data/cosmetics";
 
 export const PLAYER_COLUMNS =
   "id, username, display_name, referral_count, created_at, equipped_frame, equipped_name, equipped_badges, xp, avatar, body_avatar, verified_until, verified_months, verified_since";
 
-function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
+function PlayerChip({ player, size = 36, isMe = false, showBadges = true, showSquad = true }) {
   const equipped = equippedFrom(player);
   const name = displayNameOf(player);
 
@@ -24,6 +25,8 @@ function PlayerChip({ player, size = 36, isMe = false, showBadges = true }) {
       <VerifiedTick player={player} size={Math.max(14, Math.round(size * 0.44))} />
 
       <StaffTag userId={player?.id} />
+
+      {showSquad && <SquadTag userId={player?.id} link={false} />}
 
       <LevelBadge xp={player?.xp} />
 

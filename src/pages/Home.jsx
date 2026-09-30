@@ -12,6 +12,7 @@ import AvatarCard from "../components/home/AvatarCard";
 import VerifiedReminder from "../components/home/VerifiedReminder";
 import WelcomeCard from "../components/home/WelcomeCard";
 import PeopleToAdd from "../components/home/PeopleToAdd";
+import SquadCard from "../components/home/SquadCard";
 import PushCard from "../components/home/PushCard";
 import InstallCard from "../components/home/InstallCard";
 import SpendBoard from "../components/SpendBoard";
@@ -187,6 +188,8 @@ function Home({ user }) {
       <VerifiedReminder />
 
       <WelcomeCard />
+
+      <SquadCard />
 
       <PeopleToAdd />
 

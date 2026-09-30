@@ -22,6 +22,7 @@ const NAV_LINKS = [
     label: "Leaderboard",
     match: (path) => path.endsWith("/leaderboard"),
   },
+  { to: "/squads", label: "Squads", match: (path) => path.startsWith("/squads") },
   { to: "/invites", label: "Invites" },
   { to: "/chat", label: "Chat", badge: true, match: (path) => path.startsWith("/chat") },
   {
@@ -61,7 +62,7 @@ function Navbar({ user, onLogout }) {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 1100) setMenuOpen(false);
+      if (window.innerWidth > 1220) setMenuOpen(false);
     };
 
     window.addEventListener("resize", handleResize);

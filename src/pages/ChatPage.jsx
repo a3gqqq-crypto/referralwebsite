@@ -20,6 +20,7 @@ import { BadgeRow, EmoteAvatar, FramedAvatar, Sticker, StyledName } from "../com
 import { EMOTES, STICKERS, canUseEmote, canUseSticker, emoteFromBody, stickerFromBody } from "../data/avatarParts";
 import { LevelBadge } from "../components/Level";
 import StaffTag from "../components/StaffTag";
+import SquadTag from "../components/SquadTag";
 import VerifiedTick from "../components/VerifiedTick";
 import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
@@ -255,6 +256,7 @@ function MessageRow({
             </Link>
             <VerifiedTick player={sender} size={15} />
             <StaffTag userId={message.sender_id} />
+            <SquadTag userId={message.sender_id} />
             <LevelBadge xp={sender?.xp} />
             <BadgeRow ids={equipped.badges} size={16} />
             <time dateTime={message.created_at}>{formatTime(message.created_at)}</time>

@@ -6,6 +6,7 @@ import {
 } from "./Cosmetics";
 import { LevelBadge, LevelProgress } from "./Level";
 import StaffTag from "./StaffTag";
+import SquadTag from "./SquadTag";
 import VerifiedTick from "./VerifiedTick";
 import { lastSeenText, useIsOnline } from "../lib/presence";
 import { fullBodySrc } from "../lib/avatarRender";
@@ -76,6 +77,8 @@ function ProfileCard({
           )}
 
           <StaffTag userId={userId} size={size === "lg" ? "lg" : "sm"} />
+
+          <SquadTag userId={userId} />
 
           <LevelBadge xp={xp} size={size === "lg" ? "lg" : "sm"} />
 

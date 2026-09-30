@@ -1,0 +1,540 @@
+/* =========================================
+   SQUADS
+========================================= */
+
+.squad-tag-link {
+  display: inline-flex;
+
+  text-decoration: none;
+}
+
+.squad-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+
+  padding: 2px 7px;
+
+  border-radius: 999px;
+
+  color: #fff;
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  white-space: nowrap;
+
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.squad-emblem {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  border-radius: 28%;
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Squads page ---------- */
+
+.squads-page .page-header p {
+  max-width: 620px;
+}
+
+.squads-wars {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+
+  margin-bottom: 18px;
+  padding: 16px 20px;
+
+  border: 1px solid var(--line-gold);
+
+  background:
+    radial-gradient(420px 150px at 0% 50%, rgba(255, 92, 141, 0.18), transparent 70%),
+    var(--surface);
+}
+
+.squads-wars-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  flex: 1;
+  min-width: 200px;
+}
+
+.squads-wars-title strong {
+  font-family: var(--font-display);
+  font-size: 24px;
+}
+
+.squads-wars-title span {
+  color: var(--text-soft);
+
+  font-size: 14px;
+}
+
+.squads-wars-timer {
+  padding: 6px 12px;
+
+  border-radius: 999px;
+
+  background: var(--gold-wash);
+  color: var(--gold-soft);
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.squads-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.squads-board {
+  padding: 8px;
+}
+
+.squads-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 12px 6px;
+}
+
+.squads-board-head h2 {
+  font-size: 22px;
+}
+
+.squads-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  border-radius: 14px;
+
+  color: inherit;
+  text-decoration: none;
+
+  transition: background 0.15s ease;
+}
+
+.squads-row:hover {
+  background: rgba(255, 200, 225, 0.05);
+}
+
+.squads-row.is-mine {
+  background: var(--gold-wash);
+
+  box-shadow: inset 0 0 0 1px var(--line-gold);
+}
+
+.squads-rank {
+  width: 28px;
+
+  color: var(--text-mute);
+
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+.squads-row:nth-child(1) .squads-rank {
+  color: var(--place-1);
+}
+
+.squads-row:nth-child(2) .squads-rank {
+  color: var(--place-2);
+}
+
+.squads-row:nth-child(3) .squads-rank {
+  color: var(--place-3);
+}
+
+.squads-row-name {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.squads-row-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.squads-row-name small {
+  color: var(--text-mute);
+
+  font-size: 12.5px;
+}
+
+.squads-score {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.squads-score small {
+  display: block;
+
+  color: var(--text-mute);
+
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.squads-empty {
+  padding: 18px 12px;
+
+  color: var(--text-mute);
+}
+
+.squads-side {
+  display: grid;
+  gap: 18px;
+}
+
+.squads-mine,
+.squads-how,
+.squads-champs {
+  padding: 18px;
+}
+
+.squads-mine h2,
+.squads-how h2,
+.squads-champs h2 {
+  margin-bottom: 10px;
+
+  font-size: 20px;
+}
+
+.squads-how ol {
+  display: grid;
+  gap: 8px;
+
+  margin: 0;
+  padding-left: 20px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.squads-champ {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 8px 0;
+
+  border-top: 1px solid var(--line);
+
+  font-size: 14px;
+}
+
+.squads-champ:first-of-type {
+  border-top: none;
+}
+
+.squads-champ span {
+  color: var(--text-mute);
+}
+
+/* ---------- One squad ---------- */
+
+.squad-hero {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+
+  margin-bottom: 18px;
+  padding: 26px;
+
+  border-radius: var(--radius-lg, 22px);
+
+  overflow: hidden;
+}
+
+.squad-hero::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(90deg, rgba(20, 13, 22, 0.55), rgba(20, 13, 22, 0.15));
+
+  pointer-events: none;
+}
+
+.squad-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.squad-hero-text {
+  flex: 1;
+  min-width: 200px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.squad-hero-text h1 {
+  font-size: clamp(34px, 6vw, 52px);
+  line-height: 1;
+}
+
+.squad-hero-text p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.squad-hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-top: 6px;
+}
+
+.squad-hero-stats span {
+  padding: 5px 11px;
+
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.squad-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.squad-members {
+  padding: 8px;
+}
+
+.squad-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 10px;
+
+  border-radius: 12px;
+}
+
+/* Tags wrap under the name on narrow screens instead of squeezing it away. */
+.squad-member .player-chip {
+  flex: 1;
+  min-width: 0;
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+
+.squad-member .player-chip-name {
+  flex-shrink: 0;
+  max-width: calc(100% - 50px);
+}
+
+.squad-member-side {
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.squad-member-xp {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.squad-kick {
+  padding: 0;
+
+  border: none;
+
+  background: none;
+  color: var(--rose);
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.squad-member-xp small {
+  color: var(--text-mute);
+
+  font-weight: 500;
+}
+
+.squad-owner-chip {
+  font-size: 11px;
+}
+
+/* ---------- Create / edit ---------- */
+
+.squad-form {
+  display: grid;
+  gap: 14px;
+}
+
+.squad-form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 10px;
+}
+
+.squad-form input,
+.squad-form textarea {
+  width: 100%;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
+.squad-form input[name="tag"] {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.squad-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.squad-picker button {
+  display: grid;
+  place-items: center;
+
+  width: 40px;
+  height: 40px;
+
+  border: 2px solid transparent;
+  border-radius: 12px;
+
+  background: var(--surface-2);
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.squad-picker button.is-on {
+  border-color: var(--gold);
+}
+
+.squad-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px;
+
+  border-radius: 16px;
+}
+
+.squad-preview strong {
+  color: #fff;
+
+  font-family: var(--font-display);
+  font-size: 22px;
+
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Home card ---------- */
+
+.squad-home {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-top: 16px;
+  padding: 14px 16px;
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.squad-home-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.squad-home-text strong {
+  font-size: 15.5px;
+}
+
+.squad-home-text span {
+  color: var(--text-soft);
+
+  font-size: 13.5px;
+}
+
+@media (max-width: 900px) {
+  .squads-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .squads-side {
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .squad-hero {
+    padding: 20px;
+  }
+
+  .squad-hero-actions {
+    width: 100%;
+  }
+
+  .squad-hero-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
