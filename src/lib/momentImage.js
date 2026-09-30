@@ -185,7 +185,7 @@ export async function renderMomentImage(moment) {
 
   ctx.fillStyle = "rgba(255, 241, 245, 0.6)";
   ctx.font = `500 28px ${BODY}`;
-  ctx.fillText("made on Suffrova · invite friends, win real prizes", W / 2, 1712);
+  ctx.fillText("made on Suffrova · hang out, level up, win prizes", W / 2, 1712);
 
   // JPEG keeps it small enough to send quickly (the gradients make PNGs ~1.5 MB).
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.92));

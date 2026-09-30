@@ -11,8 +11,8 @@ function Footer() {
           <p className="footer-wordmark">Suffrova</p>
 
           <p className="footer-tagline">
-            Referral competitions with real prizes.
-            Invite your people, climb the board.
+            Chat, call and hang out with friends.
+            Build your avatar, level up, win real prizes.
           </p>
         </div>
 

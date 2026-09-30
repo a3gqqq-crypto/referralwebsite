@@ -106,6 +106,13 @@ export function ProfileProvider({ user, children }) {
       return;
     }
 
+    // Next time they're logged out, the front page opens on "Log in".
+    try {
+      localStorage.setItem("suffrova-returning", "1");
+    } catch {
+      // Storage blocked: they just see sign-up first.
+    }
+
     if (profileResult.error) {
       console.error(profileResult.error);
       setError("Could not load your profile.");

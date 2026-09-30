@@ -3,7 +3,16 @@ import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { useEventList } from "../data/events";
 import AuthLiveBoard from "./AuthLiveBoard";
+import { formatCountdown, useNow } from "../hooks/useCountdown";
 import "../styles/auth.css";
+
+// Set once someone has been logged in on this device (see ProfileContext).
+const RETURNING_KEY = "suffrova-returning";
+
+function EndsIn({ end }) {
+  const now = useNow(1000);
+  return <span className="auth-ends mono"> · ends in {formatCountdown(end, now)}</span>;
+}
 
 const BANNED_TEXT =
   "This account was banned for breaking the Suffrova rules. If you think it's a mistake, DM @suffrova on Instagram.";
@@ -178,8 +187,15 @@ function isBlockedUsername(username) {
 
 
 function Auth({ onAuthenticated }) {
+  // New visitors (like people from ads) land on sign-up; returning ones on log in.
   const [mode, setMode] =
-    useState("login");
+    useState(() => {
+      try {
+        return localStorage.getItem(RETURNING_KEY) ? "login" : "signup";
+      } catch {
+        return "signup";
+      }
+    });
 
   const [username, setUsername] =
     useState("");
@@ -694,25 +710,33 @@ function Auth({ onAuthenticated }) {
         </div>
 
         <div className="auth-poster-body">
-          <span className="eyebrow">Invite · Climb · Win</span>
+          <span className="eyebrow">Chat · Call · Compete</span>
 
           <h1>
-            Bring your friends.{" "}
+            Hang out. Level up.{" "}
             <span className="mark">Win real prizes.</span>
           </h1>
+
+          <ul className="auth-perks">
+            <li>💬 Chat & voice calls</li>
+            <li>🧍 Your own 3D avatar</li>
+            <li>😎 Emotes, stickers & badges</li>
+            <li>🏆 Events with real prizes</li>
+            <li>✨ Free to join</li>
+          </ul>
 
           <ol className="auth-steps">
             <li>
               <b>1</b>
-              Grab your personal invite link
+              Make your 3D avatar and profile
             </li>
             <li>
               <b>2</b>
-              Every friend who joins moves you up the board
+              Chat, call and make friends in the Lounge
             </li>
             <li>
               <b>3</b>
-              Finish top 3 when the event ends to win
+              Invite friends to climb event boards and win
             </li>
           </ol>
         </div>
@@ -729,6 +753,7 @@ function Auth({ onAuthenticated }) {
               <span>
                 <strong>{liveEvent.title}</strong> ·{" "}
                 {liveEvent.prize} prize pool
+                <EndsIn end={liveEvent.endDate} />
               </span>
             </>
           ) : (

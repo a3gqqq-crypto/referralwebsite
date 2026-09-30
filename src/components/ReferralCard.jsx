@@ -13,7 +13,7 @@ import {
 import "../styles/invites.css";
 
 const SHARE_MESSAGE =
-  "Join me on Suffrova — invite friends, climb the leaderboard, win real prizes 🏆";
+  "Come hang out with me on Suffrova 👋 chat, calls, 3D avatars and real prizes 🏆";
 
 function ReferralCard({ user }) {
   const [stats, setStats] = useState(null);

@@ -24,7 +24,7 @@ const DOCS = {
       {
         heading: "Who we are",
         body: [
-          "Suffrova is a referral competition and community site run by a small independent team (three friends), not a company. When these terms say \"we\" or \"us\", they mean the Suffrova team.",
+          "Suffrova is a social community site (chat, calls, avatars and referral events) run by a small independent team (three friends), not a company. When these terms say \"we\" or \"us\", they mean the Suffrova team.",
         ],
       },
       {

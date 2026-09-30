@@ -1,7 +1,7 @@
 {
   "name": "Suffrova",
   "short_name": "Suffrova",
-  "description": "Invite friends, climb the leaderboard, win real prizes.",
+  "description": "Chat, call, build your 3D avatar and win real prizes.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#140d16",

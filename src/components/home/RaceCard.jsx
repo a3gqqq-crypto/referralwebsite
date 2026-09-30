@@ -10,7 +10,7 @@ import { bragShareText, renderBragImage } from "../../lib/bragImage";
 import { useStoryShare } from "../StoryShare";
 import { displayNameOf } from "../../data/cosmetics";
 
-const SHARE_TEXT = "Join me on Suffrova — invite friends, climb the board, win real prizes.";
+const SHARE_TEXT = "Come hang out with me on Suffrova: chat, calls, 3D avatars and real prizes.";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
