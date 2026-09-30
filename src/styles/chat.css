@@ -146,6 +146,57 @@
   color: var(--text-mute);
 }
 
+/* "Pooki is typing…" above the message box */
+.chat-typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 0 6px 6px;
+
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
+
+.chat-typing-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.chat-typing-dots span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: var(--gold-soft);
+
+  animation: chat-typing 1.2s ease-in-out infinite;
+}
+
+.chat-typing-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.chat-typing-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes chat-typing {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
 .chat-side-head {
   display: flex;
   align-items: center;

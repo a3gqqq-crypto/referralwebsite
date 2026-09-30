@@ -786,6 +786,90 @@ function ChatPage() {
     [onDirectMessage, loadRecent, isDm, target]
   );
 
+  /* ---------- "Typing…" (private and group chats) ---------- */
+
+  // Sent over a live channel only (nothing is saved). Shows for a few seconds
+  // after someone's last keystroke, and clears when their message arrives.
+  const typingKey = isGroup ? `g-${groupId}` : isDm && target && me ? `d-${[me, target.id].sort().join("-")}` : null;
+  const [typers, setTypers] = useState({});
+  const typingChannel = useRef(null);
+  const lastTypingSent = useRef(0);
+
+  useEffect(() => {
+    setTypers({});
+    if (!typingKey) return undefined;
+
+    const channel = supabase
+      .channel(`typing-${typingKey}`, { config: { broadcast: { self: false } } })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (!payload?.id || payload.id === me) return;
+        if (payload.stop) {
+          setTypers((current) => {
+            const next = { ...current };
+            delete next[payload.id];
+            return next;
+          });
+          return;
+        }
+        setTypers((current) => ({ ...current, [payload.id]: Date.now() + 4000 }));
+        ensureProfiles([payload.id]);
+      })
+      .subscribe();
+    typingChannel.current = channel;
+
+    return () => {
+      typingChannel.current = null;
+      supabase.removeChannel(channel);
+    };
+  }, [typingKey, me, ensureProfiles]);
+
+  // Drop typers whose last keystroke was a while ago.
+  const typingCount = Object.keys(typers).length;
+  useEffect(() => {
+    if (!typingCount) return undefined;
+    const timer = setInterval(() => {
+      setTypers((current) => {
+        const now = Date.now();
+        const next = Object.fromEntries(Object.entries(current).filter(([, until]) => until > now));
+        return Object.keys(next).length === Object.keys(current).length ? current : next;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [typingCount]);
+
+  // Their message landed: they're done typing.
+  const lastSender = messages[messages.length - 1]?.sender_id;
+  useEffect(() => {
+    if (!lastSender) return;
+    setTypers((current) => {
+      if (!(lastSender in current)) return current;
+      const next = { ...current };
+      delete next[lastSender];
+      return next;
+    });
+  }, [lastSender, messages.length]);
+
+  const sendTyping = (stop = false) => {
+    const channel = typingChannel.current;
+    if (!channel) return;
+    const now = Date.now();
+    if (!stop && now - lastTypingSent.current < 2500) return;
+    lastTypingSent.current = stop ? 0 : now;
+    channel.send({ type: "broadcast", event: "typing", payload: stop ? { id: me, stop: true } : { id: me } });
+  };
+
+  const typingNames = Object.keys(typers)
+    .filter((id) => !blocked.has(id))
+    .map((id) => displayNameOf(profiles[id], "Someone"));
+  const typingText =
+    typingNames.length === 0
+      ? null
+      : typingNames.length === 1
+        ? `${typingNames[0]} is typing…`
+        : typingNames.length === 2
+          ? `${typingNames[0]} and ${typingNames[1]} are typing…`
+          : "Several people are typing…";
+
   /* ---------- Scrolling ---------- */
 
   useLayoutEffect(() => {
@@ -910,11 +994,14 @@ function ChatPage() {
       clearPhoto();
       setDraft("");
     }
+    sendTyping(true);
     setReplyTo(null);
     stickToBottom.current = true;
-    setMessages((current) =>
-      current.some((item) => item.id === data.id) ? current : [...current, data]
-    );
+    if (data?.id) {
+      setMessages((current) =>
+        current.some((item) => item.id === data.id) ? current : [...current, data]
+      );
+    }
 
     if (isDm) loadRecent();
 
@@ -1327,6 +1414,17 @@ function ChatPage() {
           <LoungeLock xp={myXp} />
         ) : isGroup && !group ? null : canSend ? (
           <form className="chat-composer" onSubmit={send}>
+            {typingText && (
+              <div className="chat-typing" role="status">
+                <span className="chat-typing-dots" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                {typingText}
+              </div>
+            )}
+
             {error && <div className="notice notice-error chat-error">{error}</div>}
 
             {replyTo && (
@@ -1412,6 +1510,8 @@ function ChatPage() {
                 value={draft}
                 onChange={(event) => {
                   setDraft(event.target.value);
+                  if (event.target.value.trim()) sendTyping();
+                  else sendTyping(true);
                   if (error) setError("");
                 }}
                 onKeyDown={onKeyDown}
