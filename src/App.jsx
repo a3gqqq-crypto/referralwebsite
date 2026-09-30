@@ -1,162 +1,36 @@
 import { Suspense, useEffect, useState } from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { featuredEvent, useEventList } from "./data/events";
-
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import MobileTabBar from "./components/MobileTabBar";
 import Auth from "./components/Auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ResetPassword from "./components/ResetPassword";
-
-import Home from "./pages/Home";
-import MomentViewPage from "./pages/MomentViewPage";
-import ProfilePage from "./pages/ProfilePage";
-import NotFound from "./pages/NotFound";
-import PageLoading from "./components/PageLoading";
 import { lazyPage } from "./lib/lazyPage";
 
-// Home, shared Moments and public profiles are entry points, so they load
-// with the app; everything else downloads when it's first opened.
-const EventsPage = lazyPage(() => import("./pages/EventsPage"));
-const EventDetailsPage = lazyPage(() => import("./pages/EventDetails"));
-const EventLeaderboardPage = lazyPage(() => import("./pages/EventLeaderboardPage"));
-const InvitesPage = lazyPage(() => import("./pages/InvitesPage"));
-const DonationsPage = lazyPage(() => import("./pages/DonationsPage"));
-const MomentsPage = lazyPage(() => import("./pages/MomentsPage"));
-const LockerPage = lazyPage(() => import("./pages/LockerPage"));
-const ShopPage = lazyPage(() => import("./pages/ShopPage"));
-const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
-const ChatPage = lazyPage(() => import("./pages/ChatPage"));
-const AdminPage = lazyPage(() => import("./pages/AdminPage"));
+import { openedFromResetLink, supabase } from "./lib/supabaseClient";
+
+import "./styles/auth.css";
+
+// The logged-in app is its own download. Start it right away when this
+// device has a saved login, so members don't wait for it; new visitors get
+// the sign-up page without it.
+const loadAuthenticatedApp = () => import("./AuthenticatedApp");
+
+try {
+  if (Object.keys(localStorage).some((key) => key.startsWith("sb-") && key.endsWith("-auth-token"))) {
+    loadAuthenticatedApp().catch(() => {});
+  }
+} catch {
+  // Storage blocked: it loads after the session check instead.
+}
+
+const AuthenticatedApp = lazyPage(loadAuthenticatedApp);
+
+// Shareable pages that also open without an account.
+const MomentViewPage = lazyPage(() => import("./pages/MomentViewPage"));
+const ProfilePage = lazyPage(() => import("./pages/ProfilePage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
 const LegalPage = lazyPage(() => import("./pages/LegalPage"));
 const LEGAL_DOCS = ["terms", "privacy", "refunds"];
-const CallPage = lazyPage(() => import("./pages/CallPage"));
-
-import { EventProvider } from "./context/EventContext";
-import { ProfileProvider } from "./context/ProfileContext";
-import { SocialProvider } from "./context/SocialContext";
-import { CallProvider } from "./context/CallContext";
-import { CallDock, IncomingCall } from "./components/CallDock";
-
-import { openedFromResetLink, supabase } from "./lib/supabaseClient";
-import { startPresence, stopPresence } from "./lib/presence";
-import { refreshPush } from "./lib/push";
-
-import "./styles/navbar.css";
-import "./styles/footer.css";
-import "./styles/auth.css";
-import "./styles/donation.css";
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
-
-function LeaderboardRedirect() {
-  const { events, loading } = useEventList();
-
-  if (loading) return <PageLoading />;
-
-  const featured = featuredEvent(events);
-
-  return <Navigate to={featured ? `/events/${featured.id}/leaderboard` : "/events"} replace />;
-}
-
-// Joins the "who's online" channel and keeps last_seen_at fresh while the tab is open.
-function usePresence(userId) {
-  useEffect(() => {
-    if (!userId) return;
-
-    startPresence(userId);
-    refreshPush();
-
-    const touch = () => supabase.rpc("touch_last_seen").then(() => {});
-    touch();
-
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible") touch();
-    }, 2 * 60 * 1000);
-
-    document.addEventListener("visibilitychange", touch);
-
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", touch);
-      stopPresence();
-    };
-  }, [userId]);
-}
-
-function AuthenticatedApp({ session, onLogout }) {
-  const user = session.user;
-  const { pathname } = useLocation();
-  const fullHeight = pathname.startsWith("/chat") || pathname.startsWith("/call");
-
-  usePresence(user?.id);
-
-  return (
-    <EventProvider user={user}>
-      <ProfileProvider user={user}>
-        <SocialProvider user={user}>
-          <CallProvider user={user}>
-            <div className={`app ${fullHeight ? "app-fill" : ""}`}>
-              <ScrollToTop />
-
-              <Navbar user={user} onLogout={onLogout} />
-
-              <Suspense fallback={<PageLoading />}>
-              <Routes>
-                <Route path="/" element={<Home user={user} />} />
-                <Route path="/events" element={<EventsPage />} />
-                <Route path="/leaderboard" element={<LeaderboardRedirect />} />
-                <Route path="/events/:eventId" element={<EventDetailsPage user={user} />} />
-                <Route path="/events/:eventId/leaderboard" element={<EventLeaderboardPage user={user} />} />
-                <Route path="/invites" element={<InvitesPage user={user} />} />
-                <Route path="/moments" element={<MomentsPage user={user} />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/profile" element={<LockerPage />} />
-                <Route path="/u/:username" element={<ProfilePage viewer={user} />} />
-                <Route path="/people" element={<PeoplePage />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/chat/:username" element={<ChatPage />} />
-                <Route path="/call/:roomId" element={<CallPage />} />
-                <Route path="/donations" element={<DonationsPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/rules" element={<RulesPage />} />
-                {LEGAL_DOCS.map((doc) => (
-                  <Route key={doc} path={`/${doc}`} element={<LegalPage doc={doc} />} />
-                ))}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              </Suspense>
-
-              {!fullHeight && <Footer />}
-
-              <CallDock />
-              <IncomingCall />
-
-              <MobileTabBar />
-            </div>
-          </CallProvider>
-        </SocialProvider>
-      </ProfileProvider>
-    </EventProvider>
-  );
-}
 
 function useClickSound() {
   useEffect(() => {
@@ -230,12 +104,14 @@ function App() {
     </div>
   );
 
+  const withLoading = (element) => <Suspense fallback={loadingScreen}>{element}</Suspense>;
+
   const gated = loading ? (
     loadingScreen
   ) : session && resetting ? (
     <ResetPassword onDone={() => setResetting(false)} onCancel={() => setResetting(false)} />
   ) : session ? (
-    <AuthenticatedApp session={session} onLogout={handleLogout} />
+    withLoading(<AuthenticatedApp session={session} onLogout={handleLogout} />)
   ) : (
     <Auth onAuthenticated={setSession} />
   );
@@ -245,35 +121,20 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Moments and profiles are shareable, so they open without an account. */}
-          <Route path="/m/:momentId" element={<MomentViewPage />} />
+          <Route path="/m/:momentId" element={withLoading(<MomentViewPage />)} />
 
           {!loading && !session && (
-            <Route path="/u/:username" element={<ProfilePage standalone />} />
+            <Route path="/u/:username" element={withLoading(<ProfilePage standalone />)} />
           )}
 
           {!loading && !session && (
-            <Route
-              path="/rules"
-              element={
-                <Suspense fallback={loadingScreen}>
-                  <RulesPage standalone />
-                </Suspense>
-              }
-            />
+            <Route path="/rules" element={withLoading(<RulesPage standalone />)} />
           )}
 
           {!loading &&
             !session &&
             LEGAL_DOCS.map((doc) => (
-              <Route
-                key={doc}
-                path={`/${doc}`}
-                element={
-                  <Suspense fallback={loadingScreen}>
-                    <LegalPage doc={doc} standalone />
-                  </Suspense>
-                }
-              />
+              <Route key={doc} path={`/${doc}`} element={withLoading(<LegalPage doc={doc} standalone />)} />
             ))}
 
           <Route path="*" element={gated} />
