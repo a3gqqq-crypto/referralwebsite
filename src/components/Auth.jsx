@@ -978,7 +978,9 @@ function Auth({ onAuthenticated }) {
           </p>
 
           <p className="auth-rules">
-            <Link to="/rules">How it works · Rules & FAQ</Link>
+            <Link to="/about">About us</Link>
+            {" · "}
+            <Link to="/rules">Rules & FAQ</Link>
             {" · "}
             <Link to="/terms">Terms</Link>
             {" · "}

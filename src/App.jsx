@@ -29,6 +29,7 @@ const AuthenticatedApp = lazyPage(loadAuthenticatedApp);
 const MomentViewPage = lazyPage(() => import("./pages/MomentViewPage"));
 const ProfilePage = lazyPage(() => import("./pages/ProfilePage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
+const AboutPage = lazyPage(() => import("./pages/AboutPage"));
 const LegalPage = lazyPage(() => import("./pages/LegalPage"));
 const LEGAL_DOCS = ["terms", "privacy", "refunds"];
 
@@ -129,6 +130,10 @@ function App() {
 
           {!loading && !session && (
             <Route path="/rules" element={withLoading(<RulesPage standalone />)} />
+          )}
+
+          {!loading && !session && (
+            <Route path="/about" element={withLoading(<AboutPage standalone />)} />
           )}
 
           {!loading &&

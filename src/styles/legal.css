@@ -75,8 +75,59 @@
   font-weight: 600;
 }
 
+.about-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  max-width: 820px;
+  margin-bottom: 18px;
+}
+
+.about-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  padding: 16px 18px;
+}
+
+.about-fact strong {
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.about-fact span {
+  color: var(--text-soft);
+
+  font-size: 14px;
+}
+
 @media (max-width: 640px) {
   .legal-doc {
     padding: 18px 16px;
+  }
+
+  .about-facts {
+    gap: 8px;
+  }
+
+  .about-fact {
+    padding: 12px;
+  }
+
+  .about-fact strong {
+    font-size: 26px;
+  }
+
+  .about-fact span {
+    font-size: 12.5px;
   }
 }

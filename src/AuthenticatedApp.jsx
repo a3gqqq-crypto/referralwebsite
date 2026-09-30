@@ -42,6 +42,7 @@ const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
 const ChatPage = lazyPage(() => import("./pages/ChatPage"));
 const AdminPage = lazyPage(() => import("./pages/AdminPage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
+const AboutPage = lazyPage(() => import("./pages/AboutPage"));
 const LegalPage = lazyPage(() => import("./pages/LegalPage"));
 const CallPage = lazyPage(() => import("./pages/CallPage"));
 
@@ -129,6 +130,7 @@ function AuthenticatedApp({ session, onLogout }) {
                 <Route path="/donations" element={<DonationsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/rules" element={<RulesPage />} />
+                <Route path="/about" element={<AboutPage />} />
                 {LEGAL_DOCS.map((doc) => (
                   <Route key={doc} path={`/${doc}`} element={<LegalPage doc={doc} />} />
                 ))}
