@@ -6,6 +6,7 @@ import { featuredEvent, useEventList } from "./data/events";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import MobileTabBar from "./components/MobileTabBar";
+import LevelUpCelebration from "./components/LevelUpCelebration";
 
 import Home from "./pages/Home";
 import ProfilePage from "./pages/ProfilePage";
@@ -142,6 +143,7 @@ function AuthenticatedApp({ session, onLogout }) {
 
               <CallDock />
               <IncomingCall />
+              <LevelUpCelebration />
 
               <MobileTabBar />
             </div>

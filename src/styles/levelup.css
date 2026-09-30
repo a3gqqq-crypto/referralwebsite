@@ -1,0 +1,141 @@
+/* Level-up celebration */
+
+.levelup {
+  overflow: hidden;
+}
+
+.levelup-body {
+  position: relative;
+  z-index: 1;
+
+  align-items: center;
+  gap: 6px;
+
+  text-align: center;
+}
+
+.levelup-figure {
+  height: 190px;
+  width: auto;
+
+  margin-bottom: 4px;
+
+  filter: drop-shadow(0 10px 20px rgba(255, 92, 141, 0.35));
+
+  animation: levelup-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.levelup-eyebrow {
+  color: var(--sun);
+
+  font-size: 13px;
+  letter-spacing: 0.2em;
+}
+
+.levelup-number {
+  display: block;
+
+  background: var(--accent-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  font-family: var(--font-display);
+  font-size: 58px;
+  font-weight: 800;
+  line-height: 1;
+
+  animation: levelup-pop 0.6s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.levelup-tier {
+  color: var(--text-soft);
+
+  font-weight: 600;
+}
+
+.levelup-unlocks {
+  display: grid;
+  gap: 6px;
+
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.levelup-unlocks li {
+  padding: 10px 12px;
+
+  border: 1px solid var(--line-gold);
+  border-radius: 12px;
+
+  background: var(--gold-wash);
+
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.levelup-next {
+  margin-top: 4px;
+
+  font-size: 14px;
+}
+
+.levelup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+
+  margin-top: 8px;
+}
+
+.levelup-confetti {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.levelup-confetti span {
+  position: absolute;
+  top: -12px;
+  left: calc(var(--i) * 4.2%);
+
+  width: 8px;
+  height: 14px;
+
+  border-radius: 2px;
+
+  background: hsl(calc(var(--i) * 47deg) 90% 65%);
+
+  animation: levelup-fall 2.4s calc(var(--i) * 0.07s) ease-in forwards;
+}
+
+@keyframes levelup-fall {
+  to {
+    transform: translateY(620px) rotate(calc(var(--i) * 70deg));
+    opacity: 0;
+  }
+}
+
+/* Scale only, never hidden: if animations are paused the text still shows. */
+@keyframes levelup-pop {
+  from {
+    transform: scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .levelup-confetti {
+    display: none;
+  }
+
+  .levelup-figure,
+  .levelup-number {
+    animation: none;
+  }
+}
