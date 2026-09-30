@@ -23,6 +23,36 @@ function formatLeft(ms) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
+// Step-by-step for people who've never paid with crypto.
+function TrustWalletGuide() {
+  return (
+    <details className="checkout-guide">
+      <summary>🛡️ New to crypto? Pay with Trust Wallet in 4 steps</summary>
+      <ol>
+        <li>
+          Get <b>Trust Wallet</b> from the{" "}
+          <a href="https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409" target="_blank" rel="noreferrer">App Store</a>{" "}
+          or{" "}
+          <a href="https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp" target="_blank" rel="noreferrer">Google Play</a>{" "}
+          and create a wallet. Write your secret phrase on paper and <b>never share it with anyone</b>, not even us.
+        </li>
+        <li>
+          Tap <b>Buy</b> and get <b>USDT on BNB Smart Chain</b> (the app shows it as USDT BEP20). Also get about
+          $1 of <b>BNB</b>. It pays the tiny network fee.
+        </li>
+        <li>
+          Here, pick <b>USDT · BNB Smart Chain</b>. Copy the address and the exact amount we show you.
+        </li>
+        <li>
+          In Trust Wallet: open <b>USDT</b> → <b>Send</b>, paste the address and amount, and confirm. Then come back
+          and tap <b>I paid</b>. It unlocks by itself in about a minute.
+        </li>
+      </ol>
+      <p>Under 18? Ask a parent to help you set it up.</p>
+    </details>
+  );
+}
+
 // Pay for a shop item, or donate, in USDT/USDC. The order has a unique amount,
 // so after "I paid" the server can find the payment on chain by itself; pasting
 // the transaction ID is only a fallback.
@@ -223,6 +253,8 @@ function CryptoCheckout({ item, donation, giftTo = null, onClose, onPaid }) {
             )}
 
             {status && <div className={`notice notice-${status.type}`}>{status.text}</div>}
+
+            <TrustWalletGuide />
 
             <p className="checkout-hint checkout-center">
               Crypto payments can't be reversed. See our <a href="/terms" target="_blank">Terms</a> and{" "}

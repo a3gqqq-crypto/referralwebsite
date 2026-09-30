@@ -327,3 +327,44 @@
 .checkout-manual .btn {
   align-self: flex-start;
 }
+
+.checkout-guide {
+  padding: 10px 12px;
+
+  border: 1px solid var(--line-gold);
+  border-radius: 12px;
+
+  background: var(--gold-wash);
+
+  font-size: 14px;
+}
+
+.checkout-guide summary {
+  color: var(--text);
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.checkout-guide ol {
+  display: grid;
+  gap: 8px;
+
+  margin: 10px 0 6px;
+  padding-left: 20px;
+
+  color: var(--text-soft);
+
+  line-height: 1.5;
+}
+
+.checkout-guide a {
+  color: var(--gold-soft);
+  font-weight: 600;
+}
+
+.checkout-guide p {
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
