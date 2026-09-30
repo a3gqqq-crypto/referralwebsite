@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
+import { removeChatImage, useChatImage } from "../lib/chatImages";
+import { prepareAvatarImage } from "../data/avatars";
 import Icon from "./Icon";
 import { FramedAvatar, StyledName } from "./Cosmetics";
 import { PLAYER_COLUMNS } from "./PlayerChip";
@@ -11,6 +13,101 @@ import { displayNameOf, equippedFrom } from "../data/cosmetics";
 import "../styles/social.css";
 
 const MAX_MEMBERS = 20;
+
+// Group picture (private: only members can load it), or the first letter.
+export function GroupAvatar({ group, size = 36 }) {
+  const link = useChatImage(group?.avatar || null);
+  const letter = (group?.name || "?").trim().charAt(0).toUpperCase();
+  const [brokenUrl, setBrokenUrl] = useState(null);
+  const url = link?.url && link.url !== brokenUrl ? link.url : null;
+
+  return (
+    <span
+      className="chat-group-icon"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.5) }}
+      aria-hidden="true"
+    >
+      {url ? <img src={url} alt="" draggable="false" onError={() => setBrokenUrl(url)} /> : letter}
+    </span>
+  );
+}
+
+// Owner-only: upload a new group picture or remove it.
+function GroupPictureEditor({ group, me, onChanged }) {
+  const inputRef = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const save = async (image) => {
+    const { error: saveError } = await supabase.rpc("set_group_avatar", { p_group: group.id, p_image: image });
+    if (saveError) throw new Error(saveError.message);
+    // Old picture: delete it if it's in my folder (a previous owner's stays theirs).
+    if (group.avatar && group.avatar !== image && group.avatar.startsWith(`${me}/`)) removeChatImage(group.avatar);
+    await onChanged();
+  };
+
+  const upload = async (file) => {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    let path = null;
+    try {
+      const prepared = await prepareAvatarImage(file);
+      path = `${me}/group-${Date.now()}.${prepared.ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("chat-images")
+        .upload(path, prepared.blob, { contentType: prepared.blob.type, cacheControl: "31536000" });
+      if (uploadError) throw new Error("Upload failed. Try a smaller image.");
+      await save(path);
+    } catch (err) {
+      if (path) removeChatImage(path);
+      setError(err.message);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="group-picture">
+      <GroupAvatar group={group} size={72} />
+      <div className="group-picture-actions">
+        <button type="button" className="btn btn-sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+          <Icon name="image" size={15} />
+          {busy ? "Uploading…" : group.avatar ? "Change picture" : "Add picture"}
+        </button>
+        {group.avatar && (
+          <button
+            type="button"
+            className="btn btn-sm btn-ghost"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                await save(null);
+              } catch (err) {
+                setError(err.message);
+              }
+              setBusy(false);
+            }}
+          >
+            Remove
+          </button>
+        )}
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(event) => {
+            upload(event.target.files?.[0]);
+            event.target.value = "";
+          }}
+        />
+      </div>
+      {error && <div className="notice notice-error">{error}</div>}
+    </div>
+  );
+}
 
 function useDialog() {
   const ref = useRef(null);
@@ -222,6 +319,16 @@ export function GroupInfoModal({ group, onClose }) {
     <dialog ref={ref} className="report-modal group-modal" onCancel={onClose}>
       <div className="report-modal-body">
         <h2>Group info</h2>
+
+        {isOwner ? (
+          <GroupPictureEditor group={group} me={me} onChanged={refreshGroups} />
+        ) : (
+          group.avatar && (
+            <div className="group-picture">
+              <GroupAvatar group={group} size={72} />
+            </div>
+          )
+        )}
 
         {isOwner ? (
           <form

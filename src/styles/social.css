@@ -119,6 +119,27 @@
   overflow-y: auto;
 }
 
+.group-picture {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.group-picture .chat-group-icon {
+  border-radius: 20px;
+}
+
+.group-picture-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.group-picture .notice {
+  flex-basis: 100%;
+}
+
 .group-pick-head {
   display: flex;
   align-items: center;

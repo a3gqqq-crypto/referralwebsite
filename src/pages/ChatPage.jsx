@@ -25,7 +25,7 @@ import { useMyProfile } from "../context/ProfileContext";
 import { prepareChatImage, removeChatImage, uploadChatImage, useChatImage } from "../lib/chatImages";
 import { cosmeticById, displayNameOf, equippedFrom, formatPrice } from "../data/cosmetics";
 import { useSocial } from "../context/SocialContext";
-import { CreateGroupModal, GroupInfoModal } from "../components/GroupModals";
+import { CreateGroupModal, GroupAvatar, GroupInfoModal } from "../components/GroupModals";
 
 import "../styles/chat.css";
 
@@ -1054,9 +1054,7 @@ function ChatPage() {
                     className={`chat-friend chat-group ${isGroup && groupId === item.id ? "active" : ""} ${item.unread ? "has-unread" : ""}`}
                     onClick={() => setListOpen(false)}
                   >
-                    <span className="chat-group-icon" aria-hidden="true">
-                      {item.name.trim().charAt(0).toUpperCase()}
-                    </span>
+                    <GroupAvatar group={item} size={36} />
                     <span className="chat-friend-text">
                       <span className="chat-friend-name">{item.name}</span>
                       <small>{last}</small>
@@ -1139,9 +1137,9 @@ function ChatPage() {
           {isGroup ? (
             group ? (
               <div className="chat-head-lounge chat-head-group">
-                <span className="chat-group-icon" aria-hidden="true">
-                  {group.name.trim().charAt(0).toUpperCase()}
-                </span>
+                <button type="button" className="chat-group-head-pic" onClick={() => setGroupInfo(true)} aria-label="Group info">
+                  <GroupAvatar group={group} size={38} />
+                </button>
                 <div>
                   <strong className="chat-head-title">{group.name}</strong>
                   <small>

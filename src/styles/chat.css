@@ -201,6 +201,32 @@
   font-weight: 800;
 }
 
+.chat-group-icon img {
+  width: 100%;
+  height: 100%;
+
+  border-radius: inherit;
+
+  object-fit: cover;
+}
+
+.chat-group-icon:has(img) {
+  background: var(--surface-2);
+}
+
+.chat-group-head-pic {
+  flex-shrink: 0;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 12px;
+
+  background: none;
+
+  cursor: pointer;
+}
+
 .chat-group .chat-friend-name {
   overflow: hidden;
   text-overflow: ellipsis;

@@ -187,6 +187,7 @@ export function SocialProvider({ user, children }) {
         groupListeners.current.forEach((listener) => listener(message));
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_group_members" }, () => loadGroups())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_groups" }, () => loadGroups())
       .subscribe();
 
     return () => {
