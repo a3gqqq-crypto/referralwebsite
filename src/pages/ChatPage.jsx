@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 import { supabase } from "../lib/supabaseClient";
 import Icon from "../components/Icon";
@@ -387,7 +387,17 @@ function ChatPage() {
   const canPostLoungePhoto = isStaff || myXp >= LOUNGE_PHOTO_XP;
 
   const [recent, setRecent] = useState({});
-  const [listOpen, setListOpen] = useState(false);
+  // Phones: opening Chat shows your conversations (Lounge + friends) first;
+  // the Lounge only opens when you tap it.
+  const location = useLocation();
+  const showListFirst = () =>
+    !isDm && !location.state?.lounge && window.matchMedia("(max-width: 860px)").matches;
+  const [listOpen, setListOpen] = useState(showListFirst);
+  const [listFor, setListFor] = useState(location.key);
+  if (listFor !== location.key) {
+    setListFor(location.key);
+    setListOpen(showListFirst());
+  }
   const [reporting, setReporting] = useState(null);
   const [muting, setMuting] = useState(null);
   const onlineCount = useOnlineUsers().size;
@@ -484,7 +494,6 @@ function ChatPage() {
   /* ---------- DM target ---------- */
 
   useEffect(() => {
-    setListOpen(false);
     setError("");
     setDraft("");
     setPhoto(null);
@@ -931,6 +940,7 @@ function ChatPage() {
         <div className="chat-sidebar-scroll">
           <Link
             to="/chat"
+            state={{ lounge: true }}
             className={`chat-room ${!isDm ? "active" : ""}`}
             onClick={() => setListOpen(false)}
           >

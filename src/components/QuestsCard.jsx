@@ -8,7 +8,7 @@ import { formatUntilNextDay } from "../lib/streakDay";
 
 const QUEST_UI = {
   invite: { icon: "link", to: "/invites", go: "Get link" },
-  lounge: { icon: "chat", to: "/chat", go: "Open Lounge" },
+  lounge: { icon: "chat", to: "/chat", go: "Open Lounge", state: { lounge: true } },
   moment: { icon: "heart", to: "/moments", go: "Make one" },
   friend: { icon: "users", to: "/people", go: "Find people" },
   dm: { icon: "chat", to: "/chat", go: "Open chat" },
@@ -129,7 +129,7 @@ function QuestsCard({ now, compact = false }) {
                   {busy === quest.id ? "…" : "Claim"}
                 </button>
               ) : (
-                <Link to={ui.to} className="btn btn-sm">
+                <Link to={ui.to} state={ui.state} className="btn btn-sm">
                   {quest.target > 1 ? `${quest.progress}/${quest.target}` : ui.go}
                 </Link>
               )}
