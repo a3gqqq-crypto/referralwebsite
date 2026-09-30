@@ -6,7 +6,7 @@ import "../styles/legal.css";
 const UPDATED = "29 September 2026";
 const CONTACT = (
   <>
-    DM us on Instagram at{" "}
+    email <a href="mailto:support@suffrova.com">support@suffrova.com</a> or DM us on Instagram at{" "}
     <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">
       @suffrova
     </a>

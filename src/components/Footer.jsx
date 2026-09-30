@@ -40,6 +40,7 @@ function Footer() {
             </a>
             <Link to="/rules">Rules & FAQ</Link>
             <Link to="/donations">Support us</Link>
+            <a href="mailto:support@suffrova.com">support@suffrova.com</a>
           </div>
         </nav>
 

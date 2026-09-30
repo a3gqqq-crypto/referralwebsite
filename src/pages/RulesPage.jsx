@@ -103,7 +103,7 @@ function RulesPage({ standalone = false }) {
       </section>
 
       <p className="rules-foot">
-        Questions or problems?{" "}
+        Questions or problems? Email <a href="mailto:support@suffrova.com">support@suffrova.com</a> or{" "}
         <a href="https://www.instagram.com/suffrova" target="_blank" rel="noreferrer">DM @suffrova on Instagram</a>.
       </p>
     </main>

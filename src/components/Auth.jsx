@@ -15,7 +15,7 @@ function EndsIn({ end }) {
 }
 
 const BANNED_TEXT =
-  "This account was banned for breaking the Suffrova rules. If you think it's a mistake, DM @suffrova on Instagram.";
+  "This account was banned for breaking the Suffrova rules. If you think it's a mistake, email support@suffrova.com.";
 
 
 /* =========================================
