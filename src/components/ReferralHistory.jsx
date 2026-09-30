@@ -18,6 +18,7 @@ function ReferralHistory({ user }) {
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(0);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -25,6 +26,11 @@ function ReferralHistory({ user }) {
     let cancelled = false;
 
     const load = async () => {
+      // Sign-ups that count once they confirm their email.
+      supabase.rpc("my_pending_invites").then(({ data }) => {
+        if (!cancelled) setPending(data || 0);
+      });
+
       let { data: rows, error: rowsError } = await supabase
         .from("referrals")
         .select("invited_user_id, created_at")
@@ -127,6 +133,13 @@ function ReferralHistory({ user }) {
         )}
       </div>
 
+      {pending > 0 && (
+        <p className="invites-pending">
+          ⏳ {pending} more {pending === 1 ? "person" : "people"} signed up with your link but haven't confirmed
+          their email yet. They count as soon as they click the link in their inbox.
+        </p>
+      )}
+
       {loading ? (
         <SkeletonRows count={3} />
       ) : error ? (
@@ -136,8 +149,8 @@ function ReferralHistory({ user }) {
           <div className="empty-state-icon" aria-hidden="true">👋</div>
           <h3>Nobody yet</h3>
           <p>
-            When someone signs up with your link, they'll
-            show up here right away.
+            When someone signs up with your link and confirms
+            their email, they'll show up here.
           </p>
         </div>
       ) : (

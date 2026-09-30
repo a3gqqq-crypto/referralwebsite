@@ -99,6 +99,7 @@ function Home({ user }) {
         .from("profiles")
         .select(PLAYER_COLUMNS)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .order("referral_count", { ascending: false })
         .limit(50);
 

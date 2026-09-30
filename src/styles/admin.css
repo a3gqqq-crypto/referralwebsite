@@ -123,6 +123,16 @@
   color: var(--rose);
 }
 
+.admin-ban-site {
+  border-color: rgba(255, 138, 122, 0.35);
+
+  color: var(--rose);
+}
+
+.admin-ban-site:hover:not(:disabled) {
+  background: var(--rose-wash);
+}
+
 
 /* ---------- Overview ---------- */
 

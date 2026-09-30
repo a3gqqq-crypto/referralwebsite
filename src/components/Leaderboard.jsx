@@ -22,6 +22,7 @@ function Leaderboard({ user }) {
       const { data, error: loadError } = await supabase
         .from("profiles")
         .select(PLAYER_COLUMNS)
+        .eq("site_banned", false)
         .order("referral_count", { ascending: false })
         .order("created_at", { ascending: true });
 

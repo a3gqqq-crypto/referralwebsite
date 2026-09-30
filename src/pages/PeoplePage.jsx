@@ -108,18 +108,21 @@ function PeoplePage() {
         .from("profiles")
         .select(COLUMNS)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .order("referral_count", { ascending: false })
         .limit(9),
       supabase
         .from("profiles")
         .select(COLUMNS)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .order("created_at", { ascending: false })
         .limit(9),
       supabase
         .from("profiles")
         .select(COLUMNS)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .order("xp", { ascending: false })
         .limit(9),
     ]).then(([topResult, newResult, levelResult]) => {
@@ -153,6 +156,7 @@ function PeoplePage() {
         .select(COLUMNS)
         .or(`username.ilike."%${pattern}%",display_name.ilike."%${pattern}%"`)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .order("referral_count", { ascending: false })
         .limit(24);
 

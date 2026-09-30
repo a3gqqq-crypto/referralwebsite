@@ -90,7 +90,7 @@ export function ProfileProvider({ user, children }) {
     const [profileResult, ownedResult] = await Promise.all([
       supabase
         .from("profiles")
-        .select(`${PROFILE_COLUMNS}, last_checkin`)
+        .select(`${PROFILE_COLUMNS}, last_checkin, site_banned`)
         .eq("id", userId)
         .single(),
       supabase
@@ -98,6 +98,13 @@ export function ProfileProvider({ user, children }) {
         .select("cosmetic_id")
         .eq("user_id", userId),
     ]);
+
+    // Banned accounts get logged out (logins are blocked server-side too).
+    if (profileResult.data?.site_banned) {
+      await supabase.auth.signOut();
+      window.location.replace("/?banned=1");
+      return;
+    }
 
     if (profileResult.error) {
       console.error(profileResult.error);

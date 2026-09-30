@@ -9,7 +9,7 @@ import { useMyProfile } from "../../context/ProfileContext";
 import { loadStaff } from "../../data/staff";
 import { adminCall, timeAgo } from "./adminApi";
 
-const COLUMNS = `${PLAYER_COLUMNS}, chat_banned, chat_muted_until`;
+const COLUMNS = `${PLAYER_COLUMNS}, chat_banned, chat_muted_until, site_banned`;
 
 // Matches usernames and display names. Keeps only letters, numbers, spaces and
 // underscores so nothing can act as a LIKE wildcard or break the PostgREST filter.
@@ -118,7 +118,11 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
           <span className="mono">{person.xp || 0}</span> XP · joined {timeAgo(person.created_at)}
         </span>
 
-        {person.chat_banned && <span className="chip admin-banned">Chat banned</span>}
+        {person.site_banned ? (
+          <span className="chip admin-banned">Banned from site</span>
+        ) : (
+          person.chat_banned && <span className="chip admin-banned">Chat banned</span>
+        )}
         {mutedFor && <span className="chip admin-banned">Muted · {mutedFor} left</span>}
         {role && tagHidden && <span className="chip">{role} · tag hidden</span>}
       </div>
@@ -188,6 +192,28 @@ function UserRow({ person, isMe, role, tagHidden, canManageRoles, onUpdated }) {
             }
           >
             {person.chat_banned ? "Unban from chat" : "Ban from chat"}
+          </button>
+        )}
+
+        {/* Site bans are owner-only (the server checks too). */}
+        {canManageRoles && !isMe && !role && (
+          <button
+            type="button"
+            className={`btn btn-sm ${person.site_banned ? "" : "admin-ban-site"}`}
+            disabled={busy}
+            onClick={() => {
+              const ask = person.site_banned
+                ? `Unban ${person.username}? They can log in again.`
+                : `Ban ${person.username} from Suffrova?\n\nThey get logged out and can't log back in, drop off the leaderboards, and the invite that brought them in stops counting.`;
+              if (!window.confirm(ask)) return;
+              run(
+                "owner_set_site_ban",
+                { p_user: person.id, p_banned: !person.site_banned },
+                person.site_banned ? "Unbanned. They can log in again." : "Banned from the site."
+              );
+            }}
+          >
+            {person.site_banned ? "Unban from site" : "Ban from site"}
           </button>
         )}
 

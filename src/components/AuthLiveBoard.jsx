@@ -28,6 +28,7 @@ function AuthLiveBoard({ race }) {
         .from("profiles")
         .select(PLAYER_COLUMNS)
         .not("username", "is", null)
+        .eq("site_banned", false)
         .gt("referral_count", 0)
         .order("referral_count", { ascending: false })
         .limit(3);

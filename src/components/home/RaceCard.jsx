@@ -205,6 +205,7 @@ export function MiniBoard({ event, standings, loading, userId }) {
       .from("profiles")
       .select(PLAYER_COLUMNS)
       .not("username", "is", null)
+      .eq("site_banned", false)
       .gt("referral_count", 0)
       .order("referral_count", { ascending: false })
       .order("created_at", { ascending: true })

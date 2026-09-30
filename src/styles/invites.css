@@ -142,6 +142,19 @@
   font-size: 38px;
 }
 
+.invites-pending {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+
+  border: 1px dashed var(--line-gold);
+  border-radius: 12px;
+
+  color: var(--text-soft);
+
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
 .invites-count {
   min-width: 46px;
   height: 46px;

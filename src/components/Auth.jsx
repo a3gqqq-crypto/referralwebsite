@@ -5,6 +5,9 @@ import { useEventList } from "../data/events";
 import AuthLiveBoard from "./AuthLiveBoard";
 import "../styles/auth.css";
 
+const BANNED_TEXT =
+  "This account was banned for breaking the Suffrova rules. If you think it's a mistake, DM @suffrova on Instagram.";
+
 
 /* =========================================
    FREE USERNAME MODERATION
@@ -255,6 +258,13 @@ function Auth({ onAuthenticated }) {
   ========================================= */
 
   useEffect(() => {
+    // Sent here after a ban logged them out.
+    if (new URLSearchParams(window.location.search).get("banned")) {
+      setError(BANNED_TEXT);
+      window.history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+
     const hash = new URLSearchParams(window.location.hash.slice(1));
 
     if (hash.get("error_code") || hash.get("error")) {
@@ -660,8 +670,9 @@ function Auth({ onAuthenticated }) {
       );
 
       setError(
-        authError?.message ||
-          "Something went wrong. Please try again."
+        /banned/i.test(authError?.message || "")
+          ? BANNED_TEXT
+          : authError?.message || "Something went wrong. Please try again."
       );
 
     } finally {
