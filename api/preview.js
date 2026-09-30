@@ -37,7 +37,7 @@ async function buildMeta(query, siteUrl) {
     const tag = clean(query.squad, /[^A-Za-z0-9]/g).slice(0, 4);
     const [inviter, squad] = await Promise.all([findProfile(ref), findSquad(tag)]);
     const who = nameOf(inviter) || "A friend";
-    const url = `${siteUrl}/?${new URLSearchParams({ ...(ref && { ref }), ...(tag && { squad: tag }) })}`;
+    const url = `${siteUrl}/join/${encodeURIComponent(ref)}${tag ? `?squad=${tag}` : ""}`;
 
     if (squad) {
       return {

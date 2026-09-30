@@ -9,7 +9,7 @@ import { EditSquadModal, SquadEmblem } from "../components/SquadModals";
 import { useSocial } from "../context/SocialContext";
 import { useMyProfile } from "../context/ProfileContext";
 import { MAX_SQUAD, loadSquads, squadByTag, squadGradient, useSquads } from "../data/squads";
-import { useCopy } from "../hooks/useCopy";
+import { referralLinkFor, useCopy } from "../hooks/useCopy";
 
 import "../styles/squads.css";
 
@@ -94,7 +94,7 @@ function SquadPage() {
   }
 
   const full = squad.memberIds.length >= MAX_SQUAD;
-  const inviteLink = `${window.location.origin}/?ref=${encodeURIComponent(profile?.username || "")}&squad=${squad.tag}`;
+  const inviteLink = referralLinkFor(profile?.username, squad.tag);
 
   return (
     <main className="page squads-page">

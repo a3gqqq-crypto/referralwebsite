@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Auth from "./components/Auth";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ResetPassword from "./components/ResetPassword";
+import JoinRedirect from "./components/JoinRedirect";
 import { lazyPage } from "./lib/lazyPage";
 
 import { openedFromResetLink, supabase } from "./lib/supabaseClient";
@@ -123,6 +124,9 @@ function App() {
         <Routes>
           {/* Moments and profiles are shareable, so they open without an account. */}
           <Route path="/m/:momentId" element={withLoading(<MomentViewPage />)} />
+
+          {/* Shareable invite links: /join/NAME?squad=TAG -> /?ref=NAME&squad=TAG */}
+          <Route path="/join/:ref" element={<JoinRedirect />} />
 
           {!loading && !session && (
             <Route path="/u/:username" element={withLoading(<ProfilePage standalone />)} />

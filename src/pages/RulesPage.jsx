@@ -10,7 +10,7 @@ const SECTIONS = [
     id: "invites",
     title: "Invites & events",
     items: [
-      ["How does an invite count?", "When someone makes a new Suffrova account through your link (suffrova.com/?ref=yourname), it's added to your count. Each person can only be invited once."],
+      ["How does an invite count?", "When someone makes a new Suffrova account through your link (suffrova.com/join/yourname), it's added to your count. Each person can only be invited once."],
       ["Do old invites count in a new event?", "No. Invite events only count invites made between the event's start and end, so everyone starts at zero."],
       ["Do I need to join the event?", "For invite races, yes: tap “Join event” to appear on its board. Login Streak events enter you automatically when you open the site."],
       ["What if two people tie?", "In invite races, whoever joined the event first stays ahead. In streak events, whoever logged in on more days that month wins the tie, then whoever got there first."],

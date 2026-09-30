@@ -5,14 +5,8 @@
       "destination": "/api/moment-preview?momentId=:momentId"
     },
     {
-      "source": "/",
-      "has": [{ "type": "query", "key": "ref" }],
-      "destination": "/api/preview?kind=invite"
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "query", "key": "squad" }],
-      "destination": "/api/preview?kind=invite"
+      "source": "/join/:ref",
+      "destination": "/api/preview?kind=invite&ref=:ref"
     },
     {
       "source": "/u/:username",

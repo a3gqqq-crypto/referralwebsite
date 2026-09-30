@@ -39,8 +39,12 @@ export async function nativeShare({ title, text, url }) {
   }
 }
 
-export function referralLinkFor(username) {
+// suffrova.com/join/NAME: a real page path, so the server can give the link
+// its own preview ("NAME invited you to Suffrova"). It forwards to /?ref=NAME.
+// squadTag adds ?squad=TAG (a squad invite).
+export function referralLinkFor(username, squadTag = null) {
   if (!username) return "";
 
-  return `${window.location.origin}/?ref=${encodeURIComponent(username)}`;
+  const base = `${window.location.origin}/join/${encodeURIComponent(username)}`;
+  return squadTag ? `${base}?squad=${encodeURIComponent(squadTag)}` : base;
 }
