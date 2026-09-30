@@ -15,6 +15,9 @@ export const SLOTS = {
 
 export const MAX_BADGES = 3;
 
+// Seasonal drops leave the shop at this moment (people who bought them keep them).
+const HALLOWEEN_ENDS = "2026-11-01T00:00:00Z";
+
 export const COSMETICS = [
   /* ---------- Frames ---------- */
   {
@@ -108,6 +111,15 @@ export const COSMETICS = [
     price: null,
     earn: { referrals: 5, label: "Get 5 referrals" },
   },
+  {
+    id: "frame-spooky",
+    type: "frame",
+    name: "Spooky",
+    description: "Pumpkin glow and witchy purple, flickering like a candle. Halloween only.",
+    rarity: "epic",
+    price: 299,
+    limitedUntil: HALLOWEEN_ENDS,
+  },
 
   /* ---------- Name effects ---------- */
   {
@@ -118,6 +130,15 @@ export const COSMETICS = [
     rarity: "legendary",
     price: null,
     earn: { referrals: 25, label: "Get 25 referrals" },
+  },
+  {
+    id: "name-haunted",
+    type: "name",
+    name: "Haunted",
+    description: "A ghostly shimmer that never sits still. Halloween only.",
+    rarity: "epic",
+    price: 299,
+    limitedUntil: HALLOWEEN_ENDS,
   },
   {
     id: "name-gold",
@@ -284,6 +305,15 @@ export const COSMETICS = [
     description: "Floodlights and a roaring crowd.",
     rarity: "legendary",
     price: 499,
+  },
+  {
+    id: "banner-haunted",
+    type: "banner",
+    name: "Haunted night",
+    description: "Full moon, bats, a haunted house and pumpkins. Halloween only.",
+    rarity: "legendary",
+    price: 399,
+    limitedUntil: HALLOWEEN_ENDS,
   },
 
   /* ---------- Badges ---------- */
@@ -660,6 +690,16 @@ export const RARITY_LABEL = {
 const BY_ID = new Map(COSMETICS.map((item) => [item.id, item]));
 
 export const cosmeticById = (id) => BY_ID.get(id) || null;
+
+// Limited items can only be bought until their end date.
+export const stillOnSale = (item, now = Date.now()) =>
+  !item?.limitedUntil || new Date(item.limitedUntil).getTime() > now;
+
+// "Until Nov 1" for limited items.
+export const limitedLabel = (item) =>
+  item?.limitedUntil
+    ? `Until ${new Date(new Date(item.limitedUntil).getTime() - 1).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" })}`
+    : null;
 
 export const cosmeticsOfType = (type) =>
   COSMETICS.filter((item) => item.type === type);

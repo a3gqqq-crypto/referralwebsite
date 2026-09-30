@@ -21,6 +21,8 @@ import {
   displayNameOf,
   equippedFrom,
   formatPrice,
+  limitedLabel,
+  stillOnSale,
 } from "../data/cosmetics";
 
 import "../styles/shop.css";
@@ -35,8 +37,14 @@ function ShopPage() {
 
   const { profile, owned, username, equip, setBadges, isOwner, refresh } = useMyProfile();
 
+  // Limited items past their date stay visible only to people who own them;
+  // ones still on sale lead the "Everything" list.
+  const listed = COSMETICS.filter((item) => stillOnSale(item) || owned.has(item.id));
+  const seasonal = listed.filter((item) => item.limitedUntil && stillOnSale(item));
   const items =
-    filter === "all" ? COSMETICS : COSMETICS.filter((item) => item.type === filter);
+    filter === "all"
+      ? [...seasonal, ...listed.filter((item) => !seasonal.includes(item))]
+      : listed.filter((item) => item.type === filter);
 
   const [selectedId, setSelectedId] = useState(
     () => cosmeticById(params.get("item"))?.id || "frame-crowned"
@@ -266,6 +274,26 @@ function ShopPage() {
 
       <div className="shop-layout">
         <section className="shop-catalog">
+          {seasonal.length > 0 && (
+            <button
+              type="button"
+              className="shop-drop"
+              onClick={() => {
+                setParams({});
+                choose(seasonal[0].id);
+              }}
+            >
+              <span className="shop-drop-emoji" aria-hidden="true">🎃</span>
+              <span className="shop-drop-text">
+                <strong>Halloween drop</strong>
+                <span>
+                  {seasonal.length} spooky items · {limitedLabel(seasonal[0]).replace("Until", "until")} only
+                </span>
+              </span>
+              <Icon name="arrowRight" size={16} />
+            </button>
+          )}
+
           <div className="shop-filters" role="tablist" aria-label="Categories">
             {FILTERS.map((key) => (
               <button
@@ -295,7 +323,11 @@ function ShopPage() {
                   onClick={() => choose(item.id)}
                   aria-pressed={selected?.id === item.id}
                 >
-                  {item.exclusive && <span className="shop-exclusive">Exclusive</span>}
+                  {item.limitedUntil && stillOnSale(item) ? (
+                    <span className="shop-exclusive shop-limited">🎃 {limitedLabel(item)}</span>
+                  ) : (
+                    item.exclusive && <span className="shop-exclusive">Exclusive</span>
+                  )}
 
                   <span className="shop-item-preview">
                     <CosmeticPreview item={item} username={username || "you"} avatar={profile?.avatar} body={equipped.body} />
@@ -379,6 +411,9 @@ function ShopPage() {
                   <h2>
                     {selected.name}
                     {selected.exclusive && <span className="shop-exclusive is-inline">Exclusive</span>}
+                    {selected.limitedUntil && stillOnSale(selected) && (
+                      <span className="shop-exclusive shop-limited is-inline">🎃 {limitedLabel(selected)}</span>
+                    )}
                   </h2>
                   <span className={`rarity-text-${selected.rarity}`}>
                     {RARITY_LABEL[selected.rarity]} {SLOTS[selected.type].single.toLowerCase()}
@@ -419,6 +454,13 @@ function ShopPage() {
                   <Icon name="crown" size={16} />
                   {busy ? "Unlocking…" : "Get it free · Owner"}
                 </button>
+              ) : selected.price != null && !stillOnSale(selected) ? (
+                <div className="shop-earn-box">
+                  <div className="shop-earn-label">
+                    <Icon name="clock" size={14} />
+                    No longer sold. It was a limited drop.
+                  </div>
+                </div>
               ) : selected.price != null ? (
                 <button
                   type="button"
@@ -453,7 +495,7 @@ function ShopPage() {
                 </div>
               )}
 
-              {selected.price != null && (
+              {selected.price != null && stillOnSale(selected) && (
                 <button type="button" className="btn btn-block btn-sm shop-gift-btn" onClick={() => setPicking(true)}>
                   <span aria-hidden="true">🎁</span>
                   {isOwner ? "Gift to a friend · free" : `Gift to a friend · ${formatPrice(selected.price)}`}

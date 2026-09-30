@@ -381,6 +381,67 @@
   vertical-align: middle;
 }
 
+.shop-limited {
+  background: linear-gradient(100deg, #ff7a1a, #6b2fa3);
+
+  box-shadow: 0 4px 14px -4px rgba(255, 122, 26, 0.7);
+
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Seasonal drop banner above the catalog. */
+.shop-drop {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-bottom: 14px;
+  padding: 14px 18px;
+
+  border: 1px solid rgba(255, 122, 26, 0.45);
+  border-radius: var(--radius-lg, 20px);
+
+  background:
+    radial-gradient(360px 140px at 0% 50%, rgba(255, 122, 26, 0.28), transparent 70%),
+    linear-gradient(100deg, #2a1236, #1a0b24);
+  color: var(--text);
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.shop-drop:hover {
+  border-color: rgba(255, 122, 26, 0.8);
+}
+
+.shop-drop-emoji {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.shop-drop-text {
+  flex: 1;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-drop-text strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.shop-drop-text span {
+  color: #ffb36b;
+
+  font-size: 13.5px;
+}
+
 .shop-gift-btn {
   margin-top: 8px;
 }
