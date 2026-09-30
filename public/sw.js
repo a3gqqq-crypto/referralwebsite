@@ -5,6 +5,24 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
+// Pages always come from the network; with no connection, show a friendly
+// offline screen instead of the browser's error page.
+const OFFLINE_PAGE = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Suffrova</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#140d16;color:#fff1f5;font-family:system-ui,sans-serif;text-align:center;padding:24px}
+.s{width:72px;height:72px;border-radius:20px;margin:0 auto 18px;display:grid;place-items:center;background:linear-gradient(100deg,#ff4d8d,#ff7a5c,#ff9f3d);font-size:40px;font-weight:800}
+p{color:#d3bcc9}button{margin-top:14px;padding:12px 24px;border:0;border-radius:999px;background:linear-gradient(100deg,#ff4d8d,#ff9f3d);color:#fff;font-weight:700;font-size:16px}</style></head>
+<body><div><div class="s">S</div><h1>You're offline</h1><p>Check your internet connection, then try again.</p><button onclick="location.reload()">Try again</button></div></body></html>`;
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.mode !== "navigate") return;
+
+  event.respondWith(
+    fetch(event.request).catch(
+      () => new Response(OFFLINE_PAGE, { headers: { "Content-Type": "text/html; charset=utf-8" } })
+    )
+  );
+});
+
 self.addEventListener("push", (event) => {
   let data = {};
 

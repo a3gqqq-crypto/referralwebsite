@@ -35,8 +35,11 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", unlock);
 }
 
+// Ringtone notes that are playing or queued, so answering can cut them off.
+const ringingNotes = new Set();
+
 // Tiny synthesized sounds, so there are no audio files to load.
-function beep(notes) {
+function beep(notes, track = false) {
   try {
     const context = getAudio();
     if (context.state === "suspended") context.resume();
@@ -53,17 +56,46 @@ function beep(notes) {
       osc.connect(gain).connect(context.destination);
       osc.start(start + at);
       osc.stop(start + at + length + 0.05);
+      if (track) {
+        ringingNotes.add(osc);
+        osc.onended = () => ringingNotes.delete(osc);
+      }
     });
   } catch {
     // Sound is a nice-to-have.
   }
 }
 
+// Silence the ringtone right now: queued notes, vibration and the "calling"
+// phone notification.
+function stopRinging() {
+  ringingNotes.forEach((osc) => {
+    try {
+      osc.stop();
+    } catch {
+      // Already stopped.
+    }
+  });
+  ringingNotes.clear();
+
+  try {
+    navigator.vibrate?.(0);
+  } catch {
+    // No vibration on this device.
+  }
+
+  navigator.serviceWorker?.getRegistration?.().then((registration) =>
+    registration?.getNotifications().then((list) =>
+      list.filter((note) => note.data?.kind === "call").forEach((note) => note.close())
+    )
+  ).catch(() => {});
+}
+
 const SOUNDS = {
   join: () => beep([[660, 0, 0.12], [990, 0.1, 0.18]]),
   leave: () => beep([[880, 0, 0.12], [520, 0.1, 0.2]]),
   ring: () => {
-    beep([[880, 0, 0.35, 0.18], [1100, 0, 0.35, 0.09], [880, 0.45, 0.35, 0.18], [1100, 0.45, 0.35, 0.09]]);
+    beep([[880, 0, 0.35, 0.18], [1100, 0, 0.35, 0.09], [880, 0.45, 0.35, 0.18], [1100, 0.45, 0.35, 0.09]], true);
     try {
       navigator.vibrate?.([400, 150, 400]);
     } catch {
@@ -113,6 +145,8 @@ export function CallProvider({ user, children }) {
   const [reactions, setReactions] = useState([]);
   const [mutedForMe, setMutedForMe] = useState(() => new Set());
   const [incoming, setIncoming] = useState(null);
+  // Calls already answered or declined here: never ring for them again.
+  const handledCalls = useRef(new Set());
   const [, setTick] = useState(0);
 
   const roomRef = useRef(null);
@@ -216,6 +250,11 @@ export function CallProvider({ user, children }) {
 
   const join = useCallback(
     async (key) => {
+      // Answering (from the pop-up, a notification or a link) stops the ringtone at once.
+      stopRinging();
+      handledCalls.current.add(key);
+      setIncoming((current) => (current?.callId === key ? null : current));
+
       if (roomRef.current) {
         if (roomKey === key) return;
         await leave();
@@ -586,7 +625,11 @@ export function CallProvider({ user, children }) {
           if (note.kind !== "call" || !note.link) return;
 
           const callId = note.link.split("/").pop();
-          if (roomRef.current && roomKey === callId) return;
+          if (handledCalls.current.has(callId) || keyRef.current === callId) return;
+          // Delivered late (the tab was asleep): too old to still be ringing.
+          if (note.created_at && Date.now() - new Date(note.created_at).getTime() > 45000) return;
+          // Already opening this call (e.g. tapped the phone notification).
+          if (window.location.pathname === `/call/${callId}`) return;
 
           let caller = null;
           if (note.actor_id) {
@@ -598,6 +641,9 @@ export function CallProvider({ user, children }) {
             caller = data;
           }
 
+          // Answered somewhere else while we looked up the caller.
+          if (handledCalls.current.has(callId) || keyRef.current === callId) return;
+
           setIncoming({ callId, link: note.link, title: note.title, caller, at: Date.now() });
         }
       )
@@ -606,7 +652,7 @@ export function CallProvider({ user, children }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [me, roomKey]);
+  }, [me]);
 
   // Ring until answered, declined, or 30 seconds pass.
   useEffect(() => {
@@ -619,6 +665,7 @@ export function CallProvider({ user, children }) {
     return () => {
       clearInterval(ringer);
       clearTimeout(giveUp);
+      stopRinging();
     };
   }, [incoming]);
 
@@ -640,7 +687,11 @@ export function CallProvider({ user, children }) {
     live: phase === "live" && Boolean(room),
     canScreenShare,
     incoming,
-    dismissIncoming: () => setIncoming(null),
+    dismissIncoming: () => {
+      stopRinging();
+      if (incoming) handledCalls.current.add(incoming.callId);
+      setIncoming(null);
+    },
     join,
     leave,
     toggleMic,

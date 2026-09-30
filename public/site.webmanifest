@@ -1,21 +1,26 @@
 {
+  "id": "/",
   "name": "Suffrova",
   "short_name": "Suffrova",
   "description": "Chat, call, build your 3D avatar and win real prizes.",
-  "start_url": "/",
+  "start_url": "/?source=app",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#140d16",
   "theme_color": "#140d16",
+  "categories": ["social", "entertainment"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

@@ -12,6 +12,7 @@ import AvatarCard from "../components/home/AvatarCard";
 import VerifiedReminder from "../components/home/VerifiedReminder";
 import WelcomeCard from "../components/home/WelcomeCard";
 import PushCard from "../components/home/PushCard";
+import InstallCard from "../components/home/InstallCard";
 import SpendBoard from "../components/SpendBoard";
 import ActivityFeed from "../components/home/ActivityFeed";
 import { MiniBoard, RaceCard } from "../components/home/RaceCard";
@@ -234,6 +235,8 @@ function Home({ user }) {
       </div>
 
       <AvatarCard />
+
+      <InstallCard />
 
       <PushCard />
 

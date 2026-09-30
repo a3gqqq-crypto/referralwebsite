@@ -7,6 +7,8 @@ import "./styles/global.css";
 
 import App from "./App.jsx";
 import { registerServiceWorker } from "./lib/push";
+// Loaded first so the browser's one-time "can install" event isn't missed.
+import "./lib/install";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

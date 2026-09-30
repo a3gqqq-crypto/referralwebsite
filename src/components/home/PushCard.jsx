@@ -14,7 +14,8 @@ function PushCard() {
     } catch {
       // Private mode.
     }
-    if (isIosBrowserTab()) return "ios";
+    // iPhone in Safari: the install card explains Add to Home Screen instead.
+    if (isIosBrowserTab()) return "hidden";
     if (!pushSupported()) return "hidden";
     if (Notification.permission === "granted") return "hidden";
     if (Notification.permission === "denied") return "blocked";
@@ -59,13 +60,6 @@ function PushCard() {
           <>
             <strong>Notifications are on 🎉</strong>
             <span>Calls and messages will reach you even when Suffrova is closed.</span>
-          </>
-        ) : state === "ios" ? (
-          <>
-            <strong>Get calls on your iPhone</strong>
-            <span>
-              Tap <b>Share</b> → <b>Add to Home Screen</b>, open Suffrova from there, then turn on notifications.
-            </span>
           </>
         ) : state === "blocked" ? (
           <>
