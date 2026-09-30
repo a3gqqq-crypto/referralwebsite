@@ -223,6 +223,11 @@ function CryptoCheckout({ item, donation, giftTo = null, onClose, onPaid }) {
             )}
 
             {status && <div className={`notice notice-${status.type}`}>{status.text}</div>}
+
+            <p className="checkout-hint checkout-center">
+              Crypto payments can't be reversed. See our <a href="/terms" target="_blank">Terms</a> and{" "}
+              <a href="/refunds" target="_blank">Refund Policy</a>.
+            </p>
           </>
         ) : (
           <>

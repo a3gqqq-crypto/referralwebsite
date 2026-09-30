@@ -93,6 +93,20 @@
   font-size: 13px;
 }
 
+.footer-legal {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-legal a {
+  color: var(--text-mute);
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--text);
+}
+
 @media (max-width: 760px) {
   .site-footer-inner {
     flex-direction: column;

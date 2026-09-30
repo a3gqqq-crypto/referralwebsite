@@ -352,6 +352,26 @@
   color: var(--gold-soft);
 }
 
+.auth-rules {
+  color: var(--text-mute);
+}
+
+.auth-legal {
+  margin-top: 2px;
+
+  color: var(--text-mute);
+
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-legal a {
+  color: var(--text-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .auth-switch button:hover {
   text-decoration: underline;
   text-underline-offset: 4px;

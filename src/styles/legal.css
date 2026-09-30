@@ -1,0 +1,82 @@
+/* Terms / Privacy / Refund pages */
+
+.legal-updated {
+  margin-top: 6px;
+
+  color: var(--text-mute);
+
+  font-size: 13px;
+}
+
+.legal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin: 4px 0 18px;
+}
+
+.legal-tabs a {
+  padding: 7px 14px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  color: var(--text-soft);
+
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.legal-tabs a.active {
+  border-color: var(--line-gold);
+
+  background: var(--gold-wash);
+  color: var(--text);
+}
+
+.legal-doc {
+  display: grid;
+  gap: 26px;
+
+  max-width: 820px;
+  padding: 26px 28px;
+}
+
+.legal-doc h2 {
+  margin-bottom: 8px;
+
+  font-size: 21px;
+}
+
+.legal-doc p,
+.legal-doc li {
+  color: var(--text-soft);
+
+  line-height: 1.65;
+}
+
+.legal-doc p + p,
+.legal-doc p + ul,
+.legal-doc ul + p {
+  margin-top: 10px;
+}
+
+.legal-doc ul {
+  display: grid;
+  gap: 6px;
+
+  padding-left: 20px;
+}
+
+.legal-doc a {
+  color: var(--gold-soft);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .legal-doc {
+    padding: 18px 16px;
+  }
+}

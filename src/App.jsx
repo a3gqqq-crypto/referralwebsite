@@ -37,6 +37,8 @@ const PeoplePage = lazyPage(() => import("./pages/PeoplePage"));
 const ChatPage = lazyPage(() => import("./pages/ChatPage"));
 const AdminPage = lazyPage(() => import("./pages/AdminPage"));
 const RulesPage = lazyPage(() => import("./pages/RulesPage"));
+const LegalPage = lazyPage(() => import("./pages/LegalPage"));
+const LEGAL_DOCS = ["terms", "privacy", "refunds"];
 const CallPage = lazyPage(() => import("./pages/CallPage"));
 
 import { EventProvider } from "./context/EventContext";
@@ -135,6 +137,9 @@ function AuthenticatedApp({ session, onLogout }) {
                 <Route path="/donations" element={<DonationsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/rules" element={<RulesPage />} />
+                {LEGAL_DOCS.map((doc) => (
+                  <Route key={doc} path={`/${doc}`} element={<LegalPage doc={doc} />} />
+                ))}
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </Suspense>
@@ -256,6 +261,20 @@ function App() {
               }
             />
           )}
+
+          {!loading &&
+            !session &&
+            LEGAL_DOCS.map((doc) => (
+              <Route
+                key={doc}
+                path={`/${doc}`}
+                element={
+                  <Suspense fallback={loadingScreen}>
+                    <LegalPage doc={doc} standalone />
+                  </Suspense>
+                }
+              />
+            ))}
 
           <Route path="*" element={gated} />
         </Routes>

@@ -914,6 +914,13 @@ function Auth({ onAuthenticated }) {
                   : "Create account"}
             </button>
 
+            {!isLogin && (
+              <p className="auth-legal">
+                By creating an account you agree to our <Link to="/terms">Terms</Link> and{" "}
+                <Link to="/privacy">Privacy Policy</Link>. Under 18? Get a parent's OK first.
+              </p>
+            )}
+
           </form>
           )}
 
@@ -936,6 +943,10 @@ function Auth({ onAuthenticated }) {
 
           <p className="auth-rules">
             <Link to="/rules">How it works · Rules & FAQ</Link>
+            {" · "}
+            <Link to="/terms">Terms</Link>
+            {" · "}
+            <Link to="/privacy">Privacy</Link>
           </p>
 
         </div>

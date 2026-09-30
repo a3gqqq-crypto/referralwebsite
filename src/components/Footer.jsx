@@ -47,6 +47,11 @@ function Footer() {
 
       <div className="footer-bottom">
         <span>© {year} Suffrova</span>
+        <span className="footer-legal">
+          <Link to="/terms">Terms</Link>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/refunds">Refunds</Link>
+        </span>
         <span>Made by three friends, not a corporation.</span>
       </div>
     </footer>
