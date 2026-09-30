@@ -99,8 +99,26 @@ export const COSMETICS = [
     price: null,
     earn: { manual: true, label: "Finish top 3 in an event" },
   },
+  {
+    id: "frame-magnet",
+    type: "frame",
+    name: "Magnet",
+    description: "People just show up when you're around.",
+    rarity: "epic",
+    price: null,
+    earn: { referrals: 5, label: "Get 5 referrals" },
+  },
 
   /* ---------- Name effects ---------- */
+  {
+    id: "name-influencer",
+    type: "name",
+    name: "Influencer",
+    description: "A name that moves. Twenty-five people followed it here.",
+    rarity: "legendary",
+    price: null,
+    earn: { referrals: 25, label: "Get 25 referrals" },
+  },
   {
     id: "name-gold",
     type: "name",
@@ -298,6 +316,16 @@ export const COSMETICS = [
     icon: "crown",
     price: null,
     earn: { referrals: 50, label: "Get 50 referrals" },
+  },
+  {
+    id: "badge-hundred",
+    type: "badge",
+    name: "Icon",
+    description: "A hundred people. You basically built this place.",
+    rarity: "mythic",
+    icon: "gem",
+    price: null,
+    earn: { referrals: 100, label: "Get 100 referrals" },
   },
   {
     id: "badge-early",

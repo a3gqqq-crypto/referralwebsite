@@ -1,5 +1,6 @@
 import ReferralCard from "../components/ReferralCard";
 import ReferralHistory from "../components/ReferralHistory";
+import InviteRewards from "../components/InviteRewards";
 import Leaderboard from "../components/Leaderboard";
 import { useReveal } from "../hooks/useReveal";
 
@@ -25,6 +26,8 @@ function InvitesPage({ user }) {
       </header>
 
       <ReferralCard user={user} />
+
+      <InviteRewards />
 
       <div
         ref={panelsRef}
