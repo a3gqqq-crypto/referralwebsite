@@ -23,6 +23,7 @@ export async function supabaseGet(path, { method = "GET", body } = {}) {
     process.env.SUPABASE_ANON_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -33,7 +34,9 @@ export async function supabaseGet(path, { method = "GET", body } = {}) {
       method,
       headers: {
         apikey: key,
-        Authorization: `Bearer ${key}`,
+        // Old-style anon keys are JWTs and go here too; new publishable keys
+        // (sb_publishable_...) must not be sent as a Bearer token.
+        ...(key.startsWith("eyJ") ? { Authorization: `Bearer ${key}` } : {}),
         Accept: "application/json",
         "Content-Type": "application/json",
       },
