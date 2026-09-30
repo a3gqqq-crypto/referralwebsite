@@ -16,6 +16,14 @@ html {
   background: var(--bg);
 
   -webkit-text-size-adjust: 100%;
+
+  /* No page scrollbar; the page still scrolls with wheel, touch and keys. */
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 body {
