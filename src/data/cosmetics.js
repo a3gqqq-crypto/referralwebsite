@@ -378,6 +378,16 @@ export const COSMETICS = [
     earn: { manual: true, label: "Finish top 3 in an event" },
   },
   {
+    id: "badge-squad-champ",
+    type: "badge",
+    name: "Squad Champion",
+    description: "Your squad finished #1 in Squad Wars.",
+    rarity: "legendary",
+    icon: "trophy",
+    price: null,
+    earn: { manual: true, label: "Win a week of Squad Wars with your squad" },
+  },
+  {
     id: "badge-early-supporter",
     type: "badge",
     name: "Early Supporter",
