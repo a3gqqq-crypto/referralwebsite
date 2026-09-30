@@ -388,6 +388,16 @@ export const COSMETICS = [
     earn: { manual: true, label: "Win a week of Squad Wars with your squad" },
   },
   {
+    id: "badge-squad-month",
+    type: "badge",
+    name: "Squad of the Month",
+    description: "Your squad won the most weeks of Squad Wars in a month.",
+    rarity: "mythic",
+    icon: "crown",
+    price: null,
+    earn: { manual: true, label: "Win the most weeks of Squad Wars in a month" },
+  },
+  {
     id: "badge-early-supporter",
     type: "badge",
     name: "Early Supporter",

@@ -94,6 +94,85 @@
   font-weight: 600;
 }
 
+.squads-month {
+  display: grid;
+  gap: 10px;
+
+  margin-bottom: 18px;
+  padding: 16px 20px;
+
+  border: 1px solid rgba(255, 209, 102, 0.45);
+
+  background:
+    radial-gradient(420px 150px at 0% 50%, rgba(255, 209, 102, 0.16), transparent 70%),
+    var(--surface);
+}
+
+.squads-month-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+}
+
+.squads-month-crown {
+  font-size: 34px;
+}
+
+.squads-prize {
+  display: inline-block;
+
+  margin-left: 10px;
+  padding: 2px 10px;
+
+  border-radius: 999px;
+
+  background: linear-gradient(100deg, #ffd166, #ff9f3d);
+  color: #2a1400;
+
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 800;
+
+  vertical-align: middle;
+}
+
+.squads-month-empty {
+  color: var(--text-mute);
+
+  font-size: 14px;
+}
+
+.squads-month-race {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.squads-prize-btn {
+  justify-self: start;
+}
+
+.squads-prize-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.squads-prize-edit input {
+  flex: 1;
+  min-width: 120px;
+
+  padding: 8px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 10px;
+
+  background: var(--bg-raised);
+  color: var(--text);
+}
+
 .squads-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);

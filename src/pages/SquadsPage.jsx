@@ -7,7 +7,8 @@ import SkeletonRows from "../components/SkeletonRows";
 import { CreateSquadModal, SquadEmblem } from "../components/SquadModals";
 import { useSocial } from "../context/SocialContext";
 import { useNow } from "../hooks/useCountdown";
-import { MAX_SQUAD, formatLeft, useSquads, weekEnds } from "../data/squads";
+import { MAX_SQUAD, formatLeft, monthEnds, useSquads, weekEnds } from "../data/squads";
+import { useMyProfile } from "../context/ProfileContext";
 
 import "../styles/squads.css";
 
@@ -19,9 +20,40 @@ function SquadsPage() {
   const [standings, setStandings] = useState(null);
   const [champions, setChampions] = useState([]);
   const [creating, setCreating] = useState(false);
+  const { isOwner } = useMyProfile();
+  const [monthRace, setMonthRace] = useState([]);
+  const [monthChamps, setMonthChamps] = useState([]);
+  const [prize, setPrize] = useState("");
+  const [editingPrize, setEditingPrize] = useState(false);
+  const [prizeDraft, setPrizeDraft] = useState("");
 
   const mine = me ? squads.byUser.get(me) || null : null;
   const squadCount = squads.bySquad.size;
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      supabase.rpc("squad_month_wins"),
+      supabase.from("squad_month_champions").select("month, squad_name, squad_tag, wins, prize").order("month", { ascending: false }).limit(6),
+      supabase.from("app_settings").select("value").eq("key", "squad_month_prize").maybeSingle(),
+    ]).then(([race, champs, setting]) => {
+      if (cancelled) return;
+      setMonthRace(race.data || []);
+      setMonthChamps(champs.data || []);
+      setPrize(setting.data?.value || "");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [squadCount]);
+
+  const savePrize = async () => {
+    const { error } = await supabase.rpc("owner_set_squad_prize", { p_prize: prizeDraft });
+    if (!error) {
+      setPrize(prizeDraft.trim());
+      setEditingPrize(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -64,6 +96,76 @@ function SquadsPage() {
           <span>Invites give the most XP (+100 each), then check-ins, quests and chatting.</span>
         </div>
         <span className="squads-wars-timer">Ends in {formatLeft(weekEnds(now).getTime(), now.getTime())}</span>
+      </section>
+
+      <section className="squads-month card">
+        <div className="squads-month-head">
+          <span className="squads-month-crown" aria-hidden="true">👑</span>
+          <div className="squads-wars-title">
+            <strong>
+              Squad of the Month{prize ? <span className="squads-prize">{prize} prize</span> : null}
+            </strong>
+            <span>
+              The squad that wins the most weeks this month gets {prize ? `${prize} and ` : ""}the Mythic Squad of
+              the Month badge.
+            </span>
+          </div>
+          <span className="squads-wars-timer">Decided in {formatLeft(monthEnds(now).getTime(), now.getTime())}</span>
+        </div>
+
+        {monthRace.length === 0 ? (
+          <p className="squads-month-empty">No weekly wins yet this month. The first week is decided on Monday.</p>
+        ) : (
+          <ol className="squads-month-race">
+            {monthRace.slice(0, 3).map((row, index) => (
+              <li key={row.id}>
+                <Link to={`/squads/${row.tag}`} className={`squads-row ${mine?.id === row.id ? "is-mine" : ""}`}>
+                  <span className="squads-rank">{index + 1}</span>
+                  <SquadEmblem squad={row} size={36} />
+                  <span className="squads-row-name">
+                    <strong>{row.name}</strong>
+                    <small>[{row.tag}]</small>
+                  </span>
+                  <span className="squads-score">
+                    {row.wins}
+                    <small>{row.wins === 1 ? "win" : "wins"}</small>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {isOwner &&
+          (editingPrize ? (
+            <div className="squads-prize-edit">
+              <input
+                value={prizeDraft}
+                onChange={(event) => setPrizeDraft(event.target.value)}
+                maxLength={40}
+                placeholder="$30"
+                aria-label="Monthly prize"
+              />
+              <button type="button" className="btn btn-sm btn-primary" onClick={savePrize}>
+                Save
+              </button>
+              <button type="button" className="btn btn-sm" onClick={() => setEditingPrize(false)}>
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-sm btn-ghost squads-prize-btn"
+              onClick={() => {
+                setPrizeDraft(prize);
+                setEditingPrize(true);
+              }}
+            >
+              <Icon name="edit" size={14} />
+              Owner: change the monthly prize
+            </button>
+          ))}
       </section>
 
       <div className="squads-layout">
@@ -135,8 +237,29 @@ function SquadsPage() {
               <li>From Monday to Sunday (UTC), all XP members earn counts for the squad.</li>
               <li>Invite friends: each new member you bring is +100 XP for your squad.</li>
               <li>The top squad on Monday gets the 🏆 Squad Champion badge.</li>
+              <li>
+                The squad with the most weekly wins in a month is 👑 Squad of the Month
+                {prize ? ` and wins ${prize}` : ""}.
+              </li>
             </ol>
           </section>
+
+          {monthChamps.length > 0 && (
+            <section className="squads-champs card">
+              <h2>👑 Squads of the Month</h2>
+              {monthChamps.map((champ) => (
+                <div key={champ.month} className="squads-champ">
+                  <Link to={`/squads/${champ.squad_tag}`}>
+                    {champ.squad_name} [{champ.squad_tag}]
+                  </Link>
+                  <span>
+                    {new Date(champ.month).toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" })} ·{" "}
+                    {champ.wins} {champ.wins === 1 ? "win" : "wins"}
+                  </span>
+                </div>
+              ))}
+            </section>
+          )}
 
           {champions.length > 0 && (
             <section className="squads-champs card">

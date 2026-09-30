@@ -29,6 +29,11 @@ export function weekEnds(now = new Date()) {
   return new Date(start + 7 * 86400000);
 }
 
+// Squad of the Month is decided at the start of the next month (UTC).
+export function monthEnds(now = new Date()) {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+}
+
 export function formatLeft(until, now = Date.now()) {
   const ms = Math.max(0, until - now);
   const days = Math.floor(ms / 86400000);

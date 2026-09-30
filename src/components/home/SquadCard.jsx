@@ -127,7 +127,7 @@ function SquadCard() {
       <span style={{ fontSize: 34 }} aria-hidden="true">⚔️</span>
       <span className="squad-home-text">
         <strong>Squad Wars are on</strong>
-        <span>Join a squad or start one with friends. The top squad each week gets the Champion badge.</span>
+        <span>Team up with friends. Win weeks for badges, and the most wins in a month takes the cash prize.</span>
       </span>
       <Icon name="arrowRight" size={16} />
     </Link>
